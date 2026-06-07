@@ -30,6 +30,16 @@ NEXT_PUBLIC_SITE_SUBTITLE=Untuk 10 Desember
 NEXT_PUBLIC_UNLOCK_ISO=2026-12-09T16:00:00.000Z
 ```
 
+`ADMIN_SESSION_SECRET` wajib diisi minimal 32 karakter. Buat nilai acak yang panjang, beda dari `ADMIN_PASSWORD`.
+
+Contoh generate secret:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Setelah environment variable ditambah atau diubah di Vercel, lakukan **Redeploy** agar production memakai nilai baru.
+
 ## 4. Deploy
 
 Klik **Deploy**.
@@ -41,8 +51,8 @@ https://namaproject.vercel.app
 https://namaproject.vercel.app/admin
 ```
 
-## 5. Preview unlocked mode
+## 5. Preview public mode
 
-Login ke `/admin`, lalu klik tombol **Preview Unlocked**.
+Login ke `/admin`, lalu klik tombol **Preview Public**.
 
-Preview ini hanya bekerja kalau cookie admin masih aktif.
+Preview ini hanya bekerja kalau cookie admin masih aktif. Kalau login gagal dengan pesan `ADMIN_SESSION_SECRET wajib diisi minimal 32 karakter`, artinya environment variable tersebut belum benar di Vercel.
