@@ -74,6 +74,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Password salah.' }, { status: 401 });
   }
   clearAttempts(key);
-  await setAdminCookie(createAdminToken());
+  try {
+    await setAdminCookie(createAdminToken());
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Konfigurasi session admin belum valid.' },
+      { status: 500 }
+    );
+  }
   return NextResponse.json({ ok: true });
 }

@@ -29,7 +29,12 @@ export function verifyAdminToken(token?: string | null) {
   if (!token || !token.includes('.')) return false;
   const [payload, signature, extra] = token.split('.');
   if (extra) return false;
-  const expected = sign(payload);
+  let expected: string;
+  try {
+    expected = sign(payload);
+  } catch {
+    return false;
+  }
   if (signature.length !== expected.length) return false;
   if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return false;
 
