@@ -1,0 +1,8 @@
+import AdminClient from '@/components/AdminClient';
+import { isAdminRequest } from '@/lib/adminAuth';
+
+export const dynamic = 'force-dynamic';
+
+export default function AdminPage() {
+  return <AdminClient authenticated={isAdminRequest()} />;
+}

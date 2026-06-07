@@ -1,0 +1,2 @@
+Letakkan file musik kamu di folder ini, misalnya: lagu-kecil.mp3
+Lalu isi URL di Admin > Settings menjadi: /audio/lagu-kecil.mp3

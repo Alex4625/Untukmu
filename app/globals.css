@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --bg: #fff7f3;
+  --text: #3b2f2f;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: radial-gradient(circle at top left, #fff1e6 0, transparent 32%),
+              radial-gradient(circle at top right, rgba(245, 183, 198, 0.35), transparent 34%),
+              #fff7f3;
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+::selection { background: #f5b7c6; color: #3b2f2f; }
+
+.romantic-bg {
+  position: relative;
+  overflow: hidden;
+}
+.romantic-bg::before,
+.romantic-bg::after {
+  content: '';
+  position: fixed;
+  pointer-events: none;
+  z-index: -1;
+  width: 380px;
+  height: 380px;
+  border-radius: 999px;
+  filter: blur(8px);
+  opacity: .35;
+}
+.romantic-bg::before { left: -130px; top: 120px; background: #f5b7c6; }
+.romantic-bg::after { right: -140px; bottom: 80px; background: #fff1e6; }
+
+.container-page { @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8; }
+.card { @apply rounded-[2rem] border border-white/70 bg-white/70 shadow-romantic backdrop-blur-xl; }
+.btn-primary { @apply inline-flex min-h-11 items-center justify-center rounded-full bg-maroon px-6 py-3 text-sm font-bold text-white shadow-lg shadow-rose/20 transition hover:-translate-y-0.5 hover:bg-cocoa; }
+.btn-secondary { @apply inline-flex min-h-11 items-center justify-center rounded-full border border-rose/30 bg-white/70 px-6 py-3 text-sm font-bold text-maroon transition hover:bg-white; }
+.input { @apply w-full rounded-2xl border border-rose/20 bg-white px-4 py-3 text-sm outline-none transition focus:border-rose focus:ring-4 focus:ring-rose/10; }
+.label { @apply mb-2 block text-sm font-bold text-cocoa; }
+.section-title { @apply font-display text-3xl font-bold text-cocoa sm:text-4xl lg:text-5xl; }
+
+.sparkle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e98da3;
+  animation: floatSparkle 6s ease-in-out infinite;
+  opacity: .45;
+}
+@keyframes floatSparkle {
+  0%, 100% { transform: translateY(0) scale(1); opacity: .25; }
+  50% { transform: translateY(-18px) scale(1.25); opacity: .75; }
+}
+.fade-in { animation: fadeIn .7s ease both; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+.confetti-piece {
+  position: fixed;
+  top: -12px;
+  width: 9px;
+  height: 16px;
+  border-radius: 4px;
+  animation: confettiFall 3.2s linear forwards;
+  z-index: 60;
+}
+@keyframes confettiFall {
+  to { transform: translateY(105vh) rotate(720deg); opacity: 0.8; }
+}
+
+.prose-letter p { margin-bottom: 1rem; line-height: 1.85; }
+
+.admin-grid { grid-template-columns: 1fr; }
+@media (min-width: 1024px) {
+  .admin-grid { grid-template-columns: 280px 1fr; }
+}
