@@ -6,11 +6,11 @@ import { getPublicContent } from '@/lib/publicContent';
 
 export const dynamic = 'force-dynamic';
 
-export default async function TimelinePage({ searchParams }: { searchParams: { preview?: string } }) {
-  const content = await getPublicContent(searchParams.preview === 'unlocked' && isAdminRequest());
+export default async function TimelinePage() {
+  const content = await getPublicContent(await isAdminRequest());
   if (!content.unlocked) return <LockedNotice />;
   return (
-    <SectionShell eyebrow="Timeline" title="Timeline Kisah Kita" description="Setiap tanggal punya cerita. Beberapa sederhana, tapi tetap berarti.">
+    <SectionShell eyebrow="Timeline" title="Perjalanan Kita" description="Kenangan-kenangan kecil yang aku ingat.">
       <Timeline memories={content.memories} />
     </SectionShell>
   );

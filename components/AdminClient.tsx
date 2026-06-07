@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Letter, Memory, MemoryCard, Plan, PublicContent, QuizQuestion, SiteSettings } from '@/lib/types';
-import { ImagePlus, Lock, LogOut, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { Lock, LogOut, Plus, RefreshCw, Trash2 } from 'lucide-react';
 
 type AdminData = Omit<PublicContent, 'unlocked' | 'unlockIso'>;
 type Tab = 'memories' | 'letters' | 'memory_cards' | 'quiz_questions' | 'plans' | 'site_settings';
+type MutationBody = Record<string, unknown>;
 
 const tabs: { key: Tab; label: string }[] = [
   { key: 'memories', label: 'Kenangan/Galeri' },
@@ -50,16 +51,32 @@ export default function AdminClient({ authenticated: initialAuth }: { authentica
     else setError(json.error || 'Gagal memuat data.');
   }
 
-  useEffect(() => { load(); // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!authenticated) return;
+
+    let cancelled = false;
+    async function loadInitialData() {
+      const res = await fetch('/api/admin/content', { cache: 'no-store' });
+      const json = await res.json();
+      if (cancelled) return;
+      if (res.ok) setData(json);
+      else setError(json.error || 'Gagal memuat data.');
+    }
+
+    void loadInitialData();
+    return () => {
+      cancelled = true;
+    };
   }, [authenticated]);
 
   if (!authenticated) {
     return (
       <main className="container-page flex min-h-screen items-center justify-center py-16">
         <form onSubmit={login} className="card w-full max-w-md p-8 sm:p-10">
-          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-cream text-maroon"><Lock size={28} /></div>
-          <h1 className="font-display text-4xl font-bold text-cocoa">Admin Untuk Nona</h1>
-          <p className="mt-3 leading-7 text-cocoa/65">Masukkan password admin untuk menambah kenangan, surat, foto, quiz, dan rencana.</p>
+          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-cream text-rose"><Lock size={28} /></div>
+          <p className="eyebrow">Admin</p>
+          <h1 className="mt-2 font-display text-4xl font-normal text-maroon">Untuk Nona</h1>
+          <p className="mt-3 leading-7 text-muted">Masukkan password admin untuk menambah kenangan, surat, foto, quiz, dan rencana.</p>
           <label className="label mt-6">Password</label>
           <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password admin" />
           {error && <p className="mt-3 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</p>}
@@ -73,20 +90,25 @@ export default function AdminClient({ authenticated: initialAuth }: { authentica
     <main className="container-page py-6 sm:py-10">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-rosegold">Admin</p>
-          <h1 className="font-display text-4xl font-bold text-cocoa">Dashboard Untuk Nona</h1>
+          <p className="eyebrow">Untuk Nona Admin</p>
+          <h1 className="mt-1 text-2xl font-semibold text-cocoa">Selamat datang, Alex</h1>
+          <p className="mt-1 text-sm text-muted">Ringkasan konten yang sudah kamu tambahkan.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <a href="/?preview=unlocked" target="_blank" className="btn-secondary">Preview Unlocked</a>
+          <a href="/hub" target="_blank" rel="noreferrer" className="btn-secondary">Preview Public</a>
           <button onClick={load} className="btn-secondary gap-2"><RefreshCw size={16} /> Refresh</button>
           <button onClick={logout} className="btn-primary gap-2"><LogOut size={16} /> Logout</button>
         </div>
       </div>
 
       <div className="grid admin-grid gap-6">
-        <aside className="card h-fit p-3 lg:sticky lg:top-6">
+        <aside className="h-fit rounded-2xl bg-maroon p-3 text-cream shadow-soft lg:sticky lg:top-6">
+          <div className="px-4 py-4">
+            <p className="font-display text-2xl font-normal leading-none">Untuk Nona</p>
+            <p className="mt-1 text-[11px] uppercase tracking-[0.08em] text-cream/60">admin panel</p>
+          </div>
           {tabs.map((item) => (
-            <button key={item.key} onClick={() => setTab(item.key)} className={`mb-2 w-full rounded-2xl px-4 py-3 text-left text-sm font-bold transition ${tab === item.key ? 'bg-maroon text-white' : 'text-cocoa/70 hover:bg-cream'}`}>
+            <button key={item.key} onClick={() => setTab(item.key)} className={`mb-1 w-full rounded-lg px-4 py-3 text-left text-sm font-medium transition ${tab === item.key ? 'bg-white/15 text-white' : 'text-cream/70 hover:bg-white/10 hover:text-white'}`}>
               {item.label}
             </button>
           ))}
@@ -107,21 +129,21 @@ export default function AdminClient({ authenticated: initialAuth }: { authentica
 
 function Stats({ data }: { data: AdminData }) {
   const cards = [
-    ['Kenangan', data.memories.length],
-    ['Surat', data.letters.length],
-    ['Kartu', data.memory_cards.length],
-    ['Quiz', data.quiz_questions.length],
-    ['Rencana', data.plans.length]
+    ['Kenangan', data.memories.length, 'border-rose'],
+    ['Surat', data.letters.length, 'border-rosegold'],
+    ['Kartu', data.memory_cards.length, 'border-softpink'],
+    ['Quiz', data.quiz_questions.length, 'border-info'],
+    ['Rencana', data.plans.length, 'border-sage']
   ];
-  return <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">{cards.map(([label, value]) => <div key={label} className="rounded-3xl border border-white/70 bg-white/70 p-4 text-center"><p className="font-display text-3xl font-bold text-maroon">{value}</p><p className="text-xs font-bold uppercase tracking-[0.2em] text-rosegold">{label}</p></div>)}</div>;
+  return <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">{cards.map(([label, value, border]) => <div key={label} className={`rounded-xl border border-[rgba(196,138,106,0.22)] border-t-4 ${border} bg-white p-4 text-center shadow-xs`}><p className="text-3xl font-semibold text-maroon">{value}</p><p className="mt-1 text-xs text-muted">{label}</p></div>)}</div>;
 }
 
-async function createItem(resource: Tab, body: any) {
+async function createItem(resource: Tab, body: MutationBody) {
   const res = await fetch(`/api/admin/content/${resource}`, { method: 'POST', body: JSON.stringify(body) });
   const json = await res.json();
   if (!res.ok) throw new Error(json.error || 'Gagal menyimpan.');
 }
-async function updateItem(resource: Tab, id: string, body: any) {
+async function updateItem(resource: Tab, id: string, body: MutationBody) {
   const res = await fetch(`/api/admin/content/${resource}/${id}`, { method: 'PUT', body: JSON.stringify(body) });
   const json = await res.json();
   if (!res.ok) throw new Error(json.error || 'Gagal update.');
@@ -159,7 +181,8 @@ function MemoryAdmin({ items, reload }: { items: Memory[]; reload: () => void })
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.title) return alert('Judul wajib diisi.');
-    edit ? await updateItem('memories', edit.id, form) : await createItem('memories', form);
+    if (edit) await updateItem('memories', edit.id, form);
+    else await createItem('memories', form);
     reset(); reload();
   }
   return <AdminPanel title="Kelola Kenangan & Galeri" button="Simpan Kenangan" onSubmit={submit}>
@@ -181,7 +204,12 @@ function LetterAdmin({ items, reload }: { items: Letter[]; reload: () => void })
   const [editing, setEditing] = useState<Letter | null>(null);
   function fill(item: Letter) { setEditing(item); setForm({ title: item.title, body: item.body, unlock_label: item.unlock_label || '', status: item.status }); }
   function reset() { setEditing(null); setForm({ title: '', body: '', unlock_label: 'Surat kecil', status: 'active' }); }
-  async function submit(e: React.FormEvent) { e.preventDefault(); editing ? await updateItem('letters', editing.id, form) : await createItem('letters', form); reset(); reload(); }
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (editing) await updateItem('letters', editing.id, form);
+    else await createItem('letters', form);
+    reset(); reload();
+  }
   return <AdminPanel title="Kelola Surat" button="Simpan Surat" onSubmit={submit}>
     <Field label="Judul Surat" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
     <Field label="Label" value={form.unlock_label} onChange={(v) => setForm({ ...form, unlock_label: v })} />
@@ -196,7 +224,12 @@ function CardAdmin({ items, reload }: { items: MemoryCard[]; reload: () => void 
   const [editing, setEditing] = useState<MemoryCard | null>(null);
   function fill(i: MemoryCard) { setEditing(i); setForm({ title: i.title, body: i.body, card_type: i.card_type || '', status: i.status, sort_order: i.sort_order }); }
   function reset() { setEditing(null); setForm({ title: '', body: '', card_type: 'Alasan', status: 'active', sort_order: 0 }); }
-  async function submit(e: React.FormEvent) { e.preventDefault(); editing ? await updateItem('memory_cards', editing.id, form) : await createItem('memory_cards', form); reset(); reload(); }
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (editing) await updateItem('memory_cards', editing.id, form);
+    else await createItem('memory_cards', form);
+    reset(); reload();
+  }
   return <AdminPanel title="Kelola Kotak Kenangan" button="Simpan Kartu" onSubmit={submit}>
     <Field label="Judul Kartu" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
     <Field label="Tipe" value={form.card_type} onChange={(v) => setForm({ ...form, card_type: v })} />
@@ -212,7 +245,12 @@ function QuizAdmin({ items, reload }: { items: QuizQuestion[]; reload: () => voi
   const [editing, setEditing] = useState<QuizQuestion | null>(null);
   function fill(i: QuizQuestion) { setEditing(i); setForm({ question: i.question, option_a: i.option_a, option_b: i.option_b, option_c: i.option_c, option_d: i.option_d, correct_option: i.correct_option, feedback: i.feedback || '', status: i.status, sort_order: i.sort_order }); }
   function reset() { setEditing(null); setForm({ question: '', option_a: '', option_b: '', option_c: '', option_d: '', correct_option: 'A', feedback: '', status: 'active', sort_order: 0 }); }
-  async function submit(e: React.FormEvent) { e.preventDefault(); editing ? await updateItem('quiz_questions', editing.id, form) : await createItem('quiz_questions', form); reset(); reload(); }
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (editing) await updateItem('quiz_questions', editing.id, form);
+    else await createItem('quiz_questions', form);
+    reset(); reload();
+  }
   return <AdminPanel title="Kelola Quiz" button="Simpan Quiz" onSubmit={submit}>
     <Field label="Pertanyaan" value={form.question} onChange={(v) => setForm({ ...form, question: v })} />
     <div className="grid gap-3 md:grid-cols-2"><Field label="Opsi A" value={form.option_a} onChange={(v) => setForm({ ...form, option_a: v })} /><Field label="Opsi B" value={form.option_b} onChange={(v) => setForm({ ...form, option_b: v })} /><Field label="Opsi C" value={form.option_c} onChange={(v) => setForm({ ...form, option_c: v })} /><Field label="Opsi D" value={form.option_d} onChange={(v) => setForm({ ...form, option_d: v })} /></div>
@@ -227,7 +265,12 @@ function PlanAdmin({ items, reload }: { items: Plan[]; reload: () => void }) {
   const [editing, setEditing] = useState<Plan | null>(null);
   function fill(i: Plan) { setEditing(i); setForm({ title: i.title, note: i.note || '', plan_status: i.plan_status, status: i.status, sort_order: i.sort_order }); }
   function reset() { setEditing(null); setForm({ title: '', note: '', plan_status: 'ingin_dilakukan', status: 'active', sort_order: 0 }); }
-  async function submit(e: React.FormEvent) { e.preventDefault(); editing ? await updateItem('plans', editing.id, form) : await createItem('plans', form); reset(); reload(); }
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (editing) await updateItem('plans', editing.id, form);
+    else await createItem('plans', form);
+    reset(); reload();
+  }
   return <AdminPanel title="Kelola Rencana Kita" button="Simpan Rencana" onSubmit={submit}>
     <Field label="Rencana" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
     <Field label="Catatan" value={form.note} onChange={(v) => setForm({ ...form, note: v })} />
@@ -237,8 +280,12 @@ function PlanAdmin({ items, reload }: { items: Plan[]; reload: () => void }) {
 }
 
 function SettingsAdmin({ item, reload }: { item: SiteSettings | null; reload: () => void }) {
+  const settingsKey = JSON.stringify([item?.birthday_message, item?.final_message, item?.music_url]);
+  return <SettingsForm key={settingsKey} item={item} reload={reload} />;
+}
+
+function SettingsForm({ item, reload }: { item: SiteSettings | null; reload: () => void }) {
   const [form, setForm] = useState({ birthday_message: item?.birthday_message || '', final_message: item?.final_message || '', music_url: item?.music_url || '' });
-  useEffect(() => setForm({ birthday_message: item?.birthday_message || '', final_message: item?.final_message || '', music_url: item?.music_url || '' }), [item]);
   async function submit(e: React.FormEvent) { e.preventDefault(); await updateItem('site_settings', 'main', form); reload(); }
   return <AdminPanel title="Site Settings" button="Simpan Settings" onSubmit={submit}>
     <Field label="URL Musik" value={form.music_url} onChange={(v) => setForm({ ...form, music_url: v })} />
@@ -248,11 +295,11 @@ function SettingsAdmin({ item, reload }: { item: SiteSettings | null; reload: ()
 }
 
 function AdminPanel({ title, button, onSubmit, children }: { title: string; button: string; onSubmit: (e: React.FormEvent) => void; children: React.ReactNode }) {
-  return <form onSubmit={onSubmit} className="card p-5 sm:p-8"><h2 className="font-display text-3xl font-bold text-cocoa">{title}</h2><div className="mt-6 space-y-4">{children}</div><button className="btn-primary mt-6 gap-2"><Plus size={16} />{button}</button></form>;
+  return <form onSubmit={onSubmit} className="rounded-2xl border border-[rgba(196,138,106,0.22)] bg-white p-5 shadow-romantic sm:p-6"><h2 className="text-xl font-semibold text-cocoa">{title}</h2><div className="mt-6 space-y-4">{children}</div><button className="btn-primary mt-6 gap-2"><Plus size={16} />{button}</button></form>;
 }
 function Field({ label, value, onChange, type = 'text' }: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
   return <div><label className="label">{label}</label><input className="input" type={type} value={value} onChange={(e) => onChange(e.target.value)} /></div>;
 }
-function ItemList<T>({ items, title, subtitle, onEdit, onDelete }: { items: T[]; title: (i: T) => string; subtitle: (i: T) => string; onEdit: (i: T) => void; onDelete: (i: T) => void }) {
-  return <div className="mt-8 space-y-3"><h3 className="font-bold text-cocoa">Daftar Konten</h3>{items.map((item: any) => <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-rose/10 bg-white/70 p-4"><div><p className="font-bold text-cocoa">{title(item)}</p><p className="text-sm text-cocoa/55">{subtitle(item)}</p></div><div className="flex gap-2"><button type="button" onClick={() => onEdit(item)} className="btn-secondary !py-2">Edit</button><button type="button" onClick={() => onDelete(item)} className="rounded-full bg-red-50 px-4 py-2 text-sm font-bold text-red-600"><Trash2 size={15} /></button></div></div>)}</div>;
+function ItemList<T extends { id: string }>({ items, title, subtitle, onEdit, onDelete }: { items: T[]; title: (i: T) => string; subtitle: (i: T) => string; onEdit: (i: T) => void; onDelete: (i: T) => void }) {
+  return <div className="mt-8 space-y-3"><h3 className="font-semibold text-cocoa">Daftar Konten</h3>{items.map((item) => <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[rgba(196,138,106,0.22)] bg-white p-4 shadow-xs"><div><p className="font-medium text-cocoa">{title(item)}</p><p className="text-sm text-muted">{subtitle(item)}</p></div><div className="flex gap-2"><button type="button" onClick={() => onEdit(item)} className="btn-secondary !min-h-10 !py-2">Edit</button><button type="button" aria-label="Hapus" onClick={() => onDelete(item)} className="inline-flex min-h-10 items-center justify-center rounded-lg bg-error px-4 py-2 text-sm font-semibold text-white"><Trash2 size={15} /></button></div></div>)}</div>;
 }

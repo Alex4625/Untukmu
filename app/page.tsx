@@ -4,8 +4,7 @@ import { isAdminRequest } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
-export default async function HomePage({ searchParams }: { searchParams: { preview?: string } }) {
-  const preview = searchParams.preview === 'unlocked' && isAdminRequest();
-  const content = await getPublicContent(preview);
+export default async function HomePage() {
+  const content = await getPublicContent(await isAdminRequest());
   return <HomeClient content={content} />;
 }

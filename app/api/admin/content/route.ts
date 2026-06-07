@@ -3,7 +3,7 @@ import { isAdminRequest } from '@/lib/adminAuth';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 
 export async function GET() {
-  if (!isAdminRequest()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!(await isAdminRequest())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const supabase = getSupabaseAdmin();
   const [memories, letters, cards, quiz, plans, settings] = await Promise.all([
     supabase.from('memories').select('*').order('created_at', { ascending: false }),

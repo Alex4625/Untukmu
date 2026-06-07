@@ -6,8 +6,8 @@ import { getPublicContent } from '@/lib/publicContent';
 
 export const dynamic = 'force-dynamic';
 
-export default async function PlansPage({ searchParams }: { searchParams: { preview?: string } }) {
-  const content = await getPublicContent(searchParams.preview === 'unlocked' && isAdminRequest());
+export default async function PlansPage() {
+  const content = await getPublicContent(await isAdminRequest());
   if (!content.unlocked) return <LockedNotice />;
   return (
     <SectionShell eyebrow="Rencana Kita" title="Rencana Kita" description="Hal-hal kecil yang semoga bisa kita lakukan bersama.">

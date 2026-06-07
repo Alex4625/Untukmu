@@ -3,9 +3,15 @@ import crypto from 'crypto';
 
 const COOKIE_NAME = 'untukmu_admin_session';
 const MAX_AGE = 60 * 60 * 24 * 7;
+const MAX_AGE_MS = MAX_AGE * 1000;
+const MIN_SECRET_LENGTH = 32;
 
 function secret() {
-  return process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_PASSWORD || 'untukmu-dev-secret';
+  const value = process.env.ADMIN_SESSION_SECRET;
+  if (!value || value.length < MIN_SECRET_LENGTH) {
+    throw new Error(`ADMIN_SESSION_SECRET wajib diisi minimal ${MIN_SECRET_LENGTH} karakter.`);
+  }
+  return value;
 }
 
 function sign(value: string) {
@@ -13,26 +19,37 @@ function sign(value: string) {
 }
 
 export function createAdminToken() {
-  const payload = JSON.stringify({ role: 'admin', iat: Date.now() });
+  const now = Date.now();
+  const payload = JSON.stringify({ role: 'admin', iat: now, exp: now + MAX_AGE_MS });
   const b64 = Buffer.from(payload).toString('base64url');
   return `${b64}.${sign(b64)}`;
 }
 
 export function verifyAdminToken(token?: string | null) {
   if (!token || !token.includes('.')) return false;
-  const [payload, signature] = token.split('.');
+  const [payload, signature, extra] = token.split('.');
+  if (extra) return false;
   const expected = sign(payload);
   if (signature.length !== expected.length) return false;
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+  if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return false;
+
+  try {
+    const parsed = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+    return parsed.role === 'admin' && typeof parsed.exp === 'number' && Date.now() < parsed.exp;
+  } catch {
+    return false;
+  }
 }
 
-export function isAdminRequest() {
-  const token = cookies().get(COOKIE_NAME)?.value;
+export async function isAdminRequest() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE_NAME)?.value;
   return verifyAdminToken(token);
 }
 
-export function setAdminCookie(token: string) {
-  cookies().set(COOKIE_NAME, token, {
+export async function setAdminCookie(token: string) {
+  const cookieStore = await cookies();
+  cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
@@ -41,6 +58,7 @@ export function setAdminCookie(token: string) {
   });
 }
 
-export function clearAdminCookie() {
-  cookies().delete(COOKIE_NAME);
+export async function clearAdminCookie() {
+  const cookieStore = await cookies();
+  cookieStore.delete(COOKIE_NAME);
 }

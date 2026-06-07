@@ -9,7 +9,7 @@ export default function MemoryGrid({ memories }: { memories: Memory[] }) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 lg:gap-5">
       {memories.map((item) => (
-        <article key={item.id} className="group overflow-hidden rounded-[1.6rem] border border-white/70 bg-white/80 shadow-lg shadow-rose/10 transition hover:-translate-y-1 hover:shadow-romantic">
+        <article key={item.id} className="group overflow-hidden rounded-2xl border border-[rgba(196,138,106,0.22)] bg-white shadow-romantic transition duration-300 hover:-translate-y-1 hover:border-softpink hover:shadow-soft">
           <div className="relative aspect-[4/5] bg-cream">
             {item.image_url ? (
               <Image src={cloudinaryOptimized(item.image_url, 900)} alt={item.title} fill className="object-cover transition duration-500 group-hover:scale-105" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
@@ -18,14 +18,14 @@ export default function MemoryGrid({ memories }: { memories: Memory[] }) {
             )}
             {item.is_favorite && (
               <div className="absolute right-3 top-3 rounded-full bg-white/80 p-2 text-rose backdrop-blur">
-                <Heart size={16} fill="currentColor" />
+                <Heart size={16} fill="currentColor" aria-hidden="true" />
               </div>
             )}
           </div>
           <div className="p-4">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-rosegold">{item.category || 'Kenangan'}</p>
-            <h3 className="mt-1 line-clamp-2 font-bold text-cocoa">{item.title}</h3>
-            <p className="mt-1 text-xs text-cocoa/60">{formatDateID(item.memory_date)}</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-rosegold">{item.category || 'Kenangan'}</p>
+            <h3 className="mt-1 line-clamp-2 font-display text-2xl font-normal leading-tight text-maroon">{item.title}</h3>
+            <p className="mt-2 text-xs text-muted">{formatDateID(item.memory_date)}</p>
           </div>
         </article>
       ))}
@@ -34,5 +34,5 @@ export default function MemoryGrid({ memories }: { memories: Memory[] }) {
 }
 
 function Empty({ text }: { text: string }) {
-  return <div className="rounded-3xl border border-rose/20 bg-white/70 p-8 text-center text-cocoa/60">{text}</div>;
+  return <div className="rounded-2xl border border-[rgba(196,138,106,0.22)] bg-white p-8 text-center text-muted shadow-romantic">{text}</div>;
 }

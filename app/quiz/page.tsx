@@ -6,8 +6,8 @@ import { getPublicContent } from '@/lib/publicContent';
 
 export const dynamic = 'force-dynamic';
 
-export default async function QuizPage({ searchParams }: { searchParams: { preview?: string } }) {
-  const content = await getPublicContent(searchParams.preview === 'unlocked' && isAdminRequest());
+export default async function QuizPage() {
+  const content = await getPublicContent(await isAdminRequest());
   if (!content.unlocked) return <LockedNotice />;
   return (
     <SectionShell eyebrow="Quiz" title="Quiz Tentang Kita" description="Pertanyaan kecil untuk membuat hadiah ini terasa lebih hidup.">

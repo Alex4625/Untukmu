@@ -1,16 +1,17 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useSyncExternalStore } from 'react';
 
 type Props = { unlockIso: string };
 
 type Remaining = { days: number; hours: number; minutes: number; seconds: number; done: boolean };
 
 const initialRemaining: Remaining = { days: 0, hours: 0, minutes: 0, seconds: 0, done: false };
+let nowSnapshot = 0;
 
-function getRemaining(unlockIso: string): Remaining {
+function getRemaining(unlockIso: string, now = Date.now()): Remaining {
   const target = new Date(unlockIso).getTime();
-  const diff = target - Date.now();
+  const diff = target - now;
 
   if (diff <= 0) {
     return { days: 0, hours: 0, minutes: 0, seconds: 0, done: true };
@@ -27,20 +28,31 @@ function getRemaining(unlockIso: string): Remaining {
   };
 }
 
+function subscribe(callback: () => void) {
+  nowSnapshot = Date.now();
+  const firstTick = window.setTimeout(callback, 0);
+  const timer = window.setInterval(() => {
+    nowSnapshot = Date.now();
+    callback();
+  }, 1000);
+  return () => {
+    window.clearTimeout(firstTick);
+    window.clearInterval(timer);
+  };
+}
+
+function getClientSnapshot() {
+  return nowSnapshot;
+}
+
+function getServerSnapshot() {
+  return 0;
+}
+
 export default function Countdown({ unlockIso }: Props) {
-  const [mounted, setMounted] = useState(false);
-  const [time, setTime] = useState<Remaining>(initialRemaining);
-
-  useEffect(() => {
-    setMounted(true);
-    setTime(getRemaining(unlockIso));
-
-    const timer = window.setInterval(() => {
-      setTime(getRemaining(unlockIso));
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, [unlockIso]);
+  const now = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
+  const mounted = now > 0;
+  const time = mounted ? getRemaining(unlockIso, now) : initialRemaining;
 
   const items = useMemo(
     () => [
@@ -52,31 +64,21 @@ export default function Countdown({ unlockIso }: Props) {
     [time]
   );
 
-  if (!mounted) {
-    return (
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" suppressHydrationWarning>
-        {['Hari', 'Jam', 'Menit', 'Detik'].map((label) => (
-          <div key={label} className="rounded-3xl border border-rose/20 bg-white/75 p-4 text-center shadow-sm backdrop-blur">
-            <div className="font-display text-4xl font-bold text-maroon sm:text-5xl">--</div>
-            <div className="mt-1 text-xs font-bold uppercase tracking-[0.25em] text-rosegold">{label}</div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
   if (time.done) {
     return <p className="text-lg font-bold text-maroon">Hari ini akhirnya datang.</p>;
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" suppressHydrationWarning>
-      {items.map(([label, value]) => (
-        <div key={String(label)} className="rounded-3xl border border-rose/20 bg-white/75 p-4 text-center shadow-sm backdrop-blur">
-          <div className="font-display text-4xl font-bold text-maroon sm:text-5xl">{String(value).padStart(2, '0')}</div>
-          <div className="mt-1 text-xs font-bold uppercase tracking-[0.25em] text-rosegold">{label}</div>
-        </div>
-      ))}
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-live="polite" suppressHydrationWarning>
+      {items.map(([label, value]) => {
+        const display = mounted ? String(value).padStart(2, '0') : '--';
+        return (
+          <div key={String(label)} className="rounded-2xl border border-[rgba(196,138,106,0.22)] bg-white px-4 py-6 text-center shadow-romantic">
+            <div className="font-display text-6xl font-light leading-none text-maroon sm:text-7xl">{display}</div>
+            <div className="mt-2 text-[11px] font-medium uppercase tracking-[0.08em] text-muted">{label}</div>
+          </div>
+        );
+      })}
     </div>
   );
 }

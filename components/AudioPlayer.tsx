@@ -21,13 +21,13 @@ export default function AudioPlayer({ src }: { src?: string | null }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-3xl border border-rose/20 bg-white/70 px-4 py-3 text-sm text-cocoa shadow-sm backdrop-blur">
-      <button onClick={toggle} disabled={!playable} className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-maroon text-white disabled:cursor-not-allowed disabled:bg-rosegold/50">
+    <div className="flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-[rgba(196,138,106,0.22)] bg-white px-4 py-3 text-sm text-cocoa shadow-xs">
+      <button onClick={toggle} disabled={!playable} aria-label={playing ? 'Jeda musik' : 'Putar musik'} className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-rose text-white transition hover:bg-rose-dark disabled:cursor-not-allowed disabled:bg-softpink">
         {playing ? <Pause size={18} /> : <Play size={18} />}
       </button>
-      <div>
-        <p className="font-bold">Musik kecil untuk menemani</p>
-        <p className="text-xs text-cocoa/60">{playable ? 'Klik tombol play kalau kamu ingin mendengarkan.' : 'Placeholder musik. Upload file nanti ke public/audio dan isi URL di admin.'}</p>
+      <div className="text-left">
+        <p className="font-medium">Musik kecil untuk menemani</p>
+        <p className="text-xs leading-5 text-muted">{playable ? 'Klik play kalau kamu ingin mendengarkan.' : 'Placeholder musik. Isi URL musik di admin.'}</p>
       </div>
       {playable && <audio ref={audioRef} src={music} loop />}
     </div>

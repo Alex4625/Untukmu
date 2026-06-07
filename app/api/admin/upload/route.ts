@@ -5,7 +5,7 @@ import { isAdminRequest } from '@/lib/adminAuth';
 export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
-  if (!isAdminRequest()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!(await isAdminRequest())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
   const apiKey = process.env.CLOUDINARY_API_KEY;

@@ -3,6 +3,6 @@ import { isAdminRequest } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
-export default function AdminPage() {
-  return <AdminClient authenticated={isAdminRequest()} />;
+export default async function AdminPage() {
+  return <AdminClient authenticated={await isAdminRequest()} />;
 }

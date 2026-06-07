@@ -4,7 +4,7 @@ import { getPublicContent } from '@/lib/publicContent';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const preview = url.searchParams.get('preview') === 'unlocked' && isAdminRequest();
+  const preview = url.searchParams.get('preview') === 'unlocked' && (await isAdminRequest());
   const content = await getPublicContent(preview);
   return NextResponse.json(content);
 }
