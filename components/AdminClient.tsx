@@ -434,6 +434,7 @@ function SettingsForm({ item, reload }: { item: SiteSettings | null; reload: () 
   async function submit(e: React.FormEvent) { e.preventDefault(); await updateItem('site_settings', 'main', form); reload(); }
   return <AdminPanel title="Site Settings" button="Simpan Settings" onSubmit={submit}>
     <Field label="URL Musik" value={form.music_url} onChange={(v) => setForm({ ...form, music_url: v })} />
+    <p className="-mt-2 text-sm text-muted">Untuk file di folder public, pakai path persis seperti <span className="font-semibold text-cocoa">/audio/about_you.mp3</span>.</p>
     <TextareaField label="Birthday Message" value={form.birthday_message} onChange={(v) => setForm({ ...form, birthday_message: v })} />
     <TextareaField label="Final Message" value={form.final_message} onChange={(v) => setForm({ ...form, final_message: v })} minHeight="min-h-40" />
   </AdminPanel>;

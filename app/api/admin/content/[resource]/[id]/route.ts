@@ -15,7 +15,11 @@ export async function PUT(request: Request, { params }: { params: Promise<{ reso
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Body tidak valid.' }, { status: 400 });
   }
   const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase.from(resource).update(body).eq('id', id).select('*').single();
+  const query =
+    resource === 'site_settings'
+      ? supabase.from('site_settings').upsert({ ...body, id }, { onConflict: 'id' }).select('*').single()
+      : supabase.from(resource).update(body).eq('id', id).select('*').single();
+  const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
 }

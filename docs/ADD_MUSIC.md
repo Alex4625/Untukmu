@@ -13,7 +13,7 @@ public/audio/
 Contoh:
 
 ```text
-public/audio/lagu-kecil.mp3
+public/audio/about_you.mp3
 ```
 
 2. Jalankan website.
@@ -22,11 +22,13 @@ public/audio/lagu-kecil.mp3
 5. Isi URL Musik:
 
 ```text
-/audio/lagu-kecil.mp3
+/audio/about_you.mp3
 ```
 
 6. Klik **Simpan Settings**.
 
 ## Catatan
+
+Path harus sama persis dengan nama file. Misalnya `about_you.mp3` berbeda dari `labout_you.mp3`.
 
 Gunakan file kecil agar website tetap ringan. Jangan upload musik yang melanggar hak cipta kalau website akan dibagikan publik.

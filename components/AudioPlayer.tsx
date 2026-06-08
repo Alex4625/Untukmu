@@ -6,8 +6,10 @@ import { useRef, useState } from 'react';
 export default function AudioPlayer({ src }: { src?: string | null }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
-  const music = src || '/audio/placeholder.txt';
-  const playable = Boolean(src);
+  const [failedSrc, setFailedSrc] = useState('');
+  const music = src?.trim() || '';
+  const playable = Boolean(music);
+  const error = failedSrc === music ? 'Musik belum bisa diputar. Cek URL musik di admin.' : '';
 
   async function toggle() {
     if (!playable || !audioRef.current) return;
@@ -15,8 +17,14 @@ export default function AudioPlayer({ src }: { src?: string | null }) {
       audioRef.current.pause();
       setPlaying(false);
     } else {
-      await audioRef.current.play();
-      setPlaying(true);
+      try {
+        setFailedSrc('');
+        await audioRef.current.play();
+        setPlaying(true);
+      } catch {
+        setPlaying(false);
+        setFailedSrc(music);
+      }
     }
   }
 
@@ -27,9 +35,11 @@ export default function AudioPlayer({ src }: { src?: string | null }) {
       </button>
       <div className="text-left">
         <p className="font-medium">Musik kecil untuk menemani</p>
-        <p className="text-xs leading-5 text-muted">{playable ? 'Klik play kalau kamu ingin mendengarkan.' : 'Placeholder musik. Isi URL musik di admin.'}</p>
+        <p className={`text-xs leading-5 ${error ? 'text-error' : 'text-muted'}`}>
+          {error || (playable ? 'Klik play kalau kamu ingin mendengarkan.' : 'Isi URL musik di admin.')}
+        </p>
       </div>
-      {playable && <audio ref={audioRef} src={music} loop />}
+      {playable && <audio ref={audioRef} src={music} loop preload="none" onError={() => { setPlaying(false); setFailedSrc(music); }} />}
     </div>
   );
 }

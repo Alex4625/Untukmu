@@ -1,6 +1,6 @@
 import { getSupabaseAdmin } from './supabaseAdmin';
 import { getUnlockIso, isUnlockedNow } from './date';
-import type { PublicContent } from './types';
+import type { PublicContent, SiteSettings } from './types';
 
 export async function getPublicContent(preview = false): Promise<PublicContent> {
   const previewMode = Boolean(preview);
@@ -13,7 +13,7 @@ export async function getPublicContent(preview = false): Promise<PublicContent> 
       memory_cards: [],
       quiz_questions: [],
       plans: [],
-      site_settings: null,
+      site_settings: await getLockedSettings(),
       unlocked: false,
       preview: false,
       unlockIso: getUnlockIso()
@@ -45,4 +45,25 @@ export async function getPublicContent(preview = false): Promise<PublicContent> 
     preview: previewMode,
     unlockIso: getUnlockIso()
   };
+}
+
+async function getLockedSettings(): Promise<SiteSettings | null> {
+  try {
+    const settings = await getSupabaseAdmin()
+      .from('site_settings')
+      .select('id,music_url,updated_at')
+      .eq('id', 'main')
+      .maybeSingle();
+    if (settings.error || !settings.data) return null;
+
+    return {
+      id: settings.data.id || 'main',
+      birthday_message: null,
+      final_message: null,
+      music_url: settings.data.music_url || null,
+      updated_at: settings.data.updated_at || new Date(0).toISOString()
+    };
+  } catch {
+    return null;
+  }
 }
