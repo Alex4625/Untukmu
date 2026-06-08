@@ -21,11 +21,9 @@ export async function getPublicContent(preview = false): Promise<PublicContent> 
   }
 
   const supabase = getSupabaseAdmin();
-  const settings = await supabase.from('site_settings').select('*').eq('id', 'main').maybeSingle();
-  if (settings.error) throw settings.error;
-
   const active = { status: 'active' };
-  const [memories, letters, cards, quiz, plans] = await Promise.all([
+  const [settings, memories, letters, cards, quiz, plans] = await Promise.all([
+    supabase.from('site_settings').select('*').eq('id', 'main').maybeSingle(),
     supabase.from('memories').select('*').match(active).order('memory_date', { ascending: true }),
     supabase.from('letters').select('*').match(active).order('created_at', { ascending: true }),
     supabase.from('memory_cards').select('*').match(active).order('sort_order', { ascending: true }),
@@ -33,7 +31,7 @@ export async function getPublicContent(preview = false): Promise<PublicContent> 
     supabase.from('plans').select('*').match(active).order('sort_order', { ascending: true })
   ]);
 
-  const err = [memories.error, letters.error, cards.error, quiz.error, plans.error].find(Boolean);
+  const err = [settings.error, memories.error, letters.error, cards.error, quiz.error, plans.error].find(Boolean);
   if (err) throw err;
 
   return {

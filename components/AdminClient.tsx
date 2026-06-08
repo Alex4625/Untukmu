@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useId, useState } from 'react';
-import type { ContentStatus, Letter, Memory, MemoryCard, Plan, PublicContent, QuizQuestion, SiteSettings } from '@/lib/types';
+import type { AdminContent } from '@/lib/adminContent';
+import type { ContentStatus, Letter, Memory, MemoryCard, Plan, QuizQuestion, SiteSettings } from '@/lib/types';
 import { Eye, EyeOff, FilePenLine, Lock, LogOut, Plus, RefreshCw, ShieldCheck, Trash2 } from 'lucide-react';
 
-type AdminData = Omit<PublicContent, 'unlocked' | 'unlockIso' | 'preview'>;
+type AdminData = AdminContent;
 type Tab = 'memories' | 'letters' | 'memory_cards' | 'quiz_questions' | 'plans' | 'site_settings';
 type MutationBody = Record<string, unknown>;
 
@@ -25,25 +26,50 @@ const statusLabels: Record<ContentStatus, string> = {
   hidden: 'Hidden'
 };
 
-export default function AdminClient({ authenticated: initialAuth }: { authenticated: boolean }) {
+export default function AdminClient({
+  authenticated: initialAuth,
+  initialData,
+  initialError = ''
+}: {
+  authenticated: boolean;
+  initialData?: AdminData | null;
+  initialError?: string;
+}) {
   const passwordId = useId();
   const [authenticated, setAuthenticated] = useState(initialAuth);
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(initialError);
   const [loading, setLoading] = useState(false);
+  const [contentLoading, setContentLoading] = useState(false);
   const [tab, setTab] = useState<Tab>('memories');
-  const [data, setData] = useState<AdminData>(emptyData);
+  const [data, setData] = useState<AdminData>(initialData || emptyData);
+  const [hasLoaded, setHasLoaded] = useState(Boolean(initialData));
+
+  async function fetchAdminContent() {
+    const res = await fetch('/api/admin/content', { cache: 'no-store' });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Gagal memuat data.');
+    return json as AdminData;
+  }
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError('');
-    const res = await fetch('/api/admin/login', { method: 'POST', body: JSON.stringify({ password }) });
-    const json = await res.json();
-    setLoading(false);
-    if (!res.ok) return setError(json.error || 'Login gagal.');
-    setPassword('');
-    setAuthenticated(true);
+    try {
+      const res = await fetch('/api/admin/login', { method: 'POST', body: JSON.stringify({ password }) });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Login gagal.');
+      const nextData = await fetchAdminContent();
+      setData(nextData);
+      setHasLoaded(true);
+      setPassword('');
+      setAuthenticated(true);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Login gagal.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function logout() {
@@ -51,31 +77,43 @@ export default function AdminClient({ authenticated: initialAuth }: { authentica
     setAuthenticated(false);
   }
 
-  async function load() {
-    if (!authenticated) return;
-    const res = await fetch('/api/admin/content', { cache: 'no-store' });
-    const json = await res.json();
-    if (res.ok) setData(json);
-    else setError(json.error || 'Gagal memuat data.');
+  async function load(force = false) {
+    if (!force && !authenticated) return;
+    setContentLoading(true);
+    setError('');
+    try {
+      setData(await fetchAdminContent());
+      setHasLoaded(true);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Gagal memuat data.');
+    } finally {
+      setContentLoading(false);
+    }
   }
 
   useEffect(() => {
-    if (!authenticated) return;
+    if (!authenticated || hasLoaded) return;
 
     let cancelled = false;
     async function loadInitialData() {
-      const res = await fetch('/api/admin/content', { cache: 'no-store' });
-      const json = await res.json();
-      if (cancelled) return;
-      if (res.ok) setData(json);
-      else setError(json.error || 'Gagal memuat data.');
+      try {
+        setContentLoading(true);
+        const json = await fetchAdminContent();
+        if (cancelled) return;
+        setData(json);
+        setHasLoaded(true);
+      } catch (error) {
+        if (!cancelled) setError(error instanceof Error ? error.message : 'Gagal memuat data.');
+      } finally {
+        if (!cancelled) setContentLoading(false);
+      }
     }
 
     void loadInitialData();
     return () => {
       cancelled = true;
     };
-  }, [authenticated]);
+  }, [authenticated, hasLoaded]);
 
   if (!authenticated) {
     return (
@@ -88,7 +126,7 @@ export default function AdminClient({ authenticated: initialAuth }: { authentica
           <label className="label mt-6" htmlFor={passwordId}>Password</label>
           <input id={passwordId} className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password admin" autoComplete="current-password" />
           {error && <p className="mt-3 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</p>}
-          <button disabled={loading} className="btn-primary mt-6 w-full">{loading ? 'Memeriksa...' : 'Masuk'}</button>
+          <button disabled={loading} className="btn-primary mt-6 w-full">{loading ? 'Memuat konten...' : 'Masuk'}</button>
         </form>
       </main>
     );
@@ -104,11 +142,12 @@ export default function AdminClient({ authenticated: initialAuth }: { authentica
         </div>
         <div className="flex flex-wrap gap-2">
           <a href="/hub?preview=unlocked" target="_blank" rel="noreferrer" className="btn-secondary">Preview Public</a>
-          <button onClick={() => void load()} className="btn-secondary gap-2"><RefreshCw size={16} /> Refresh</button>
+          <button disabled={contentLoading} onClick={() => void load()} className="btn-secondary gap-2"><RefreshCw size={16} /> {contentLoading ? 'Memuat...' : 'Refresh'}</button>
           <button onClick={logout} className="btn-primary gap-2"><LogOut size={16} /> Logout</button>
         </div>
       </div>
       {error && <p className="mb-5 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</p>}
+      {contentLoading && !hasLoaded && <p className="mb-5 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-muted shadow-xs">Memuat konten admin...</p>}
 
       <div className="grid admin-grid gap-6">
         <aside className="h-fit rounded-2xl bg-maroon p-3 text-cream shadow-soft lg:sticky lg:top-6">
