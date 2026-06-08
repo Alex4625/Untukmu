@@ -60,9 +60,14 @@ export default function AdminClient({
       const res = await fetch('/api/admin/login', { method: 'POST', body: JSON.stringify({ password }) });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Login gagal.');
-      const nextData = await fetchAdminContent();
-      setData(nextData);
-      setHasLoaded(true);
+      if (json.content) {
+        setData(json.content as AdminData);
+        setHasLoaded(true);
+      } else {
+        if (json.contentError) setError(json.contentError);
+        setData(await fetchAdminContent());
+        setHasLoaded(true);
+      }
       setPassword('');
       setAuthenticated(true);
     } catch (error) {

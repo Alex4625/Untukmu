@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createAdminToken, setAdminCookie } from '@/lib/adminAuth';
+import { getAdminContent } from '@/lib/adminContent';
 import crypto from 'crypto';
 
 const WINDOW_MS = 15 * 60 * 1000;
@@ -82,5 +83,13 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-  return NextResponse.json({ ok: true });
+  try {
+    return NextResponse.json({ ok: true, content: await getAdminContent() });
+  } catch (error) {
+    return NextResponse.json({
+      ok: true,
+      content: null,
+      contentError: error instanceof Error ? error.message : 'Konten admin belum bisa dimuat.'
+    });
+  }
 }
