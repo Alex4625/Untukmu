@@ -291,7 +291,7 @@ function MemoryAdmin({ items, reload }: { items: Memory[]; reload: () => void })
   }
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.title) return alert('Judul wajib diisi.');
+    if (!form.title) throw new Error('Judul wajib diisi.');
     if (edit) await updateItem('memories', edit.id, form);
     else await createItem('memories', form);
     reset(); reload();
@@ -441,8 +441,36 @@ function SettingsForm({ item, reload }: { item: SiteSettings | null; reload: () 
   </AdminPanel>;
 }
 
-function AdminPanel({ title, button, onSubmit, children }: { title: string; button: string; onSubmit: (e: React.FormEvent) => void; children: React.ReactNode }) {
-  return <form onSubmit={onSubmit} className="rounded-2xl border border-[rgba(196,138,106,0.22)] bg-white p-5 shadow-romantic sm:p-6"><h2 className="text-xl font-semibold text-cocoa">{title}</h2><div className="mt-6 space-y-4">{children}</div><button className="btn-primary mt-6 gap-2"><Plus size={16} />{button}</button></form>;
+function AdminPanel({ title, button, onSubmit, children }: { title: string; button: string; onSubmit: (e: React.FormEvent) => Promise<void> | void; children: React.ReactNode }) {
+  const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setFeedback(null);
+    try {
+      await onSubmit(e);
+      setFeedback({ type: 'success', message: 'Tersimpan.' });
+    } catch (error) {
+      setFeedback({ type: 'error', message: error instanceof Error ? error.message : 'Gagal menyimpan.' });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={(e) => void submit(e)} className="rounded-2xl border border-[rgba(196,138,106,0.22)] bg-white p-5 shadow-romantic sm:p-6">
+      <h2 className="text-xl font-semibold text-cocoa">{title}</h2>
+      <div className="mt-6 space-y-4">{children}</div>
+      {feedback && (
+        <p className={`mt-5 rounded-2xl px-4 py-3 text-sm font-semibold ${feedback.type === 'error' ? 'bg-red-50 text-red-600' : 'bg-sage/10 text-sage'}`}>
+          {feedback.message}
+        </p>
+      )}
+      <button disabled={saving} className="btn-primary mt-6 gap-2"><Plus size={16} />{saving ? 'Menyimpan...' : button}</button>
+    </form>
+  );
 }
 function Field({ label, value, onChange, type = 'text' }: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
   const id = useId();
@@ -526,16 +554,33 @@ function ItemList<T extends { id: string; status?: ContentStatus }>({
   subtitle: (i: T) => string;
   onEdit: (i: T) => void;
   onStatusChange?: (i: T, status: ContentStatus) => Promise<void>;
-  onDelete: (i: T) => void;
+  onDelete: (i: T) => Promise<void> | void;
 }) {
   const [pending, setPending] = useState('');
+  const [error, setError] = useState('');
 
   async function changeStatus(item: T, status: ContentStatus) {
     if (!onStatusChange) return;
     const key = `${item.id}:${status}`;
     setPending(key);
+    setError('');
     try {
       await onStatusChange(item, status);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Gagal mengubah status.');
+    } finally {
+      setPending('');
+    }
+  }
+
+  async function removeItem(item: T) {
+    const key = `${item.id}:delete`;
+    setPending(key);
+    setError('');
+    try {
+      await onDelete(item);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Gagal menghapus data.');
     } finally {
       setPending('');
     }
@@ -544,6 +589,7 @@ function ItemList<T extends { id: string; status?: ContentStatus }>({
   return (
     <div className="mt-8 space-y-3">
       <h3 className="font-semibold text-cocoa">Daftar Konten</h3>
+      {error && <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</p>}
       {!items.length && <div className="rounded-xl border border-dashed border-[rgba(196,138,106,0.35)] bg-white/70 p-5 text-sm text-muted">Belum ada item di bagian ini.</div>}
       {items.map((item) => (
         <div key={item.id} className="rounded-xl border border-[rgba(196,138,106,0.22)] bg-white p-4 shadow-xs">
@@ -557,7 +603,7 @@ function ItemList<T extends { id: string; status?: ContentStatus }>({
             </div>
             <div className="flex flex-wrap gap-2">
               <button type="button" onClick={() => onEdit(item)} className="btn-secondary !min-h-10 !py-2">Edit</button>
-              <button type="button" aria-label="Hapus" onClick={() => onDelete(item)} className="inline-flex min-h-10 items-center justify-center rounded-lg bg-error px-4 py-2 text-sm font-semibold text-white">
+              <button type="button" aria-label="Hapus" disabled={pending === `${item.id}:delete`} onClick={() => void removeItem(item)} className="inline-flex min-h-10 items-center justify-center rounded-lg bg-error px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
                 <Trash2 size={15} />
               </button>
             </div>

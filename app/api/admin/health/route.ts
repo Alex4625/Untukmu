@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { isAdminRequest } from '@/lib/adminAuth';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
+import { getSupabaseWriteAccessStatus } from '@/lib/supabaseWriteAccess';
 
 type HealthCheck = {
   key: string;
@@ -70,6 +71,14 @@ export async function GET() {
       });
     }
   }
+
+  const writeAccess = getSupabaseWriteAccessStatus();
+  checks.push({
+    key: 'supabase_write',
+    label: 'Supabase admin write',
+    ok: writeAccess.ok,
+    detail: writeAccess.detail
+  });
 
   return NextResponse.json({ ok: checks.every((check) => check.ok), checks });
 }

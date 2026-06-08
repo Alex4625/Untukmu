@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { isAdminRequest } from '@/lib/adminAuth';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { isAllowedResource, sanitizeContentInput } from '@/lib/resource';
+import { formatSupabaseMutationError, getSupabaseWriteAccessStatus } from '@/lib/supabaseWriteAccess';
 
 export async function PUT(request: Request, { params }: { params: Promise<{ resource: string; id: string }> }) {
   if (!(await isAdminRequest())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -14,13 +15,15 @@ export async function PUT(request: Request, { params }: { params: Promise<{ reso
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Body tidak valid.' }, { status: 400 });
   }
+  const writeAccess = getSupabaseWriteAccessStatus();
+  if (!writeAccess.ok) return NextResponse.json({ error: writeAccess.detail }, { status: 503 });
   const supabase = getSupabaseAdmin();
   const query =
     resource === 'site_settings'
       ? supabase.from('site_settings').upsert({ ...body, id }, { onConflict: 'id' }).select('*').single()
       : supabase.from(resource).update(body).eq('id', id).select('*').single();
   const { data, error } = await query;
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: formatSupabaseMutationError(error.message) }, { status: 500 });
   return NextResponse.json(data);
 }
 
@@ -28,8 +31,10 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   if (!(await isAdminRequest())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { resource, id } = await params;
   if (!isAllowedResource(resource)) return NextResponse.json({ error: 'Resource tidak valid.' }, { status: 400 });
+  const writeAccess = getSupabaseWriteAccessStatus();
+  if (!writeAccess.ok) return NextResponse.json({ error: writeAccess.detail }, { status: 503 });
   const supabase = getSupabaseAdmin();
   const { error } = await supabase.from(resource).delete().eq('id', id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: formatSupabaseMutationError(error.message) }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
