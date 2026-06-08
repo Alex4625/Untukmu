@@ -37,7 +37,7 @@ body {
 
 .romantic-bg {
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 .romantic-bg::before,
 .romantic-bg::after {

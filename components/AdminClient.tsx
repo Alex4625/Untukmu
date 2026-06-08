@@ -2,17 +2,11 @@
 
 import { useEffect, useId, useState } from 'react';
 import type { ContentStatus, Letter, Memory, MemoryCard, Plan, PublicContent, QuizQuestion, SiteSettings } from '@/lib/types';
-import { AlertTriangle, CheckCircle2, Eye, EyeOff, FilePenLine, Lock, LogOut, Plus, RefreshCw, ShieldCheck, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, FilePenLine, Lock, LogOut, Plus, RefreshCw, ShieldCheck, Trash2 } from 'lucide-react';
 
 type AdminData = Omit<PublicContent, 'unlocked' | 'unlockIso' | 'preview'>;
 type Tab = 'memories' | 'letters' | 'memory_cards' | 'quiz_questions' | 'plans' | 'site_settings';
 type MutationBody = Record<string, unknown>;
-type HealthCheck = {
-  key: string;
-  label: string;
-  ok: boolean;
-  detail: string;
-};
 
 const tabs: { key: Tab; label: string }[] = [
   { key: 'memories', label: 'Kenangan/Galeri' },
@@ -39,7 +33,6 @@ export default function AdminClient({ authenticated: initialAuth }: { authentica
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState<Tab>('memories');
   const [data, setData] = useState<AdminData>(emptyData);
-  const [health, setHealth] = useState<HealthCheck[] | null>(null);
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -66,17 +59,6 @@ export default function AdminClient({ authenticated: initialAuth }: { authentica
     else setError(json.error || 'Gagal memuat data.');
   }
 
-  async function loadHealth() {
-    if (!authenticated) return;
-    const res = await fetch('/api/admin/health', { cache: 'no-store' });
-    const json = await res.json();
-    if (res.ok) setHealth(json.checks || []);
-  }
-
-  async function refreshAll() {
-    await Promise.all([load(), loadHealth()]);
-  }
-
   useEffect(() => {
     if (!authenticated) return;
 
@@ -88,15 +70,8 @@ export default function AdminClient({ authenticated: initialAuth }: { authentica
       if (res.ok) setData(json);
       else setError(json.error || 'Gagal memuat data.');
     }
-    async function loadInitialHealth() {
-      const res = await fetch('/api/admin/health', { cache: 'no-store' });
-      const json = await res.json();
-      if (cancelled) return;
-      if (res.ok) setHealth(json.checks || []);
-    }
 
     void loadInitialData();
-    void loadInitialHealth();
     return () => {
       cancelled = true;
     };
@@ -129,7 +104,7 @@ export default function AdminClient({ authenticated: initialAuth }: { authentica
         </div>
         <div className="flex flex-wrap gap-2">
           <a href="/hub?preview=unlocked" target="_blank" rel="noreferrer" className="btn-secondary">Preview Public</a>
-          <button onClick={() => void refreshAll()} className="btn-secondary gap-2"><RefreshCw size={16} /> Refresh</button>
+          <button onClick={() => void load()} className="btn-secondary gap-2"><RefreshCw size={16} /> Refresh</button>
           <button onClick={logout} className="btn-primary gap-2"><LogOut size={16} /> Logout</button>
         </div>
       </div>
@@ -148,7 +123,6 @@ export default function AdminClient({ authenticated: initialAuth }: { authentica
           ))}
         </aside>
         <section className="space-y-6">
-          <HealthStrip checks={health} />
           <Stats data={data} />
           {tab === 'memories' && <MemoryAdmin items={data.memories} reload={load} />}
           {tab === 'letters' && <LetterAdmin items={data.letters} reload={load} />}
@@ -159,30 +133,6 @@ export default function AdminClient({ authenticated: initialAuth }: { authentica
         </section>
       </div>
     </main>
-  );
-}
-
-function HealthStrip({ checks }: { checks: HealthCheck[] | null }) {
-  if (!checks) {
-    return (
-      <div className="rounded-2xl border border-[rgba(196,138,106,0.22)] bg-white p-5 text-sm text-muted shadow-xs">
-        Memeriksa konfigurasi deploy...
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-      {checks.map((check) => (
-        <div key={check.key} className="rounded-xl border border-[rgba(196,138,106,0.22)] bg-white p-4 shadow-xs">
-          <div className="flex items-center gap-2">
-            {check.ok ? <CheckCircle2 size={17} className="text-sage" /> : <AlertTriangle size={17} className="text-error" />}
-            <p className="text-sm font-semibold text-cocoa">{check.label}</p>
-          </div>
-          <p className="mt-2 text-xs leading-5 text-muted">{check.detail}</p>
-        </div>
-      ))}
-    </div>
   );
 }
 
