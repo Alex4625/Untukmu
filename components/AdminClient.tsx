@@ -40,6 +40,7 @@ export default function AdminClient({
   const [authenticated, setAuthenticated] = useState(initialAuth);
   const [password, setPassword] = useState('');
   const [error, setError] = useState(initialError);
+  const [writeWarning, setWriteWarning] = useState('');
   const [loading, setLoading] = useState(false);
   const [contentLoading, setContentLoading] = useState(false);
   const [tab, setTab] = useState<Tab>('memories');
@@ -121,6 +122,27 @@ export default function AdminClient({
     };
   }, [authenticated, hasLoaded]);
 
+  useEffect(() => {
+    if (!authenticated) return;
+
+    let cancelled = false;
+    async function loadWriteHealth() {
+      try {
+        const res = await fetch('/api/admin/health', { cache: 'no-store' });
+        const json = await res.json();
+        const writeCheck = json.checks?.find((check: { key?: string }) => check.key === 'supabase_write');
+        if (!cancelled && writeCheck && !writeCheck.ok) setWriteWarning(writeCheck.detail || 'Database admin belum punya izin tulis.');
+      } catch {
+        if (!cancelled) setWriteWarning('');
+      }
+    }
+
+    void loadWriteHealth();
+    return () => {
+      cancelled = true;
+    };
+  }, [authenticated]);
+
   if (!authenticated) {
     return (
       <main className="container-page flex min-h-screen items-center justify-center py-16">
@@ -153,6 +175,7 @@ export default function AdminClient({
         </div>
       </div>
       {error && <p className="mb-5 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</p>}
+      {writeWarning && <p className="mb-5 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{writeWarning}</p>}
       {contentLoading && !hasLoaded && <p className="mb-5 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-muted shadow-xs">Memuat konten admin...</p>}
 
       <div className="grid admin-grid gap-6">
