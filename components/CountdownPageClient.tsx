@@ -8,6 +8,8 @@ import Countdown from './Countdown';
 import type { PublicContent } from '@/lib/types';
 
 export default function CountdownPageClient({ content }: { content: PublicContent }) {
+  const hubHref = content.preview ? '/hub?preview=unlocked' : '/hub';
+
   return (
     <main className="relative min-h-dvh overflow-hidden px-5 py-12 sm:py-16">
       <span className="sparkle left-[12%] top-[18%]" />
@@ -15,7 +17,7 @@ export default function CountdownPageClient({ content }: { content: PublicConten
       <span className="sparkle bottom-[20%] left-[18%]" style={{ animationDelay: '3s' }} />
 
       <section className="mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-3xl flex-col items-center justify-center text-center">
-        <Link href="/" className="btn-ghost mb-8">Kembali</Link>
+        <Link href={content.preview ? '/?preview=unlocked' : '/'} className="btn-ghost mb-8">Kembali</Link>
 
         {content.unlocked ? (
           <div className="glass-card fade-in w-full max-w-[520px] px-6 py-10 sm:px-10">
@@ -28,8 +30,13 @@ export default function CountdownPageClient({ content }: { content: PublicConten
             <p className="mx-auto mt-5 max-w-sm text-base leading-7 text-cocoa">
               Sekarang kamu boleh membuka semua hal kecil yang aku siapin untuk kamu.
             </p>
+            {content.preview && (
+              <p className="mx-auto mt-5 max-w-sm rounded-xl bg-cream px-4 py-3 text-xs font-semibold text-maroon">
+                Mode preview admin sedang aktif.
+              </p>
+            )}
             <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row">
-              <Link href="/hub" className="btn-primary">Buka Hadiahnya</Link>
+              <Link href={hubHref} className="btn-primary">Buka Hadiahnya</Link>
               <ConfettiButton label="Rayakan" />
             </div>
           </div>

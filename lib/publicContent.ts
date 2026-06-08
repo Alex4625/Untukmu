@@ -4,7 +4,8 @@ import type { PublicContent, SiteSettings } from './types';
 
 export async function getPublicContent(preview = false): Promise<PublicContent> {
   const supabase = getSupabaseAdmin();
-  const unlocked = preview || isUnlockedNow();
+  const previewMode = Boolean(preview);
+  const unlocked = previewMode || isUnlockedNow();
   const settings = await supabase.from('site_settings').select('*').eq('id', 'main').maybeSingle();
   if (settings.error) throw settings.error;
 
@@ -17,6 +18,7 @@ export async function getPublicContent(preview = false): Promise<PublicContent> 
       plans: [],
       site_settings: settings.data ? lockedSettings(settings.data) : null,
       unlocked: false,
+      preview: false,
       unlockIso: getUnlockIso()
     };
   }
@@ -41,6 +43,7 @@ export async function getPublicContent(preview = false): Promise<PublicContent> 
     plans: plans.data || [],
     site_settings: settings.data || null,
     unlocked,
+    preview: previewMode,
     unlockIso: getUnlockIso()
   };
 }

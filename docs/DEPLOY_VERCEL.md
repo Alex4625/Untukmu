@@ -55,4 +55,12 @@ https://namaproject.vercel.app/admin
 
 Login ke `/admin`, lalu klik tombol **Preview Public**.
 
-Preview ini hanya bekerja kalau cookie admin masih aktif. Kalau login gagal dengan pesan `ADMIN_SESSION_SECRET wajib diisi minimal 32 karakter`, artinya environment variable tersebut belum benar di Vercel.
+Preview akan membuka `/hub?preview=unlocked` dan hanya bekerja kalau cookie admin masih aktif. Halaman publik biasa tetap mengikuti tanggal unlock, jadi gunakan tombol ini saat ingin mengecek hadiah sebelum 10 Desember.
+
+Kalau login gagal dengan pesan `ADMIN_SESSION_SECRET wajib diisi minimal 32 karakter`, artinya environment variable tersebut belum benar di Vercel.
+
+## 6. Admin health check dan status konten
+
+Dashboard admin menampilkan health check untuk `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`, Supabase, Cloudinary, dan tanggal unlock. Gunakan panel ini setelah deploy untuk memastikan semua konfigurasi siap.
+
+Konten baru otomatis masuk sebagai **Draft**. Ubah menjadi **Published** dari daftar konten kalau sudah siap tampil setelah unlock. Gunakan **Hidden** untuk menyimpan item tanpa menampilkannya ke public.

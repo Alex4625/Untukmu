@@ -1,18 +1,20 @@
 import ConfettiButton from '@/components/ConfettiButton';
 import LockedNotice from '@/components/LockedNotice';
+import PreviewBanner from '@/components/PreviewBanner';
 import PublicNav from '@/components/PublicNav';
-import { isAdminRequest } from '@/lib/adminAuth';
 import { getPublicContent } from '@/lib/publicContent';
+import { isPreviewRequest, type PageSearchParams } from '@/lib/publicPreview';
 import { Sparkles } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
-export default async function FinalPage() {
-  const content = await getPublicContent(await isAdminRequest());
+export default async function FinalPage({ searchParams }: { searchParams?: PageSearchParams }) {
+  const content = await getPublicContent(await isPreviewRequest(searchParams));
   if (!content.unlocked) return <LockedNotice title="Kejutan terakhir belum bisa dibuka" />;
   return (
     <main className="container-page min-h-dvh py-6 sm:py-10">
-      <PublicNav />
+      <PublicNav preview={content.preview} />
+      {content.preview && <PreviewBanner />}
       <section className="glass-card mx-auto max-w-3xl p-8 text-center sm:p-12">
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-cream text-rose soft-pulse">
           <Sparkles size={34} />

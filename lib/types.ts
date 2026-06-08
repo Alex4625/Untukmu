@@ -72,5 +72,6 @@ export type PublicContent = {
   plans: Plan[];
   site_settings: SiteSettings | null;
   unlocked: boolean;
+  preview: boolean;
   unlockIso: string;
 };

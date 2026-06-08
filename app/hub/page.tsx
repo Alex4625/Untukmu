@@ -1,6 +1,7 @@
 import LockedNotice from '@/components/LockedNotice';
-import { isAdminRequest } from '@/lib/adminAuth';
+import PreviewBanner from '@/components/PreviewBanner';
 import { getPublicContent } from '@/lib/publicContent';
+import { isPreviewRequest, previewPath, type PageSearchParams } from '@/lib/publicPreview';
 import { CalendarDays, Gift, Heart, Image, Mail, Sparkles, Star, ListChecks } from 'lucide-react';
 import Link from 'next/link';
 
@@ -16,8 +17,8 @@ const menuItems = [
   { href: '/final', title: 'Kejutan Terakhir', description: 'Penutup yang paling pelan.', Icon: Sparkles, special: true }
 ];
 
-export default async function HubPage() {
-  const content = await getPublicContent(await isAdminRequest());
+export default async function HubPage({ searchParams }: { searchParams?: PageSearchParams }) {
+  const content = await getPublicContent(await isPreviewRequest(searchParams));
   if (!content.unlocked) return <LockedNotice />;
 
   const filledSections = [
@@ -31,6 +32,7 @@ export default async function HubPage() {
 
   return (
     <main className="container-page min-h-dvh py-12 sm:py-16">
+      {content.preview && <PreviewBanner />}
       <section className="mx-auto max-w-3xl text-center">
         <p className="eyebrow">Selamat Ulang Tahun</p>
         <h1 className="mt-3 font-display text-5xl font-light leading-tight text-maroon sm:text-6xl">Untuk Nona</h1>
@@ -45,7 +47,7 @@ export default async function HubPage() {
         {menuItems.map(({ href, title, description, Icon, special }, index) => (
           <Link
             key={href}
-            href={href}
+            href={previewPath(href, content.preview)}
             className={`group rounded-2xl border p-5 text-left shadow-romantic transition duration-300 hover:-translate-y-1 hover:border-softpink hover:shadow-soft active:scale-[0.97] ${
               special ? 'border-rose/35 bg-cream' : 'border-[rgba(196,138,106,0.22)] bg-white'
             }`}
