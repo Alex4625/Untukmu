@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useState } from 'react';
 import type { AdminContent } from '@/lib/adminContent';
+import { DEFAULT_MUSIC_URL } from '@/lib/siteDefaults';
 import type { ContentStatus, Letter, Memory, MemoryCard, Plan, QuizQuestion, SiteSettings } from '@/lib/types';
 import { Eye, EyeOff, FilePenLine, Lock, LogOut, Plus, RefreshCw, ShieldCheck, Trash2 } from 'lucide-react';
 
@@ -430,7 +431,7 @@ function SettingsAdmin({ item, reload }: { item: SiteSettings | null; reload: ()
 }
 
 function SettingsForm({ item, reload }: { item: SiteSettings | null; reload: () => void }) {
-  const [form, setForm] = useState({ birthday_message: item?.birthday_message || '', final_message: item?.final_message || '', music_url: item?.music_url || '' });
+  const [form, setForm] = useState({ birthday_message: item?.birthday_message || '', final_message: item?.final_message || '', music_url: item?.music_url || DEFAULT_MUSIC_URL });
   async function submit(e: React.FormEvent) { e.preventDefault(); await updateItem('site_settings', 'main', form); reload(); }
   return <AdminPanel title="Site Settings" button="Simpan Settings" onSubmit={submit}>
     <Field label="URL Musik" value={form.music_url} onChange={(v) => setForm({ ...form, music_url: v })} />

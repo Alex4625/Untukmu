@@ -29,6 +29,8 @@ public/audio/about_you.mp3
 
 ## Catatan
 
+Website sudah membawa fallback musik di `/audio/about_you.mp3`, jadi tombol musik tetap bisa dipakai saat setting database masih kosong.
+
 Path harus sama persis dengan nama file. Misalnya `about_you.mp3` berbeda dari `labout_you.mp3`.
 
 Gunakan file kecil agar website tetap ringan. Jangan upload musik yang melanggar hak cipta kalau website akan dibagikan publik.

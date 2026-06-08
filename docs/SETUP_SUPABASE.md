@@ -37,4 +37,6 @@ SUPABASE_SERVICE_ROLE_KEY=service_role key
 
 Masukkan ke `.env.local`.
 
-PENTING: `SUPABASE_SERVICE_ROLE_KEY` jangan pernah ditaruh di frontend. Project ini sudah aman karena key hanya dipakai di server API route Next.js.
+PENTING: `SUPABASE_SERVICE_ROLE_KEY` harus memakai **service_role key**, bukan anon/public/publishable key. Kalau memakai publishable key, admin bisa terkena error RLS saat menyimpan settings atau konten.
+
+`SUPABASE_SERVICE_ROLE_KEY` jangan pernah ditaruh di frontend. Project ini sudah aman karena key hanya dipakai di server API route Next.js.

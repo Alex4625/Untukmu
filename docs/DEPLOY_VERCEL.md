@@ -32,6 +32,8 @@ NEXT_PUBLIC_UNLOCK_ISO=2026-12-09T16:00:00.000Z
 
 `ADMIN_SESSION_SECRET` wajib diisi minimal 32 karakter. Buat nilai acak yang panjang, beda dari `ADMIN_PASSWORD`.
 
+`SUPABASE_SERVICE_ROLE_KEY` wajib memakai service role key dari Supabase, bukan publishable/anon key. Kalau salah key, simpan settings bisa gagal karena RLS.
+
 Contoh generate secret:
 
 ```bash
