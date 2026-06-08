@@ -1,13 +1,7 @@
-'use client';
-
 import Link from 'next/link';
-import type { PublicContent } from '@/lib/types';
 import { Flower2 } from 'lucide-react';
 
-export default function HomeClient({ content }: { content: PublicContent }) {
-  const href = content.preview ? '/hub?preview=unlocked' : content.unlocked ? '/hub' : '/countdown';
-  const label = content.preview ? 'Preview Hadiahnya' : content.unlocked ? 'Buka Hadiahnya' : 'Masuk ke Cerita Kita';
-
+export default function HomeClient() {
   return (
     <main className="relative flex min-h-dvh items-center justify-center overflow-hidden px-5 py-12">
       <span className="sparkle left-[16%] top-[18%]" />
@@ -27,13 +21,8 @@ export default function HomeClient({ content }: { content: PublicContent }) {
         <p className="mx-auto mt-3 max-w-xs text-sm leading-6 text-muted">
           Sebuah tempat kecil di internet untuk menyimpan hal-hal indah tentang kamu dan kita.
         </p>
-        {content.preview && (
-          <p className="mx-auto mt-5 max-w-xs rounded-xl bg-cream px-4 py-3 text-xs font-semibold text-maroon">
-            Mode preview admin sedang aktif.
-          </p>
-        )}
-        <Link href={href} className="btn-primary mt-8 w-full sm:w-auto">
-          {label}
+        <Link href="/countdown" className="btn-primary mt-8 w-full sm:w-auto">
+          Masuk ke Cerita Kita
         </Link>
       </section>
     </main>

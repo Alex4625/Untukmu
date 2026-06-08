@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
 const securityHeaders = [
   {
     key: 'Content-Security-Policy',
@@ -6,14 +8,14 @@ const securityHeaders = [
       "default-src 'self'",
       "base-uri 'self'",
       "connect-src 'self' https://*.supabase.co https://api.cloudinary.com",
-      "font-src 'self' https://fonts.gstatic.com",
+      "font-src 'self'",
       "form-action 'self'",
       "frame-ancestors 'none'",
       "img-src 'self' data: blob: https://res.cloudinary.com https://*.supabase.co",
       "media-src 'self' https: blob:",
       "object-src 'none'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      `script-src 'self' 'unsafe-inline'${isDevelopment ? " 'unsafe-eval'" : ''}`,
+      "style-src 'self' 'unsafe-inline'",
       "upgrade-insecure-requests"
     ].join('; ')
   },

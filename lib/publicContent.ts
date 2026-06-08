@@ -1,13 +1,10 @@
 import { getSupabaseAdmin } from './supabaseAdmin';
 import { getUnlockIso, isUnlockedNow } from './date';
-import type { PublicContent, SiteSettings } from './types';
+import type { PublicContent } from './types';
 
 export async function getPublicContent(preview = false): Promise<PublicContent> {
-  const supabase = getSupabaseAdmin();
   const previewMode = Boolean(preview);
   const unlocked = previewMode || isUnlockedNow();
-  const settings = await supabase.from('site_settings').select('*').eq('id', 'main').maybeSingle();
-  if (settings.error) throw settings.error;
 
   if (!unlocked) {
     return {
@@ -16,12 +13,16 @@ export async function getPublicContent(preview = false): Promise<PublicContent> 
       memory_cards: [],
       quiz_questions: [],
       plans: [],
-      site_settings: settings.data ? lockedSettings(settings.data) : null,
+      site_settings: null,
       unlocked: false,
       preview: false,
       unlockIso: getUnlockIso()
     };
   }
+
+  const supabase = getSupabaseAdmin();
+  const settings = await supabase.from('site_settings').select('*').eq('id', 'main').maybeSingle();
+  if (settings.error) throw settings.error;
 
   const active = { status: 'active' };
   const [memories, letters, cards, quiz, plans] = await Promise.all([
@@ -45,13 +46,5 @@ export async function getPublicContent(preview = false): Promise<PublicContent> 
     unlocked,
     preview: previewMode,
     unlockIso: getUnlockIso()
-  };
-}
-
-function lockedSettings(settings: SiteSettings): SiteSettings {
-  return {
-    ...settings,
-    birthday_message: null,
-    final_message: null
   };
 }

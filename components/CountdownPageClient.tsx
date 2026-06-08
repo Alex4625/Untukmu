@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import { Gift, LockKeyhole } from 'lucide-react';
 import AudioPlayer from './AudioPlayer';

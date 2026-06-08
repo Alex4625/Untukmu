@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import type { ContentStatus, Letter, Memory, MemoryCard, Plan, PublicContent, QuizQuestion, SiteSettings } from '@/lib/types';
 import { AlertTriangle, CheckCircle2, Eye, EyeOff, FilePenLine, Lock, LogOut, Plus, RefreshCw, ShieldCheck, Trash2 } from 'lucide-react';
 
@@ -32,6 +32,7 @@ const statusLabels: Record<ContentStatus, string> = {
 };
 
 export default function AdminClient({ authenticated: initialAuth }: { authenticated: boolean }) {
+  const passwordId = useId();
   const [authenticated, setAuthenticated] = useState(initialAuth);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -109,8 +110,8 @@ export default function AdminClient({ authenticated: initialAuth }: { authentica
           <p className="eyebrow">Admin</p>
           <h1 className="mt-2 font-display text-4xl font-normal text-maroon">Untuk Nona</h1>
           <p className="mt-3 leading-7 text-muted">Masukkan password admin untuk menambah kenangan, surat, foto, quiz, dan rencana.</p>
-          <label className="label mt-6">Password</label>
-          <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password admin" />
+          <label className="label mt-6" htmlFor={passwordId}>Password</label>
+          <input id={passwordId} className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password admin" autoComplete="current-password" />
           {error && <p className="mt-3 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</p>}
           <button disabled={loading} className="btn-primary mt-6 w-full">{loading ? 'Memeriksa...' : 'Masuk'}</button>
         </form>
@@ -236,8 +237,18 @@ async function deleteItem(resource: Tab, id: string) {
   if (!res.ok) throw new Error(json.error || 'Gagal hapus.');
 }
 
-function StatusSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  return <select className="input" value={value} onChange={(e) => onChange(e.target.value)}><option value="draft">Draft</option><option value="active">Published setelah unlock</option><option value="hidden">Hidden</option></select>;
+function StatusSelect({ label = 'Status', value, onChange }: { label?: string; value: string; onChange: (v: string) => void }) {
+  const id = useId();
+  return (
+    <div>
+      <label className="label" htmlFor={id}>{label}</label>
+      <select id={id} className="input" value={value} onChange={(e) => onChange(e.target.value)}>
+        <option value="draft">Draft</option>
+        <option value="active">Published setelah unlock</option>
+        <option value="hidden">Hidden</option>
+      </select>
+    </div>
+  );
 }
 
 function StatusBadge({ status }: { status: ContentStatus }) {
@@ -295,9 +306,9 @@ function MemoryAdmin({ items, reload }: { items: Memory[]; reload: () => void })
       <Field label="Judul" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
       <Field label="Tanggal" type="date" value={form.memory_date} onChange={(v) => setForm({ ...form, memory_date: v })} />
       <Field label="Kategori" value={form.category} onChange={(v) => setForm({ ...form, category: v })} />
-      <div><label className="label">Status</label><StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} /></div>
-      <div className="md:col-span-2"><label className="label">Cerita</label><textarea className="input min-h-28" value={form.story} onChange={(e) => setForm({ ...form, story: e.target.value })} /></div>
-      <div className="md:col-span-2"><label className="label">Upload Foto Cloudinary</label><input className="input" type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} /><p className="mt-2 text-sm text-cocoa/60">{uploading ? 'Mengupload...' : form.image_url ? 'Foto sudah terupload.' : 'Maksimal 5 MB.'}</p></div>
+      <StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} />
+      <TextareaField className="md:col-span-2" label="Cerita" value={form.story} onChange={(v) => setForm({ ...form, story: v })} />
+      <FileField className="md:col-span-2" label="Upload Foto Cloudinary" uploading={uploading} hasFile={Boolean(form.image_url)} onChange={upload} />
       <label className="flex items-center gap-2 text-sm font-bold"><input type="checkbox" checked={form.is_favorite} onChange={(e) => setForm({ ...form, is_favorite: e.target.checked })} /> Jadikan favorit</label>
     </div>
     <ItemList
@@ -325,8 +336,8 @@ function LetterAdmin({ items, reload }: { items: Letter[]; reload: () => void })
   return <AdminPanel title="Kelola Surat" button="Simpan Surat" onSubmit={submit}>
     <Field label="Judul Surat" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
     <Field label="Label" value={form.unlock_label} onChange={(v) => setForm({ ...form, unlock_label: v })} />
-    <div><label className="label">Status</label><StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} /></div>
-    <div><label className="label">Isi Surat</label><textarea className="input min-h-44" value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} /></div>
+    <StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} />
+    <TextareaField label="Isi Surat" value={form.body} onChange={(v) => setForm({ ...form, body: v })} minHeight="min-h-44" />
     <ItemList
       items={items}
       title={(i) => i.title}
@@ -353,8 +364,8 @@ function CardAdmin({ items, reload }: { items: MemoryCard[]; reload: () => void 
     <Field label="Judul Kartu" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
     <Field label="Tipe" value={form.card_type} onChange={(v) => setForm({ ...form, card_type: v })} />
     <Field label="Urutan" type="number" value={String(form.sort_order)} onChange={(v) => setForm({ ...form, sort_order: Number(v) })} />
-    <div><label className="label">Status</label><StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} /></div>
-    <div><label className="label">Isi Kartu</label><textarea className="input min-h-32" value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} /></div>
+    <StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} />
+    <TextareaField label="Isi Kartu" value={form.body} onChange={(v) => setForm({ ...form, body: v })} minHeight="min-h-32" />
     <ItemList
       items={items}
       title={(i) => i.title}
@@ -380,7 +391,7 @@ function QuizAdmin({ items, reload }: { items: QuizQuestion[]; reload: () => voi
   return <AdminPanel title="Kelola Quiz" button="Simpan Quiz" onSubmit={submit}>
     <Field label="Pertanyaan" value={form.question} onChange={(v) => setForm({ ...form, question: v })} />
     <div className="grid gap-3 md:grid-cols-2"><Field label="Opsi A" value={form.option_a} onChange={(v) => setForm({ ...form, option_a: v })} /><Field label="Opsi B" value={form.option_b} onChange={(v) => setForm({ ...form, option_b: v })} /><Field label="Opsi C" value={form.option_c} onChange={(v) => setForm({ ...form, option_c: v })} /><Field label="Opsi D" value={form.option_d} onChange={(v) => setForm({ ...form, option_d: v })} /></div>
-    <div className="grid gap-3 md:grid-cols-3"><div><label className="label">Jawaban Benar</label><select className="input" value={form.correct_option} onChange={(e) => setForm({ ...form, correct_option: e.target.value })}><option>A</option><option>B</option><option>C</option><option>D</option></select></div><Field label="Urutan" type="number" value={String(form.sort_order)} onChange={(v) => setForm({ ...form, sort_order: Number(v) })} /><div><label className="label">Status</label><StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} /></div></div>
+    <div className="grid gap-3 md:grid-cols-3"><ChoiceSelect value={form.correct_option} onChange={(v) => setForm({ ...form, correct_option: v })} /><Field label="Urutan" type="number" value={String(form.sort_order)} onChange={(v) => setForm({ ...form, sort_order: Number(v) })} /><StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} /></div>
     <Field label="Feedback" value={form.feedback} onChange={(v) => setForm({ ...form, feedback: v })} />
     <ItemList
       items={items}
@@ -407,7 +418,7 @@ function PlanAdmin({ items, reload }: { items: Plan[]; reload: () => void }) {
   return <AdminPanel title="Kelola Rencana Kita" button="Simpan Rencana" onSubmit={submit}>
     <Field label="Rencana" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
     <Field label="Catatan" value={form.note} onChange={(v) => setForm({ ...form, note: v })} />
-    <div className="grid gap-3 md:grid-cols-3"><div><label className="label">Status Rencana</label><select className="input" value={form.plan_status} onChange={(e) => setForm({ ...form, plan_status: e.target.value })}><option value="ingin_dilakukan">Ingin dilakukan</option><option value="direncanakan">Sedang direncanakan</option><option value="tercapai">Sudah tercapai</option></select></div><Field label="Urutan" type="number" value={String(form.sort_order)} onChange={(v) => setForm({ ...form, sort_order: Number(v) })} /><div><label className="label">Status Tampil</label><StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} /></div></div>
+    <div className="grid gap-3 md:grid-cols-3"><PlanStatusSelect value={form.plan_status} onChange={(v) => setForm({ ...form, plan_status: v })} /><Field label="Urutan" type="number" value={String(form.sort_order)} onChange={(v) => setForm({ ...form, sort_order: Number(v) })} /><StatusSelect label="Status Tampil" value={form.status} onChange={(v) => setForm({ ...form, status: v })} /></div>
     <ItemList
       items={items}
       title={(i) => i.title}
@@ -429,8 +440,8 @@ function SettingsForm({ item, reload }: { item: SiteSettings | null; reload: () 
   async function submit(e: React.FormEvent) { e.preventDefault(); await updateItem('site_settings', 'main', form); reload(); }
   return <AdminPanel title="Site Settings" button="Simpan Settings" onSubmit={submit}>
     <Field label="URL Musik" value={form.music_url} onChange={(v) => setForm({ ...form, music_url: v })} />
-    <div><label className="label">Birthday Message</label><textarea className="input min-h-28" value={form.birthday_message} onChange={(e) => setForm({ ...form, birthday_message: e.target.value })} /></div>
-    <div><label className="label">Final Message</label><textarea className="input min-h-40" value={form.final_message} onChange={(e) => setForm({ ...form, final_message: e.target.value })} /></div>
+    <TextareaField label="Birthday Message" value={form.birthday_message} onChange={(v) => setForm({ ...form, birthday_message: v })} />
+    <TextareaField label="Final Message" value={form.final_message} onChange={(v) => setForm({ ...form, final_message: v })} minHeight="min-h-40" />
   </AdminPanel>;
 }
 
@@ -438,7 +449,73 @@ function AdminPanel({ title, button, onSubmit, children }: { title: string; butt
   return <form onSubmit={onSubmit} className="rounded-2xl border border-[rgba(196,138,106,0.22)] bg-white p-5 shadow-romantic sm:p-6"><h2 className="text-xl font-semibold text-cocoa">{title}</h2><div className="mt-6 space-y-4">{children}</div><button className="btn-primary mt-6 gap-2"><Plus size={16} />{button}</button></form>;
 }
 function Field({ label, value, onChange, type = 'text' }: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
-  return <div><label className="label">{label}</label><input className="input" type={type} value={value} onChange={(e) => onChange(e.target.value)} /></div>;
+  const id = useId();
+  return <div><label className="label" htmlFor={id}>{label}</label><input id={id} className="input" type={type} value={value} onChange={(e) => onChange(e.target.value)} /></div>;
+}
+function TextareaField({
+  label,
+  value,
+  onChange,
+  className = '',
+  minHeight = 'min-h-28'
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  className?: string;
+  minHeight?: string;
+}) {
+  const id = useId();
+  return <div className={className}><label className="label" htmlFor={id}>{label}</label><textarea id={id} className={`input ${minHeight}`} value={value} onChange={(e) => onChange(e.target.value)} /></div>;
+}
+function FileField({
+  label,
+  uploading,
+  hasFile,
+  onChange,
+  className = ''
+}: {
+  label: string;
+  uploading: boolean;
+  hasFile: boolean;
+  onChange: (file: File) => void;
+  className?: string;
+}) {
+  const id = useId();
+  return (
+    <div className={className}>
+      <label className="label" htmlFor={id}>{label}</label>
+      <input id={id} className="input" type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && onChange(e.target.files[0])} />
+      <p className="mt-2 text-sm text-muted">{uploading ? 'Mengupload...' : hasFile ? 'Foto sudah terupload.' : 'Maksimal 5 MB.'}</p>
+    </div>
+  );
+}
+function ChoiceSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const id = useId();
+  return (
+    <div>
+      <label className="label" htmlFor={id}>Jawaban Benar</label>
+      <select id={id} className="input" value={value} onChange={(e) => onChange(e.target.value)}>
+        <option>A</option>
+        <option>B</option>
+        <option>C</option>
+        <option>D</option>
+      </select>
+    </div>
+  );
+}
+function PlanStatusSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const id = useId();
+  return (
+    <div>
+      <label className="label" htmlFor={id}>Status Rencana</label>
+      <select id={id} className="input" value={value} onChange={(e) => onChange(e.target.value)}>
+        <option value="ingin_dilakukan">Ingin dilakukan</option>
+        <option value="direncanakan">Sedang direncanakan</option>
+        <option value="tercapai">Sudah tercapai</option>
+      </select>
+    </div>
+  );
 }
 function ItemList<T extends { id: string; status?: ContentStatus }>({
   items,
