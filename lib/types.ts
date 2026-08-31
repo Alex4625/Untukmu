@@ -6,10 +6,13 @@ export type Memory = {
   story: string | null;
   memory_date: string | null;
   category: string | null;
-  image_url: string | null;
-  cloudinary_public_id: string | null;
+  media_key: string | null;
+  media_original_name?: string | null;
+  media_size_bytes?: number | null;
+  media_mime_type?: string | null;
+  image_url?: string | null;
   status: ContentStatus;
-  is_favorite: boolean;
+  is_favorite: number | boolean;
   created_at: string;
 };
 
@@ -17,8 +20,8 @@ export type Letter = {
   id: string;
   title: string;
   body: string;
-  status: ContentStatus;
   unlock_label: string | null;
+  status: ContentStatus;
   created_at: string;
 };
 
@@ -74,4 +77,5 @@ export type PublicContent = {
   unlocked: boolean;
   preview: boolean;
   unlockIso: string;
+  error?: string | null;
 };

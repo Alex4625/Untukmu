@@ -65,17 +65,24 @@ export default function Countdown({ unlockIso }: Props) {
   );
 
   if (time.done) {
-    return <p className="text-lg font-bold text-maroon">Hari ini akhirnya datang.</p>;
+    return <p className="font-display text-2xl italic text-burgundy">Hari ini akhirnya datang.</p>;
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-live="polite" suppressHydrationWarning>
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 max-w-xl mx-auto" aria-live="polite" suppressHydrationWarning>
       {items.map(([label, value]) => {
         const display = mounted ? String(value).padStart(2, '0') : '--';
         return (
-          <div key={String(label)} className="rounded-2xl border border-[rgba(196,138,106,0.22)] bg-white px-4 py-6 text-center shadow-romantic">
-            <div className="font-display text-6xl font-light leading-none text-maroon sm:text-7xl">{display}</div>
-            <div className="mt-2 text-[11px] font-medium uppercase tracking-[0.08em] text-muted">{label}</div>
+          <div
+            key={String(label)}
+            className="rounded-2xl border border-[rgba(90,40,52,0.09)] bg-[#FDFBF7] px-3 py-5 text-center shadow-card sm:px-4 sm:py-7"
+          >
+            <div className="font-display text-4xl sm:text-5xl md:text-6xl font-light leading-none text-burgundy">
+              {display}
+            </div>
+            <div className="mt-2.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.14em] text-dustyrose">
+              {label}
+            </div>
           </div>
         );
       })}

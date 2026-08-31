@@ -22,6 +22,10 @@ const fieldRules: Record<Resource, Record<string, FieldRule>> = {
     story: { type: 'string', nullable: true, maxLength: 5000 },
     memory_date: { type: 'date', nullable: true },
     category: { type: 'string', nullable: true, maxLength: 80 },
+    media_key: { type: 'string', nullable: true, maxLength: 2000 },
+    media_original_name: { type: 'string', nullable: true, maxLength: 255 },
+    media_size_bytes: { type: 'number', nullable: true },
+    media_mime_type: { type: 'string', nullable: true, maxLength: 100 },
     image_url: { type: 'string', nullable: true, maxLength: 2000 },
     cloudinary_public_id: { type: 'string', nullable: true, maxLength: 255 },
     status: { type: 'status' },
@@ -103,14 +107,15 @@ function sanitizeField(field: string, value: unknown, rule: FieldRule) {
 
   if (rule.type === 'string') {
     if (typeof value !== 'string') throw new Error(`${field} harus berupa teks.`);
-    if (rule.required && value.trim().length === 0) throw new Error(`${field} wajib diisi.`);
-    if (rule.maxLength && value.length > rule.maxLength) throw new Error(`${field} terlalu panjang.`);
-    return value;
+    const trimmed = value.trim();
+    if (rule.required && trimmed.length === 0) throw new Error(`${field} wajib diisi.`);
+    if (rule.maxLength && trimmed.length > rule.maxLength) throw new Error(`${field} terlalu panjang.`);
+    return trimmed;
   }
 
   if (rule.type === 'date') {
     if (typeof value !== 'string' || !isValidDate(value)) throw new Error(`${field} harus berupa tanggal.`);
-    return value;
+    return value.trim();
   }
 
   if (rule.type === 'number') {
@@ -120,22 +125,24 @@ function sanitizeField(field: string, value: unknown, rule: FieldRule) {
   }
 
   if (rule.type === 'boolean') {
-    if (typeof value !== 'boolean') throw new Error(`${field} harus berupa boolean.`);
-    return value;
+    if (typeof value === 'boolean') return value;
+    if (value === 1 || value === '1' || value === 'true') return true;
+    if (value === 0 || value === '0' || value === 'false') return false;
+    throw new Error(`${field} harus berupa boolean.`);
   }
 
   if (rule.type === 'status') {
-    if (typeof value !== 'string' || !contentStatuses.has(value)) throw new Error(`${field} tidak valid.`);
-    return value;
+    if (typeof value !== 'string' || !contentStatuses.has(value.trim())) throw new Error(`${field} tidak valid.`);
+    return value.trim();
   }
 
   if (rule.type === 'correct_option') {
-    if (typeof value !== 'string' || !correctOptions.has(value)) throw new Error(`${field} tidak valid.`);
-    return value;
+    if (typeof value !== 'string' || !correctOptions.has(value.trim())) throw new Error(`${field} tidak valid.`);
+    return value.trim();
   }
 
-  if (typeof value !== 'string' || !planStatuses.has(value)) throw new Error(`${field} tidak valid.`);
-  return value;
+  if (typeof value !== 'string' || !planStatuses.has(value.trim())) throw new Error(`${field} tidak valid.`);
+  return value.trim();
 }
 
 function isValidDate(value: string) {

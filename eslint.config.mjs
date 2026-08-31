@@ -2,11 +2,22 @@ import nextVitals from 'eslint-config-next/core-web-vitals';
 import nextTypescript from 'eslint-config-next/typescript';
 
 const eslintConfig = [
-  ...nextVitals,
-  ...nextTypescript,
   {
-    ignores: ['.next/**', 'node_modules/**', 'out/**', 'build/**', 'dist/**']
-  }
+    ignores: [
+      '.next/**',
+      '.open-next/**',
+      '.sqlite/**',
+      '.wrangler/**',
+      'node_modules/**',
+      'out/**',
+      'build/**',
+      'dist/**',
+      'scripts/**',
+      'drizzle/**'
+    ]
+  },
+  ...nextVitals,
+  ...nextTypescript
 ];
 
 export default eslintConfig;

@@ -8,9 +8,16 @@ export const dynamic = 'force-dynamic';
 
 export default async function LettersPage({ searchParams }: { searchParams?: PageSearchParams }) {
   const content = await getPublicContent(await isPreviewRequest(searchParams));
-  if (!content.unlocked) return <LockedNotice />;
+  if (!content.unlocked) return <LockedNotice title="Chapter ini belum saatnya dibuka" />;
+
   return (
-    <SectionShell eyebrow="Surat" title="Surat Untukmu" description="Ada beberapa hal yang lebih mudah aku tulis daripada aku ucapkan langsung." preview={content.preview}>
+    <SectionShell
+      chapterNumber="03"
+      eyebrow="Chapter 03"
+      title="Yang Aku Ingat"
+      description="Ada beberapa hal yang lebih jujur dan lembut saat ditulis pelan di atas kertas."
+      preview={content.preview}
+    >
       <Letters letters={content.letters} />
     </SectionShell>
   );

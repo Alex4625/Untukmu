@@ -8,9 +8,16 @@ export const dynamic = 'force-dynamic';
 
 export default async function QuizPage({ searchParams }: { searchParams?: PageSearchParams }) {
   const content = await getPublicContent(await isPreviewRequest(searchParams));
-  if (!content.unlocked) return <LockedNotice />;
+  if (!content.unlocked) return <LockedNotice title="Chapter ini belum saatnya dibuka" />;
+
   return (
-    <SectionShell eyebrow="Quiz" title="Quiz Tentang Kita" description="Pertanyaan kecil untuk membuat hadiah ini terasa lebih hidup." preview={content.preview}>
+    <SectionShell
+      chapterNumber="05"
+      eyebrow="Chapter 05"
+      title="Tentang Kamu"
+      description="Pertanyaan-pertanyaan ringan dan hangat tentang kita, untuk tersenyum sebentar."
+      preview={content.preview}
+    >
       <Quiz questions={content.quiz_questions} />
     </SectionShell>
   );

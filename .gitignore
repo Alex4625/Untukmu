@@ -1,13 +1,18 @@
 # dependencies
 node_modules/
 
-# next.js
+# next.js & open-next
 .next/
+.open-next/
 out/
 
 # production
 build/
 dist/
+
+# cloudflare & local database
+.wrangler/
+.sqlite/
 
 # env
 .env
@@ -23,7 +28,3 @@ pnpm-debug.log*
 # system
 .DS_Store
 Thumbs.db
-
-# vercel
-.vercel/
-.vercel

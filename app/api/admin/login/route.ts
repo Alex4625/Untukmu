@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createAdminToken, setAdminCookie } from '@/lib/adminAuth';
 import { getAdminContent } from '@/lib/adminContent';
-import crypto from 'crypto';
 
 const WINDOW_MS = 15 * 60 * 1000;
 const LOCK_MS = 15 * 60 * 1000;
@@ -44,14 +43,16 @@ function clearAttempts(key: string) {
   attempts.delete(key);
 }
 
-function timingSafePasswordEquals(value: string, expected: string) {
-  const valueBuffer = Buffer.from(value);
-  const expectedBuffer = Buffer.from(expected);
-  if (valueBuffer.length !== expectedBuffer.length) {
-    crypto.timingSafeEqual(expectedBuffer, expectedBuffer);
-    return false;
+function timingSafePasswordEquals(a: string, b: string): boolean {
+  const encoder = new TextEncoder();
+  const aBuf = encoder.encode(a);
+  const bBuf = encoder.encode(b);
+  if (aBuf.byteLength !== bBuf.byteLength) return false;
+  let diff = 0;
+  for (let i = 0; i < aBuf.byteLength; i++) {
+    diff |= aBuf[i] ^ bBuf[i];
   }
-  return crypto.timingSafeEqual(valueBuffer, expectedBuffer);
+  return diff === 0;
 }
 
 export async function POST(request: Request) {
@@ -76,7 +77,8 @@ export async function POST(request: Request) {
   }
   clearAttempts(key);
   try {
-    await setAdminCookie(createAdminToken());
+    const token = await createAdminToken();
+    await setAdminCookie(token);
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Konfigurasi session admin belum valid.' },

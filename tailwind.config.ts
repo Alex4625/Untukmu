@@ -5,29 +5,34 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        blush: '#FFF7F3',
-        cream: '#FFF1E6',
-        rose: '#B94F68',
-        'rose-dark': '#973F55',
-        softpink: '#F5B7C6',
-        rosegold: '#8F5F43',
-        cocoa: '#3B2F2F',
-        maroon: '#6D3B47',
-        muted: '#6F5555',
-        sage: '#4F7F5A',
-        amber: '#8A651F',
-        error: '#B94A48',
-        info: '#376A82'
+        base: '#F7F2EA',
+        paper: '#EEE6DB',
+        'paper-light': '#FDFBF7',
+        ink: '#272322',
+        'ink-muted': '#5C5451',
+        burgundy: '#5A2834',
+        'burgundy-dark': '#3F1C24',
+        'burgundy-light': '#743443',
+        dustyrose: '#B47F84',
+        'dustyrose-dark': '#9A666B',
+        'dustyrose-light': '#D6B4B7',
+        'rose-accent': '#B94F68',
+        sage: '#8F9983',
+        'sage-light': '#B5BEAB',
+        gold: '#B39A6B',
+        'gold-light': '#D8C59F',
+        muted: '#7A6F6B',
+        error: '#A33C3C'
       },
       fontFamily: {
-        display: ['var(--font-display)', 'Cormorant Garamond', 'Lora', 'Georgia', 'serif'],
-        sans: ['var(--font-sans)', 'DM Sans', 'Inter', 'system-ui', 'sans-serif']
+        display: ['var(--font-display)', 'Cormorant Garamond', 'serif'],
+        sans: ['var(--font-sans)', 'DM Sans', 'sans-serif']
       },
       boxShadow: {
-        xs: '0 1px 3px rgba(109, 59, 71, 0.06)',
-        romantic: '0 2px 8px rgba(109, 59, 71, 0.08)',
-        soft: '0 4px 16px rgba(109, 59, 71, 0.10)',
-        glow: '0 0 24px rgba(185, 79, 104, 0.20)'
+        subtle: '0 1px 3px rgba(39, 35, 34, 0.04)',
+        card: '0 2px 10px rgba(90, 40, 52, 0.06), 0 1px 2px rgba(90, 40, 52, 0.04)',
+        elevated: '0 8px 30px rgba(90, 40, 52, 0.08), 0 2px 8px rgba(90, 40, 52, 0.04)',
+        glow: '0 0 24px rgba(180, 127, 132, 0.25)'
       },
       screens: {
         xs: '380px'
@@ -36,4 +41,5 @@ const config: Config = {
   },
   plugins: []
 };
+
 export default config;

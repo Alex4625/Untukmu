@@ -8,9 +8,16 @@ export const dynamic = 'force-dynamic';
 
 export default async function GalleryPage({ searchParams }: { searchParams?: PageSearchParams }) {
   const content = await getPublicContent(await isPreviewRequest(searchParams));
-  if (!content.unlocked) return <LockedNotice />;
+  if (!content.unlocked) return <LockedNotice title="Chapter ini belum saatnya dibuka" />;
+
   return (
-    <SectionShell eyebrow="Galeri" title="Potongan Momen" description="Foto-foto kecil yang menyimpan banyak cerita." preview={content.preview}>
+    <SectionShell
+      chapterNumber="02"
+      eyebrow="Chapter 02"
+      title="Momen Kecil"
+      description="Koleksi potret dan potongan senyuman yang tersimpan rapi sepanjang perjalanan kita."
+      preview={content.preview}
+    >
       <MemoryGrid memories={content.memories} />
     </SectionShell>
   );

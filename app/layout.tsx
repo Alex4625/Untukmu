@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Cormorant_Garamond, DM_Sans } from 'next/font/google';
 import './globals.css';
+import { AudioProvider, PersistentAudioWidget } from '@/components/PersistentAudioPlayer';
+import ChapterDrawer from '@/components/ChapterDrawer';
 
 const displayFont = Cormorant_Garamond({
   subsets: ['latin'],
@@ -18,7 +20,7 @@ const sansFont = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://untukmu-dusky-eta.vercel.app'),
+  metadataBase: new URL('https://untukmu.pages.dev'),
   applicationName: 'Untuk Nona',
   title: 'Untuk Nona - Untuk 10 Desember',
   description: 'Sebuah tempat kecil di internet untuk menyimpan hal-hal indah tentang kamu dan kita.',
@@ -47,13 +49,19 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#fff7f3'
+  themeColor: '#F7F2EA'
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id">
-      <body className={`${sansFont.variable} ${displayFont.variable} font-sans romantic-bg antialiased`}>{children}</body>
+      <body className={`${sansFont.variable} ${displayFont.variable} font-sans bg-base text-ink antialiased selection:bg-dustyrose selection:text-white`}>
+        <AudioProvider>
+          {children}
+          <PersistentAudioWidget />
+          <ChapterDrawer />
+        </AudioProvider>
+      </body>
     </html>
   );
 }

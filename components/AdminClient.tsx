@@ -4,19 +4,19 @@ import { useEffect, useId, useState } from 'react';
 import type { AdminContent } from '@/lib/adminContent';
 import { DEFAULT_MUSIC_URL } from '@/lib/siteDefaults';
 import type { ContentStatus, Letter, Memory, MemoryCard, Plan, QuizQuestion, SiteSettings } from '@/lib/types';
-import { Eye, EyeOff, FilePenLine, Lock, LogOut, Plus, RefreshCw, ShieldCheck, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, FilePenLine, Lock, LogOut, Plus, RefreshCw, ShieldCheck, Trash2, ExternalLink } from 'lucide-react';
 
 type AdminData = AdminContent;
 type Tab = 'memories' | 'letters' | 'memory_cards' | 'quiz_questions' | 'plans' | 'site_settings';
 type MutationBody = Record<string, unknown>;
 
 const tabs: { key: Tab; label: string }[] = [
-  { key: 'memories', label: 'Kenangan/Galeri' },
-  { key: 'letters', label: 'Surat' },
-  { key: 'memory_cards', label: 'Kotak Kenangan' },
-  { key: 'quiz_questions', label: 'Quiz' },
-  { key: 'plans', label: 'Rencana Kita' },
-  { key: 'site_settings', label: 'Settings' }
+  { key: 'memories', label: '01 & 02. Kenangan & Galeri' },
+  { key: 'letters', label: '03. Surat' },
+  { key: 'memory_cards', label: '04. Kotak Kenangan' },
+  { key: 'quiz_questions', label: '05. Quiz' },
+  { key: 'plans', label: '06. Rencana' },
+  { key: 'site_settings', label: '07. Pesan & Settings' }
 ];
 
 const emptyData: AdminData = { memories: [], letters: [], memory_cards: [], quiz_questions: [], plans: [], site_settings: null };
@@ -126,18 +126,18 @@ export default function AdminClient({
     if (!authenticated) return;
 
     let cancelled = false;
-    async function loadWriteHealth() {
+    async function loadHealth() {
       try {
         const res = await fetch('/api/admin/health', { cache: 'no-store' });
         const json = await res.json();
-        const writeCheck = json.checks?.find((check: { key?: string }) => check.key === 'supabase_write');
-        if (!cancelled && writeCheck && !writeCheck.ok) setWriteWarning(writeCheck.detail || 'Database admin belum punya izin tulis.');
+        const dbCheck = json.checks?.find((check: { key?: string }) => check.key === 'database');
+        if (!cancelled && dbCheck && !dbCheck.ok) setWriteWarning(dbCheck.detail || 'Database admin belum terhubung.');
       } catch {
         if (!cancelled) setWriteWarning('');
       }
     }
 
-    void loadWriteHealth();
+    void loadHealth();
     return () => {
       cancelled = true;
     };
@@ -146,14 +146,26 @@ export default function AdminClient({
   if (!authenticated) {
     return (
       <main className="container-page flex min-h-screen items-center justify-center py-16">
-        <form onSubmit={login} className="card w-full max-w-md p-8 sm:p-10">
-          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-cream text-rose"><Lock size={28} /></div>
-          <p className="eyebrow">Admin</p>
-          <h1 className="mt-2 font-display text-4xl font-normal text-maroon">Untuk Nona</h1>
-          <p className="mt-3 leading-7 text-muted">Masukkan password admin untuk menambah kenangan, surat, foto, quiz, dan rencana.</p>
+        <form onSubmit={login} className="card w-full max-w-md p-8 sm:p-10 shadow-elevated">
+          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-paper text-burgundy">
+            <Lock size={28} className="text-dustyrose" />
+          </div>
+          <p className="eyebrow">Admin Panel</p>
+          <h1 className="mt-2 font-display text-4xl font-normal text-burgundy">Untuk Nona</h1>
+          <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+            Masukkan password admin untuk mengelola kenangan, surat, foto, quiz, dan rencana.
+          </p>
           <label className="label mt-6" htmlFor={passwordId}>Password</label>
-          <input id={passwordId} className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password admin" autoComplete="current-password" />
-          {error && <p className="mt-3 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</p>}
+          <input
+            id={passwordId}
+            className="input"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password admin"
+            autoComplete="current-password"
+          />
+          {error && <p className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</p>}
           <button disabled={loading} className="btn-primary mt-6 w-full">{loading ? 'Memuat konten...' : 'Masuk'}</button>
         </form>
       </main>
@@ -161,35 +173,69 @@ export default function AdminClient({
   }
 
   return (
-    <main className="container-page py-6 sm:py-10">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <main className="container-page py-8 sm:py-12">
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-[rgba(90,40,52,0.10)] pb-6">
         <div>
-          <p className="eyebrow">Untuk Nona Admin</p>
-          <h1 className="mt-1 text-2xl font-semibold text-cocoa">Selamat datang, Alex</h1>
-          <p className="mt-1 text-sm text-muted">Ringkasan konten yang sudah kamu tambahkan.</p>
+          <p className="eyebrow">Admin Control</p>
+          <h1 className="mt-1 font-display text-3xl font-normal text-burgundy">Selamat datang, Alex</h1>
+          <p className="mt-1 text-sm text-ink-muted">Kelola seluruh konten cerita untuk Nona.</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <a href="/hub?preview=unlocked" target="_blank" rel="noreferrer" className="btn-secondary">Preview Public</a>
-          <button disabled={contentLoading} onClick={() => void load()} className="btn-secondary gap-2"><RefreshCw size={16} /> {contentLoading ? 'Memuat...' : 'Refresh'}</button>
-          <button onClick={logout} className="btn-primary gap-2"><LogOut size={16} /> Logout</button>
+        <div className="flex flex-wrap gap-2.5">
+          <a
+            href="/hub?preview=unlocked"
+            target="_blank"
+            rel="noreferrer"
+            className="btn-secondary gap-1.5"
+          >
+            <ExternalLink size={15} />
+            <span>Preview Mode</span>
+          </a>
+          <button
+            disabled={contentLoading}
+            onClick={() => void load(true)}
+            className="btn-secondary gap-1.5"
+          >
+            <RefreshCw size={15} className={contentLoading ? 'animate-spin' : ''} />
+            <span>{contentLoading ? 'Memuat...' : 'Refresh'}</span>
+          </button>
+          <button onClick={logout} className="btn-primary gap-1.5">
+            <LogOut size={15} />
+            <span>Logout</span>
+          </button>
         </div>
       </div>
-      {error && <p className="mb-5 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</p>}
-      {writeWarning && <p className="mb-5 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{writeWarning}</p>}
-      {contentLoading && !hasLoaded && <p className="mb-5 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-muted shadow-xs">Memuat konten admin...</p>}
+
+      {error && <p className="mb-5 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</p>}
+      {writeWarning && <p className="mb-5 rounded-xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">{writeWarning}</p>}
+      {contentLoading && !hasLoaded && (
+        <p className="mb-5 rounded-xl bg-[#FDFBF7] px-4 py-3 text-sm font-semibold text-ink-muted shadow-subtle">
+          Memuat konten admin...
+        </p>
+      )}
 
       <div className="grid admin-grid gap-6">
-        <aside className="h-fit rounded-2xl bg-maroon p-3 text-cream shadow-soft lg:sticky lg:top-6">
-          <div className="px-4 py-4">
-            <p className="font-display text-2xl font-normal leading-none">Untuk Nona</p>
-            <p className="mt-1 text-[11px] uppercase tracking-[0.08em] text-cream/60">admin panel</p>
+        {/* Sidebar Tabs */}
+        <aside className="h-fit rounded-2xl bg-burgundy p-3.5 text-white shadow-elevated lg:sticky lg:top-6">
+          <div className="px-4 py-3.5 border-b border-white/10 mb-2">
+            <p className="font-display text-2xl font-light leading-none text-[#FDFBF7]">Untuk Nona</p>
+            <p className="mt-1.5 text-[10px] uppercase tracking-[0.12em] text-dustyrose-light">D1 & R2 Backend</p>
           </div>
           {tabs.map((item) => (
-            <button key={item.key} onClick={() => setTab(item.key)} className={`mb-1 w-full rounded-lg px-4 py-3 text-left text-sm font-medium transition ${tab === item.key ? 'bg-white/15 text-white' : 'text-cream/70 hover:bg-white/10 hover:text-white'}`}>
+            <button
+              key={item.key}
+              onClick={() => setTab(item.key)}
+              className={`mb-1 w-full rounded-xl px-4 py-3 text-left text-sm font-medium transition ${
+                tab === item.key
+                  ? 'bg-white/20 text-white font-semibold shadow-subtle'
+                  : 'text-white/75 hover:bg-white/10 hover:text-white'
+              }`}
+            >
               {item.label}
             </button>
           ))}
         </aside>
+
+        {/* Tab Content Section */}
         <section className="space-y-6">
           <Stats data={data} />
           {tab === 'memories' && <MemoryAdmin items={data.memories} reload={load} />}
@@ -214,20 +260,25 @@ function Stats({ data }: { data: AdminData }) {
     data.plans.some((item) => item.status === 'active'),
     Boolean(data.site_settings?.final_message)
   ].filter(Boolean).length;
+
   const cards: Array<[string, number, string, string]> = [
-    ['Semua Konten', items.length, 'border-rosegold', 'Total item di admin'],
-    ['Published', countByStatus(items, 'active'), 'border-sage', 'Akan tampil setelah unlock'],
-    ['Draft', countByStatus(items, 'draft'), 'border-softpink', 'Masih aman disiapkan'],
-    ['Hidden', countByStatus(items, 'hidden'), 'border-muted', 'Disimpan tapi tidak tampil'],
-    ['Bagian Siap', sectionsReady, 'border-rose', 'Dari 6 bagian utama']
+    ['Semua Konten', items.length, 'border-burgundy', 'Total item di database'],
+    ['Published', countByStatus(items, 'active'), 'border-sage', 'Tampil setelah unlock'],
+    ['Draft', countByStatus(items, 'draft'), 'border-dustyrose', 'Disimpan aman'],
+    ['Hidden', countByStatus(items, 'hidden'), 'border-muted', 'Disembunyikan'],
+    ['Chapter Siap', sectionsReady, 'border-gold', 'Dari 7 chapter']
   ];
+
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-5 sm:gap-4">
       {cards.map(([label, value, border, detail]) => (
-        <div key={label} className={`rounded-xl border border-[rgba(196,138,106,0.22)] border-t-4 ${border} bg-white p-4 text-center shadow-xs`}>
-          <p className="text-3xl font-semibold text-maroon">{value}</p>
-          <p className="mt-1 text-xs font-semibold text-cocoa">{label}</p>
-          <p className="mt-1 text-[11px] leading-4 text-muted">{detail}</p>
+        <div
+          key={label}
+          className={`card border-t-4 ${border} p-4 text-center`}
+        >
+          <p className="font-display text-3xl font-normal text-burgundy">{value}</p>
+          <p className="mt-1 text-xs font-semibold text-ink">{label}</p>
+          <p className="mt-1 text-[10px] leading-tight text-ink-muted">{detail}</p>
         </div>
       ))}
     </div>
@@ -243,11 +294,13 @@ async function createItem(resource: Tab, body: MutationBody) {
   const json = await res.json();
   if (!res.ok) throw new Error(json.error || 'Gagal menyimpan.');
 }
+
 async function updateItem(resource: Tab, id: string, body: MutationBody) {
   const res = await fetch(`/api/admin/content/${resource}/${id}`, { method: 'PUT', body: JSON.stringify(body) });
   const json = await res.json();
   if (!res.ok) throw new Error(json.error || 'Gagal update.');
 }
+
 async function deleteItem(resource: Tab, id: string) {
   if (!confirm('Yakin ingin menghapus data ini?')) return;
   const res = await fetch(`/api/admin/content/${resource}/${id}`, { method: 'DELETE' });
@@ -274,14 +327,14 @@ function StatusBadge({ status }: { status: ContentStatus }) {
     status === 'active'
       ? 'bg-sage/15 text-sage'
       : status === 'hidden'
-        ? 'bg-muted/10 text-muted'
-        : 'bg-softpink/20 text-maroon';
+      ? 'bg-muted/10 text-muted'
+      : 'bg-dustyrose/20 text-burgundy';
 
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold ${className}`}>
-      {status === 'active' && <ShieldCheck size={13} />}
-      {status === 'draft' && <FilePenLine size={13} />}
-      {status === 'hidden' && <EyeOff size={13} />}
+    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${className}`}>
+      {status === 'active' && <ShieldCheck size={12} />}
+      {status === 'draft' && <FilePenLine size={12} />}
+      {status === 'hidden' && <EyeOff size={12} />}
       {statusLabels[status]}
     </span>
   );
@@ -294,158 +347,346 @@ function statusAction(status: ContentStatus) {
 }
 
 function MemoryAdmin({ items, reload }: { items: Memory[]; reload: () => void }) {
-  const [form, setForm] = useState({ title: '', story: '', memory_date: '', category: 'Momen Kecil', image_url: '', cloudinary_public_id: '', status: 'draft', is_favorite: false });
+  const [form, setForm] = useState({
+    title: '',
+    story: '',
+    memory_date: '',
+    category: 'Momen Kecil',
+    media_key: '',
+    image_url: '',
+    status: 'draft',
+    is_favorite: false
+  });
   const [editing, setEditing] = useState<Memory | null>(null);
   const [uploading, setUploading] = useState(false);
   const edit = editing || null;
 
   function fill(item: Memory) {
     setEditing(item);
-    setForm({ title: item.title, story: item.story || '', memory_date: item.memory_date || '', category: item.category || '', image_url: item.image_url || '', cloudinary_public_id: item.cloudinary_public_id || '', status: item.status, is_favorite: item.is_favorite });
+    setForm({
+      title: item.title,
+      story: item.story || '',
+      memory_date: item.memory_date || '',
+      category: item.category || 'Momen Kecil',
+      media_key: item.media_key || item.image_url || '',
+      image_url: item.image_url || '',
+      status: item.status,
+      is_favorite: Boolean(item.is_favorite)
+    });
   }
-  function reset() { setEditing(null); setForm({ title: '', story: '', memory_date: '', category: 'Momen Kecil', image_url: '', cloudinary_public_id: '', status: 'draft', is_favorite: false }); }
+
+  function reset() {
+    setEditing(null);
+    setForm({
+      title: '',
+      story: '',
+      memory_date: '',
+      category: 'Momen Kecil',
+      media_key: '',
+      image_url: '',
+      status: 'draft',
+      is_favorite: false
+    });
+  }
+
   async function upload(file: File) {
     setUploading(true);
-    const fd = new FormData(); fd.append('file', file);
+    const fd = new FormData();
+    fd.append('file', file);
     const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
-    const json = await res.json(); setUploading(false);
+    const json = await res.json();
+    setUploading(false);
     if (!res.ok) return alert(json.error || 'Upload gagal.');
-    setForm((f) => ({ ...f, image_url: json.secure_url, cloudinary_public_id: json.public_id }));
+    setForm((f) => ({
+      ...f,
+      media_key: json.media_key || json.secure_url || json.image_url,
+      image_url: json.secure_url || json.image_url
+    }));
   }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.title) throw new Error('Judul wajib diisi.');
     if (edit) await updateItem('memories', edit.id, form);
     else await createItem('memories', form);
-    reset(); reload();
+    reset();
+    reload();
   }
-  return <AdminPanel title="Kelola Kenangan & Galeri" button="Simpan Kenangan" onSubmit={submit}>
-    <div className="grid gap-4 md:grid-cols-2">
-      <Field label="Judul" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
-      <Field label="Tanggal" type="date" value={form.memory_date} onChange={(v) => setForm({ ...form, memory_date: v })} />
-      <Field label="Kategori" value={form.category} onChange={(v) => setForm({ ...form, category: v })} />
-      <StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} />
-      <TextareaField className="md:col-span-2" label="Cerita" value={form.story} onChange={(v) => setForm({ ...form, story: v })} />
-      <FileField className="md:col-span-2" label="Upload Foto Cloudinary" uploading={uploading} hasFile={Boolean(form.image_url)} onChange={upload} />
-      <label className="flex items-center gap-2 text-sm font-bold"><input type="checkbox" checked={form.is_favorite} onChange={(e) => setForm({ ...form, is_favorite: e.target.checked })} /> Jadikan favorit</label>
-    </div>
-    <ItemList
-      items={items}
-      title={(i) => i.title}
-      subtitle={(i) => [i.category, i.memory_date].filter(Boolean).join(' - ') || 'Belum ada detail'}
-      onEdit={fill}
-      onStatusChange={async (i, status) => { await updateItem('memories', i.id, { status }); reload(); }}
-      onDelete={async (i) => { await deleteItem('memories', i.id); reload(); }}
-    />
-  </AdminPanel>;
+
+  return (
+    <AdminPanel title="Kelola Kenangan & Galeri (Chapter 01 & 02)" button="Simpan Kenangan" onSubmit={submit}>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Judul Momen" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
+        <Field label="Tanggal (YYYY-MM-DD)" type="date" value={form.memory_date} onChange={(v) => setForm({ ...form, memory_date: v })} />
+        <Field label="Kategori" value={form.category} onChange={(v) => setForm({ ...form, category: v })} />
+        <StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} />
+        <TextareaField className="md:col-span-2" label="Cerita / Catatan" value={form.story} onChange={(v) => setForm({ ...form, story: v })} />
+        <FileField
+          className="md:col-span-2"
+          label="Upload Foto (Cloudflare R2 Storage)"
+          uploading={uploading}
+          hasFile={Boolean(form.media_key || form.image_url)}
+          onChange={upload}
+        />
+        <label className="flex items-center gap-2 text-sm font-medium text-ink cursor-pointer">
+          <input
+            type="checkbox"
+            checked={form.is_favorite}
+            onChange={(e) => setForm({ ...form, is_favorite: e.target.checked })}
+            className="rounded border-[rgba(90,40,52,0.2)] text-burgundy focus:ring-burgundy"
+          />
+          <span>Tandai sebagai foto favorit</span>
+        </label>
+      </div>
+      <ItemList
+        items={items}
+        title={(i) => i.title}
+        subtitle={(i) => [i.category, i.memory_date].filter(Boolean).join(' · ') || 'Belum ada detail'}
+        onEdit={fill}
+        onStatusChange={async (i, status) => {
+          await updateItem('memories', i.id, { status });
+          reload();
+        }}
+        onDelete={async (i) => {
+          await deleteItem('memories', i.id);
+          reload();
+        }}
+      />
+    </AdminPanel>
+  );
 }
 
 function LetterAdmin({ items, reload }: { items: Letter[]; reload: () => void }) {
   const [form, setForm] = useState({ title: '', body: '', unlock_label: 'Surat kecil', status: 'draft' });
   const [editing, setEditing] = useState<Letter | null>(null);
-  function fill(item: Letter) { setEditing(item); setForm({ title: item.title, body: item.body, unlock_label: item.unlock_label || '', status: item.status }); }
-  function reset() { setEditing(null); setForm({ title: '', body: '', unlock_label: 'Surat kecil', status: 'draft' }); }
+
+  function fill(item: Letter) {
+    setEditing(item);
+    setForm({ title: item.title, body: item.body, unlock_label: item.unlock_label || '', status: item.status });
+  }
+
+  function reset() {
+    setEditing(null);
+    setForm({ title: '', body: '', unlock_label: 'Surat kecil', status: 'draft' });
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (editing) await updateItem('letters', editing.id, form);
     else await createItem('letters', form);
-    reset(); reload();
+    reset();
+    reload();
   }
-  return <AdminPanel title="Kelola Surat" button="Simpan Surat" onSubmit={submit}>
-    <Field label="Judul Surat" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
-    <Field label="Label" value={form.unlock_label} onChange={(v) => setForm({ ...form, unlock_label: v })} />
-    <StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} />
-    <TextareaField label="Isi Surat" value={form.body} onChange={(v) => setForm({ ...form, body: v })} minHeight="min-h-44" />
-    <ItemList
-      items={items}
-      title={(i) => i.title}
-      subtitle={(i) => i.unlock_label || 'Surat kecil'}
-      onEdit={fill}
-      onStatusChange={async (i, status) => { await updateItem('letters', i.id, { status }); reload(); }}
-      onDelete={async (i) => { await deleteItem('letters', i.id); reload(); }}
-    />
-  </AdminPanel>;
+
+  return (
+    <AdminPanel title="Kelola Surat (Chapter 03)" button="Simpan Surat" onSubmit={submit}>
+      <Field label="Judul Surat" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
+      <Field label="Label Pembuka" value={form.unlock_label} onChange={(v) => setForm({ ...form, unlock_label: v })} />
+      <StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} />
+      <TextareaField label="Isi Surat" value={form.body} onChange={(v) => setForm({ ...form, body: v })} minHeight="min-h-44" />
+      <ItemList
+        items={items}
+        title={(i) => i.title}
+        subtitle={(i) => i.unlock_label || 'Surat kecil'}
+        onEdit={fill}
+        onStatusChange={async (i, status) => {
+          await updateItem('letters', i.id, { status });
+          reload();
+        }}
+        onDelete={async (i) => {
+          await deleteItem('letters', i.id);
+          reload();
+        }}
+      />
+    </AdminPanel>
+  );
 }
 
 function CardAdmin({ items, reload }: { items: MemoryCard[]; reload: () => void }) {
   const [form, setForm] = useState({ title: '', body: '', card_type: 'Alasan', status: 'draft', sort_order: 0 });
   const [editing, setEditing] = useState<MemoryCard | null>(null);
-  function fill(i: MemoryCard) { setEditing(i); setForm({ title: i.title, body: i.body, card_type: i.card_type || '', status: i.status, sort_order: i.sort_order }); }
-  function reset() { setEditing(null); setForm({ title: '', body: '', card_type: 'Alasan', status: 'draft', sort_order: 0 }); }
+
+  function fill(i: MemoryCard) {
+    setEditing(i);
+    setForm({ title: i.title, body: i.body, card_type: i.card_type || '', status: i.status, sort_order: i.sort_order });
+  }
+
+  function reset() {
+    setEditing(null);
+    setForm({ title: '', body: '', card_type: 'Alasan', status: 'draft', sort_order: 0 });
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (editing) await updateItem('memory_cards', editing.id, form);
     else await createItem('memory_cards', form);
-    reset(); reload();
+    reset();
+    reload();
   }
-  return <AdminPanel title="Kelola Kotak Kenangan" button="Simpan Kartu" onSubmit={submit}>
-    <Field label="Judul Kartu" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
-    <Field label="Tipe" value={form.card_type} onChange={(v) => setForm({ ...form, card_type: v })} />
-    <Field label="Urutan" type="number" value={String(form.sort_order)} onChange={(v) => setForm({ ...form, sort_order: Number(v) })} />
-    <StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} />
-    <TextareaField label="Isi Kartu" value={form.body} onChange={(v) => setForm({ ...form, body: v })} minHeight="min-h-32" />
-    <ItemList
-      items={items}
-      title={(i) => i.title}
-      subtitle={(i) => `${i.card_type || 'Kartu'} - urutan ${i.sort_order}`}
-      onEdit={fill}
-      onStatusChange={async (i, status) => { await updateItem('memory_cards', i.id, { status }); reload(); }}
-      onDelete={async (i) => { await deleteItem('memory_cards', i.id); reload(); }}
-    />
-  </AdminPanel>;
+
+  return (
+    <AdminPanel title="Kelola Kotak Kenangan (Chapter 04)" button="Simpan Kartu" onSubmit={submit}>
+      <Field label="Judul Kartu" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
+      <Field label="Tipe Kartu (Alasan / Doa / Momen)" value={form.card_type} onChange={(v) => setForm({ ...form, card_type: v })} />
+      <Field label="Urutan Tampil" type="number" value={String(form.sort_order)} onChange={(v) => setForm({ ...form, sort_order: Number(v) })} />
+      <StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} />
+      <TextareaField label="Isi Kartu" value={form.body} onChange={(v) => setForm({ ...form, body: v })} minHeight="min-h-32" />
+      <ItemList
+        items={items}
+        title={(i) => i.title}
+        subtitle={(i) => `${i.card_type || 'Kartu'} · Urutan ${i.sort_order}`}
+        onEdit={fill}
+        onStatusChange={async (i, status) => {
+          await updateItem('memory_cards', i.id, { status });
+          reload();
+        }}
+        onDelete={async (i) => {
+          await deleteItem('memory_cards', i.id);
+          reload();
+        }}
+      />
+    </AdminPanel>
+  );
 }
 
 function QuizAdmin({ items, reload }: { items: QuizQuestion[]; reload: () => void }) {
-  const [form, setForm] = useState({ question: '', option_a: '', option_b: '', option_c: '', option_d: '', correct_option: 'A', feedback: '', status: 'draft', sort_order: 0 });
+  const [form, setForm] = useState({
+    question: '',
+    option_a: '',
+    option_b: '',
+    option_c: '',
+    option_d: '',
+    correct_option: 'A',
+    feedback: '',
+    status: 'draft',
+    sort_order: 0
+  });
   const [editing, setEditing] = useState<QuizQuestion | null>(null);
-  function fill(i: QuizQuestion) { setEditing(i); setForm({ question: i.question, option_a: i.option_a, option_b: i.option_b, option_c: i.option_c, option_d: i.option_d, correct_option: i.correct_option, feedback: i.feedback || '', status: i.status, sort_order: i.sort_order }); }
-  function reset() { setEditing(null); setForm({ question: '', option_a: '', option_b: '', option_c: '', option_d: '', correct_option: 'A', feedback: '', status: 'draft', sort_order: 0 }); }
+
+  function fill(i: QuizQuestion) {
+    setEditing(i);
+    setForm({
+      question: i.question,
+      option_a: i.option_a,
+      option_b: i.option_b,
+      option_c: i.option_c,
+      option_d: i.option_d,
+      correct_option: i.correct_option,
+      feedback: i.feedback || '',
+      status: i.status,
+      sort_order: i.sort_order
+    });
+  }
+
+  function reset() {
+    setEditing(null);
+    setForm({
+      question: '',
+      option_a: '',
+      option_b: '',
+      option_c: '',
+      option_d: '',
+      correct_option: 'A',
+      feedback: '',
+      status: 'draft',
+      sort_order: 0
+    });
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (editing) await updateItem('quiz_questions', editing.id, form);
     else await createItem('quiz_questions', form);
-    reset(); reload();
+    reset();
+    reload();
   }
-  return <AdminPanel title="Kelola Quiz" button="Simpan Quiz" onSubmit={submit}>
-    <Field label="Pertanyaan" value={form.question} onChange={(v) => setForm({ ...form, question: v })} />
-    <div className="grid gap-3 md:grid-cols-2"><Field label="Opsi A" value={form.option_a} onChange={(v) => setForm({ ...form, option_a: v })} /><Field label="Opsi B" value={form.option_b} onChange={(v) => setForm({ ...form, option_b: v })} /><Field label="Opsi C" value={form.option_c} onChange={(v) => setForm({ ...form, option_c: v })} /><Field label="Opsi D" value={form.option_d} onChange={(v) => setForm({ ...form, option_d: v })} /></div>
-    <div className="grid gap-3 md:grid-cols-3"><ChoiceSelect value={form.correct_option} onChange={(v) => setForm({ ...form, correct_option: v })} /><Field label="Urutan" type="number" value={String(form.sort_order)} onChange={(v) => setForm({ ...form, sort_order: Number(v) })} /><StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} /></div>
-    <Field label="Feedback" value={form.feedback} onChange={(v) => setForm({ ...form, feedback: v })} />
-    <ItemList
-      items={items}
-      title={(i) => i.question}
-      subtitle={(i) => `Jawaban ${i.correct_option} - urutan ${i.sort_order}`}
-      onEdit={fill}
-      onStatusChange={async (i, status) => { await updateItem('quiz_questions', i.id, { status }); reload(); }}
-      onDelete={async (i) => { await deleteItem('quiz_questions', i.id); reload(); }}
-    />
-  </AdminPanel>;
+
+  return (
+    <AdminPanel title="Kelola Quiz (Chapter 05)" button="Simpan Quiz" onSubmit={submit}>
+      <Field label="Pertanyaan" value={form.question} onChange={(v) => setForm({ ...form, question: v })} />
+      <div className="grid gap-3 md:grid-cols-2">
+        <Field label="Opsi A" value={form.option_a} onChange={(v) => setForm({ ...form, option_a: v })} />
+        <Field label="Opsi B" value={form.option_b} onChange={(v) => setForm({ ...form, option_b: v })} />
+        <Field label="Opsi C" value={form.option_c} onChange={(v) => setForm({ ...form, option_c: v })} />
+        <Field label="Opsi D" value={form.option_d} onChange={(v) => setForm({ ...form, option_d: v })} />
+      </div>
+      <div className="grid gap-3 md:grid-cols-3">
+        <ChoiceSelect value={form.correct_option} onChange={(v) => setForm({ ...form, correct_option: v })} />
+        <Field label="Urutan" type="number" value={String(form.sort_order)} onChange={(v) => setForm({ ...form, sort_order: Number(v) })} />
+        <StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} />
+      </div>
+      <Field label="Feedback / Penjelasan Jawaban" value={form.feedback} onChange={(v) => setForm({ ...form, feedback: v })} />
+      <ItemList
+        items={items}
+        title={(i) => i.question}
+        subtitle={(i) => `Jawaban ${i.correct_option} · Urutan ${i.sort_order}`}
+        onEdit={fill}
+        onStatusChange={async (i, status) => {
+          await updateItem('quiz_questions', i.id, { status });
+          reload();
+        }}
+        onDelete={async (i) => {
+          await deleteItem('quiz_questions', i.id);
+          reload();
+        }}
+      />
+    </AdminPanel>
+  );
 }
 
 function PlanAdmin({ items, reload }: { items: Plan[]; reload: () => void }) {
-  const [form, setForm] = useState({ title: '', note: '', plan_status: 'ingin_dilakukan', status: 'draft', sort_order: 0 });
+  const [form, setForm] = useState({
+    title: '',
+    note: '',
+    plan_status: 'ingin_dilakukan',
+    status: 'draft',
+    sort_order: 0
+  });
   const [editing, setEditing] = useState<Plan | null>(null);
-  function fill(i: Plan) { setEditing(i); setForm({ title: i.title, note: i.note || '', plan_status: i.plan_status, status: i.status, sort_order: i.sort_order }); }
-  function reset() { setEditing(null); setForm({ title: '', note: '', plan_status: 'ingin_dilakukan', status: 'draft', sort_order: 0 }); }
+
+  function fill(i: Plan) {
+    setEditing(i);
+    setForm({ title: i.title, note: i.note || '', plan_status: i.plan_status, status: i.status, sort_order: i.sort_order });
+  }
+
+  function reset() {
+    setEditing(null);
+    setForm({ title: '', note: '', plan_status: 'ingin_dilakukan', status: 'draft', sort_order: 0 });
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (editing) await updateItem('plans', editing.id, form);
     else await createItem('plans', form);
-    reset(); reload();
+    reset();
+    reload();
   }
-  return <AdminPanel title="Kelola Rencana Kita" button="Simpan Rencana" onSubmit={submit}>
-    <Field label="Rencana" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
-    <Field label="Catatan" value={form.note} onChange={(v) => setForm({ ...form, note: v })} />
-    <div className="grid gap-3 md:grid-cols-3"><PlanStatusSelect value={form.plan_status} onChange={(v) => setForm({ ...form, plan_status: v })} /><Field label="Urutan" type="number" value={String(form.sort_order)} onChange={(v) => setForm({ ...form, sort_order: Number(v) })} /><StatusSelect label="Status Tampil" value={form.status} onChange={(v) => setForm({ ...form, status: v })} /></div>
-    <ItemList
-      items={items}
-      title={(i) => i.title}
-      subtitle={(i) => `${i.plan_status.replace(/_/g, ' ')} - urutan ${i.sort_order}`}
-      onEdit={fill}
-      onStatusChange={async (i, status) => { await updateItem('plans', i.id, { status }); reload(); }}
-      onDelete={async (i) => { await deleteItem('plans', i.id); reload(); }}
-    />
-  </AdminPanel>;
+
+  return (
+    <AdminPanel title="Kelola Rencana (Chapter 06)" button="Simpan Rencana" onSubmit={submit}>
+      <Field label="Nama Rencana" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
+      <Field label="Catatan Tambahan" value={form.note} onChange={(v) => setForm({ ...form, note: v })} />
+      <div className="grid gap-3 md:grid-cols-3">
+        <PlanStatusSelect value={form.plan_status} onChange={(v) => setForm({ ...form, plan_status: v })} />
+        <Field label="Urutan" type="number" value={String(form.sort_order)} onChange={(v) => setForm({ ...form, sort_order: Number(v) })} />
+        <StatusSelect label="Status Tampil" value={form.status} onChange={(v) => setForm({ ...form, status: v })} />
+      </div>
+      <ItemList
+        items={items}
+        title={(i) => i.title}
+        subtitle={(i) => `${i.plan_status.replace(/_/g, ' ')} · Urutan ${i.sort_order}`}
+        onEdit={fill}
+        onStatusChange={async (i, status) => {
+          await updateItem('plans', i.id, { status });
+          reload();
+        }}
+        onDelete={async (i) => {
+          await deleteItem('plans', i.id);
+          reload();
+        }}
+      />
+    </AdminPanel>
+  );
 }
 
 function SettingsAdmin({ item, reload }: { item: SiteSettings | null; reload: () => void }) {
@@ -454,17 +695,50 @@ function SettingsAdmin({ item, reload }: { item: SiteSettings | null; reload: ()
 }
 
 function SettingsForm({ item, reload }: { item: SiteSettings | null; reload: () => void }) {
-  const [form, setForm] = useState({ birthday_message: item?.birthday_message || '', final_message: item?.final_message || '', music_url: item?.music_url || DEFAULT_MUSIC_URL });
-  async function submit(e: React.FormEvent) { e.preventDefault(); await updateItem('site_settings', 'main', form); reload(); }
-  return <AdminPanel title="Site Settings" button="Simpan Settings" onSubmit={submit}>
-    <Field label="URL Musik" value={form.music_url} onChange={(v) => setForm({ ...form, music_url: v })} />
-    <p className="-mt-2 text-sm text-muted">Untuk file di folder public, pakai path persis seperti <span className="font-semibold text-cocoa">/audio/about_you.mp3</span>.</p>
-    <TextareaField label="Birthday Message" value={form.birthday_message} onChange={(v) => setForm({ ...form, birthday_message: v })} />
-    <TextareaField label="Final Message" value={form.final_message} onChange={(v) => setForm({ ...form, final_message: v })} minHeight="min-h-40" />
-  </AdminPanel>;
+  const [form, setForm] = useState({
+    birthday_message: item?.birthday_message || '',
+    final_message: item?.final_message || '',
+    music_url: item?.music_url || DEFAULT_MUSIC_URL
+  });
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    await updateItem('site_settings', 'main', form);
+    reload();
+  }
+
+  return (
+    <AdminPanel title="Pengaturan Situs & Chapter 07" button="Simpan Pengaturan" onSubmit={submit}>
+      <Field label="URL File Musik" value={form.music_url} onChange={(v) => setForm({ ...form, music_url: v })} />
+      <p className="-mt-2 text-xs text-ink-muted">
+        Untuk file audio di folder public, gunakan path seperti <span className="font-mono text-burgundy">/audio/about_you.mp3</span> atau URL HTTPS.
+      </p>
+      <TextareaField
+        label="Pesan Countdown Birthday Mode"
+        value={form.birthday_message}
+        onChange={(v) => setForm({ ...form, birthday_message: v })}
+      />
+      <TextareaField
+        label="Pesan Chapter 07 (Untuk Hari Ini)"
+        value={form.final_message}
+        onChange={(v) => setForm({ ...form, final_message: v })}
+        minHeight="min-h-40"
+      />
+    </AdminPanel>
+  );
 }
 
-function AdminPanel({ title, button, onSubmit, children }: { title: string; button: string; onSubmit: (e: React.FormEvent) => Promise<void> | void; children: React.ReactNode }) {
+function AdminPanel({
+  title,
+  button,
+  onSubmit,
+  children
+}: {
+  title: string;
+  button: string;
+  onSubmit: (e: React.FormEvent) => Promise<void> | void;
+  children: React.ReactNode;
+}) {
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -474,7 +748,7 @@ function AdminPanel({ title, button, onSubmit, children }: { title: string; butt
     setFeedback(null);
     try {
       await onSubmit(e);
-      setFeedback({ type: 'success', message: 'Tersimpan.' });
+      setFeedback({ type: 'success', message: 'Data berhasil disimpan.' });
     } catch (error) {
       setFeedback({ type: 'error', message: error instanceof Error ? error.message : 'Gagal menyimpan.' });
     } finally {
@@ -483,22 +757,32 @@ function AdminPanel({ title, button, onSubmit, children }: { title: string; butt
   }
 
   return (
-    <form onSubmit={(e) => void submit(e)} className="rounded-2xl border border-[rgba(196,138,106,0.22)] bg-white p-5 shadow-romantic sm:p-6">
-      <h2 className="text-xl font-semibold text-cocoa">{title}</h2>
+    <form onSubmit={(e) => void submit(e)} className="card p-6 sm:p-8">
+      <h2 className="font-display text-2xl font-normal text-burgundy">{title}</h2>
       <div className="mt-6 space-y-4">{children}</div>
       {feedback && (
-        <p className={`mt-5 rounded-2xl px-4 py-3 text-sm font-semibold ${feedback.type === 'error' ? 'bg-red-50 text-red-600' : 'bg-sage/10 text-sage'}`}>
+        <p className={`mt-5 rounded-xl px-4 py-3 text-sm font-semibold ${feedback.type === 'error' ? 'bg-red-50 text-red-600' : 'bg-sage/10 text-sage'}`}>
           {feedback.message}
         </p>
       )}
-      <button disabled={saving} className="btn-primary mt-6 gap-2"><Plus size={16} />{saving ? 'Menyimpan...' : button}</button>
+      <button disabled={saving} className="btn-primary mt-6 gap-2">
+        <Plus size={16} />
+        <span>{saving ? 'Menyimpan...' : button}</span>
+      </button>
     </form>
   );
 }
+
 function Field({ label, value, onChange, type = 'text' }: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
   const id = useId();
-  return <div><label className="label" htmlFor={id}>{label}</label><input id={id} className="input" type={type} value={value} onChange={(e) => onChange(e.target.value)} /></div>;
+  return (
+    <div>
+      <label className="label" htmlFor={id}>{label}</label>
+      <input id={id} className="input" type={type} value={value} onChange={(e) => onChange(e.target.value)} />
+    </div>
+  );
 }
+
 function TextareaField({
   label,
   value,
@@ -513,8 +797,14 @@ function TextareaField({
   minHeight?: string;
 }) {
   const id = useId();
-  return <div className={className}><label className="label" htmlFor={id}>{label}</label><textarea id={id} className={`input ${minHeight}`} value={value} onChange={(e) => onChange(e.target.value)} /></div>;
+  return (
+    <div className={className}>
+      <label className="label" htmlFor={id}>{label}</label>
+      <textarea id={id} className={`input ${minHeight}`} value={value} onChange={(e) => onChange(e.target.value)} />
+    </div>
+  );
 }
+
 function FileField({
   label,
   uploading,
@@ -532,25 +822,35 @@ function FileField({
   return (
     <div className={className}>
       <label className="label" htmlFor={id}>{label}</label>
-      <input id={id} className="input" type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && onChange(e.target.files[0])} />
-      <p className="mt-2 text-sm text-muted">{uploading ? 'Mengupload...' : hasFile ? 'Foto sudah terupload.' : 'Maksimal 5 MB.'}</p>
+      <input
+        id={id}
+        className="input file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-paper file:text-burgundy hover:file:bg-paper-light"
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        onChange={(e) => e.target.files?.[0] && onChange(e.target.files[0])}
+      />
+      <p className="mt-2 text-xs text-ink-muted">
+        {uploading ? 'Mengunggah ke storage...' : hasFile ? 'Foto telah terhubung.' : 'Format: JPG, PNG, WebP, GIF (maks 5 MB).'}
+      </p>
     </div>
   );
 }
+
 function ChoiceSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const id = useId();
   return (
     <div>
       <label className="label" htmlFor={id}>Jawaban Benar</label>
       <select id={id} className="input" value={value} onChange={(e) => onChange(e.target.value)}>
-        <option>A</option>
-        <option>B</option>
-        <option>C</option>
-        <option>D</option>
+        <option value="A">A</option>
+        <option value="B">B</option>
+        <option value="C">C</option>
+        <option value="D">D</option>
       </select>
     </div>
   );
 }
+
 function PlanStatusSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const id = useId();
   return (
@@ -564,6 +864,7 @@ function PlanStatusSelect({ value, onChange }: { value: string; onChange: (v: st
     </div>
   );
 }
+
 function ItemList<T extends { id: string; status?: ContentStatus }>({
   items,
   title,
@@ -611,28 +912,44 @@ function ItemList<T extends { id: string; status?: ContentStatus }>({
 
   return (
     <div className="mt-8 space-y-3">
-      <h3 className="font-semibold text-cocoa">Daftar Konten</h3>
-      {error && <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</p>}
-      {!items.length && <div className="rounded-xl border border-dashed border-[rgba(196,138,106,0.35)] bg-white/70 p-5 text-sm text-muted">Belum ada item di bagian ini.</div>}
+      <h3 className="font-display text-xl font-normal text-burgundy">Daftar Konten Tersimpan</h3>
+      {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</p>}
+      {!items.length && (
+        <div className="rounded-xl border border-dashed border-[rgba(90,40,52,0.15)] bg-paper/40 p-6 text-center text-sm text-ink-muted">
+          Belum ada item di bagian ini.
+        </div>
+      )}
       {items.map((item) => (
-        <div key={item.id} className="rounded-xl border border-[rgba(196,138,106,0.22)] bg-white p-4 shadow-xs">
+        <div key={item.id} className="rounded-xl border border-[rgba(90,40,52,0.08)] bg-white p-4 shadow-subtle">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="font-medium text-cocoa">{title(item)}</p>
+                <p className="font-medium text-ink">{title(item)}</p>
                 {item.status && <StatusBadge status={item.status} />}
               </div>
-              <p className="mt-1 text-sm text-muted">{subtitle(item)}</p>
+              <p className="mt-1 text-xs text-ink-muted">{subtitle(item)}</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={() => onEdit(item)} className="btn-secondary !min-h-10 !py-2">Edit</button>
-              <button type="button" aria-label="Hapus" disabled={pending === `${item.id}:delete`} onClick={() => void removeItem(item)} className="inline-flex min-h-10 items-center justify-center rounded-lg bg-error px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
-                <Trash2 size={15} />
+              <button
+                type="button"
+                onClick={() => onEdit(item)}
+                className="btn-secondary !min-h-9 !py-1.5 !px-3 text-xs"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                aria-label="Hapus"
+                disabled={pending === `${item.id}:delete`}
+                onClick={() => void removeItem(item)}
+                className="inline-flex min-h-9 items-center justify-center rounded-full bg-error px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
+              >
+                <Trash2 size={13} />
               </button>
             </div>
           </div>
           {item.status && onStatusChange && (
-            <div className="mt-4 flex flex-wrap gap-2 border-t border-[rgba(196,138,106,0.16)] pt-4">
+            <div className="mt-3 flex flex-wrap gap-2 border-t border-[rgba(90,40,52,0.08)] pt-3">
               {contentStatuses
                 .filter((status) => status !== item.status)
                 .map((status) => {
@@ -645,10 +962,10 @@ function ItemList<T extends { id: string; status?: ContentStatus }>({
                       type="button"
                       disabled={disabled}
                       onClick={() => void changeStatus(item, status)}
-                      className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-[rgba(196,138,106,0.22)] px-3 py-2 text-xs font-semibold text-cocoa transition hover:border-rose hover:text-rose disabled:opacity-50"
+                      className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-[rgba(90,40,52,0.12)] px-2.5 py-1 text-xs font-medium text-ink transition hover:border-burgundy hover:text-burgundy disabled:opacity-50"
                     >
-                      <Icon size={14} />
-                      {disabled ? 'Menyimpan...' : action.label}
+                      <Icon size={12} />
+                      <span>{disabled ? 'Menyimpan...' : action.label}</span>
                     </button>
                   );
                 })}

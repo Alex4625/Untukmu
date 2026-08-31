@@ -1,15 +1,16 @@
 export const DEFAULT_UNLOCK_ISO = '2026-12-09T16:00:00.000Z'; // 10 Desember 2026 00:00 WITA
 
-export function getUnlockIso() {
+export function getUnlockIso(): string {
   return process.env.NEXT_PUBLIC_UNLOCK_ISO || DEFAULT_UNLOCK_ISO;
 }
 
-export function isUnlockedNow() {
-  return Date.now() >= new Date(getUnlockIso()).getTime();
+export function isUnlockedNow(now?: Date | number): boolean {
+  const current = typeof now === 'number' ? now : now instanceof Date ? now.getTime() : Date.now();
+  return current >= new Date(getUnlockIso()).getTime();
 }
 
-export function formatDateID(value?: string | null) {
-  if (!value) return 'Tanggal belum diisi';
+export function formatDateID(value?: string | null): string {
+  if (!value) return '';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return new Intl.DateTimeFormat('id-ID', {

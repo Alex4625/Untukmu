@@ -8,9 +8,16 @@ export const dynamic = 'force-dynamic';
 
 export default async function TimelinePage({ searchParams }: { searchParams?: PageSearchParams }) {
   const content = await getPublicContent(await isPreviewRequest(searchParams));
-  if (!content.unlocked) return <LockedNotice />;
+  if (!content.unlocked) return <LockedNotice title="Chapter ini belum saatnya dibuka" />;
+
   return (
-    <SectionShell eyebrow="Timeline" title="Perjalanan Kita" description="Kenangan-kenangan kecil yang aku ingat." preview={content.preview}>
+    <SectionShell
+      chapterNumber="01"
+      eyebrow="Chapter 01"
+      title="Sebuah Awal"
+      description="Kenangan-kenangan kecil yang berjalan pelan, membuka kembali bagaimana semua cerita indah ini bermula."
+      preview={content.preview}
+    >
       <Timeline memories={content.memories} />
     </SectionShell>
   );

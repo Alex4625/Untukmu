@@ -1,18 +1,24 @@
-# Untuk Nona - Untuk 10 Desember
+# Untuk Nona (UNTUKMU V2) — Untuk 10 Desember
 
-Website hadiah ulang tahun interaktif berbasis **Next.js App Router + TypeScript + Tailwind CSS + Supabase + Cloudinary**.
+Website hadiah ulang tahun interaktif dan naratif berbasis **Next.js 16 App Router + TypeScript + Tailwind CSS + Cloudflare Workers + D1 + R2 + OpenNext**.
 
-## Fitur utama
+## Fitur Utama
 
-- Landing romantis dan countdown sampai **10 Desember 2026 00:00 WITA**.
-- Timeline, Galeri, Surat, Kotak Kenangan, Quiz, Rencana Kita, dan Final Surprise terkunci sebelum tanggal unlock.
-- Admin page di `/admin` untuk tambah/edit/hapus konten, cek health deploy, dan atur Draft/Published/Hidden.
-- Upload foto ke Cloudinary melalui API route server-side.
-- Data teks disimpan di Supabase.
-- Preview unlocked mode khusus admin: `/hub?preview=unlocked`.
-- Responsive untuk HP, tablet, laptop, dan desktop.
+- **Naratif 7 Chapter**: 
+  - 01. *Sebuah Awal* (`/timeline` - Timeline vertikal kenangan kronologis)
+  - 02. *Momen Kecil* (`/gallery` - Koleksi galeri foto asimetris responsif)
+  - 03. *Yang Aku Ingat* (`/letters` - Surat digital editorial)
+  - 04. *Yang Tak Terucap* (`/memory-box` - Kartu kenangan interaktif)
+  - 05. *Tentang Kamu* (`/quiz` - Mini quiz interaktif dengan skor)
+  - 06. *Mungkin Nanti* (`/plans` - Catatan rencana dan wishlist masa depan)
+  - 07. *Untuk Hari Ini* (`/final` - Pesan penutup emosional & restrained confetti)
+- **Chapter Drawer**: Panel navigasi non-linear yang dapat diakses kapan saja dari seluruh halaman chapter.
+- **Persistent Audio**: Musik latar berjalan persisten lintas pergantian halaman dan chapter.
+- **Unlock Logic**: Otomatis terbuka pada **10 Desember 2026 00:00 WITA** (`NEXT_PUBLIC_UNLOCK_ISO=2026-12-09T16:00:00.000Z`).
+- **Admin CMS (`/admin`)**: Manajemen konten lengkap (tambah, edit, hapus, ganti status `draft`/`active`/`hidden`), upload foto R2, dan preview mode (`?preview=unlocked`).
+- **Cloudflare Edge Infrastructure**: Database Cloudflare D1 (SQLite via Drizzle ORM) dan Cloudflare R2 Storage dengan on-demand Cloudflare Image Transformations.
 
-## Cara menjalankan lokal
+## Cara Menjalankan Lokal
 
 ```bash
 npm install
@@ -21,27 +27,14 @@ npm run dev
 ```
 
 Buka:
+- Halaman Publik: `http://localhost:3000`
+- Panel Admin: `http://localhost:3000/admin`
 
-```text
-http://localhost:3000
-http://localhost:3000/admin
-```
+## Perintah Penting
 
-## File penting
-
-- `.env.example` - contoh environment variables.
-- `supabase/schema.sql` - SQL untuk membuat tabel Supabase.
-- `docs/SETUP_SUPABASE.md` - panduan Supabase.
-- `docs/SETUP_CLOUDINARY.md` - panduan Cloudinary.
-- `docs/DEPLOY_VERCEL.md` - panduan deploy Vercel.
-- `docs/ADD_MUSIC.md` - panduan tambah musik.
-
-## Catatan unlock date
-
-Nilai unlock disimpan di:
-
-```env
-NEXT_PUBLIC_UNLOCK_ISO=2026-12-09T16:00:00.000Z
-```
-
-Itu sama dengan **10 Desember 2026 pukul 00:00 WITA**.
+- `npm run dev`: Menjalankan development server Next.js lokal dengan database SQLite otomatis.
+- `npm test`: Menjalankan seluruh 31 automated unit & integration test suites.
+- `npm run lint`: Memeriksa format dan linting kode menggunakan ESLint.
+- `npm run build`: Membangun production bundle Next.js.
+- `npx @opennextjs/cloudflare build`: Meng-compile OpenNext Cloudflare Worker bundle (`.open-next/worker.js`).
+- `npm run db:generate`: Menghasilkan SQL migrasi Drizzle untuk Cloudflare D1.

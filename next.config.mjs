@@ -7,15 +7,15 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       "base-uri 'self'",
-      "connect-src 'self' https://*.supabase.co https://api.cloudinary.com",
-      "font-src 'self'",
+      "connect-src 'self' https://*.workers.dev https://*.pages.dev",
+      "font-src 'self' https://fonts.gstatic.com",
       "form-action 'self'",
       "frame-ancestors 'none'",
-      "img-src 'self' data: blob: https://res.cloudinary.com https://*.supabase.co",
-      "media-src 'self' https: blob:",
+      "img-src 'self' data: blob: https://*.workers.dev https://*.pages.dev",
+      "media-src 'self' https: blob: data:",
       "object-src 'none'",
       `script-src 'self' 'unsafe-inline'${isDevelopment ? " 'unsafe-eval'" : ''}`,
-      "style-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "upgrade-insecure-requests"
     ].join('; ')
   },
@@ -29,8 +29,8 @@ const nextConfig = {
   poweredByHeader: false,
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: 'res.cloudinary.com' },
-      { protocol: 'https', hostname: '*.supabase.co' }
+      { protocol: 'https', hostname: '*.workers.dev' },
+      { protocol: 'https', hostname: '*.pages.dev' }
     ]
   },
   async headers() {
@@ -42,4 +42,5 @@ const nextConfig = {
     ];
   }
 };
+
 export default nextConfig;

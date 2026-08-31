@@ -1,1361 +1,380 @@
-# 🌸 design.md — Untuk Nona
-> Dokumen Desain UI/UX Lengkap untuk Website Hadiah Ulang Tahun Digital
+# DESIGN.md v2 — Untukmu (Untuk Nona)
 
-**Nama Project:** Untukmu  
-**Nama Website:** Untuk Nona  
-**Stack:** Next.js App Router · TypeScript · Tailwind CSS · Supabase · Cloudinary · Vercel  
-**Tanggal Unlock:** 10 Desember 2026, 00:00 WITA (`2026-12-09T16:00:00.000Z` UTC)  
-**Dibuat oleh:** Alex (untuk Nona)
+Status: SPECIFICATION. Ini adalah revisi menyeluruh dari `docs/design.md` v1 (Juni 2026), menggabungkan requirement/content model dari repository (source of truth) dengan arah visual dari PDF "UNTUKMU Design Vision & Redesign Blueprint" (referensi visual/UX), plus keputusan desain yang sudah dikonfirmasi di percakapan ini. Dokumen ini menggantikan posisi `docs/design.md` sebagai acuan desain aktif — `design.md` v1 tetap disimpan sebagai riwayat, tidak dihapus.
 
----
+**Revisi kedua (worldbuilding + scrollytelling direction):** section 10–20 di bawah adalah perluasan/revisi dari section 2 (Navigation), section 5 (Component behavior), dan section 9.6 (Motion) di atas — hasil integrasi dua reference eksternal: Stardew Valley (prinsip handcrafted world, environmental storytelling, tactile imperfection) dan SBS "The Boat" (prinsip scroll-driven storytelling, layered parallax, chapter progression). Kedua reference dipakai murni sebagai prinsip visual/interaksi — tidak ada artwork, asset, branding, atau layout yang disalin dari keduanya; Untukmu tetap memakai identitas visual sendiri dari section 9 (palet burgundy/ivory/sage/rose accent, tipografi Cormorant Garamond + DM Sans).
 
-## Daftar Isi
-
-1. [Filosofi Desain](#1-filosofi-desain)
-2. [Target Pengguna](#2-target-pengguna)
-3. [User Flow](#3-user-flow)
-4. [Sistem Navigasi & Routing](#4-sistem-navigasi--routing)
-5. [Design System](#5-design-system)
-6. [Rancangan Per Halaman — Public](#6-rancangan-per-halaman--public)
-7. [Rancangan Per Halaman — Admin](#7-rancangan-per-halaman--admin)
-8. [Sistem Lock / Unlock](#8-sistem-lock--unlock)
-9. [Komponen UI Reusable](#9-komponen-ui-reusable)
-10. [Animasi & Micro-interaction](#10-animasi--micro-interaction)
-11. [Responsivitas](#11-responsivitas)
-12. [Aksesibilitas](#12-aksesibilitas)
-13. [State & Feedback](#13-state--feedback)
-14. [Prompt untuk AI Design Builder](#14-prompt-untuk-ai-design-builder)
-15. [Prioritas Implementasi](#15-prioritas-implementasi)
+Filosofi inti tidak berubah dari v1: ini bukan landing page biasa, tapi hadiah digital yang terasa dibuat dengan tangan. Yang berubah adalah bagaimana filosofi itu diterjemahkan secara visual dan struktural.
 
 ---
 
-## 1. Filosofi Desain
+## 1. Information architecture
 
-### Jiwa Website
-Website ini bukan sekadar landing page. Ini adalah **hadiah digital yang dibuat dengan tangan** — seperti scrapbook kertas yang didesain ulang dalam bentuk web. Setiap elemen visual harus terasa **dipilih dengan sadar**, bukan template jadi.
+Struktur konten tidak berubah dari content model repository — tujuh fitur yang sudah ada (Timeline, Gallery, Letters, Memory Box, Quiz, Plans, Final Surprise) dipertahankan penuh. Yang berubah adalah framing-nya: dari "kumpulan fitur yang bisa dipilih bebas" menjadi "chapter dari satu cerita", tanpa memaksa urutan linear (lihat bagian 3, Navigasi).
 
-### Tiga Kata Kunci Desain
-| Kata | Artinya dalam Praktik |
+### Pemetaan chapter (nama teknis tetap dipakai di admin, nama publik berubah)
+
+| # | Nama teknis (admin, kode) | Judul publik (chapter) | Konten yang ditampilkan |
+|---|---|---|---|
+| 01 | Timeline | Sebuah Awal | Kenangan kronologis dari tabel `memories`, ditampilkan sebagai timeline vertikal |
+| 02 | Gallery | Momen Kecil | Kenangan yang sama dari tabel `memories`, ditampilkan sebagai koleksi foto asimetris |
+| 03 | Letters | Yang Aku Ingat | Surat digital dari tabel `letters` |
+| 04 | Memory Box | Yang Tak Terucap | Kartu kenangan dari tabel `memory_cards` |
+| 05 | Quiz | Tentang Kamu | Pertanyaan dari tabel `quiz_questions` |
+| 06 | Plans | Mungkin Nanti | Rencana dari tabel `plans` |
+| 07 | Final Surprise | Untuk Hari Ini | Pesan akhir dari `site_settings.final_message` |
+
+Prinsip: pengguna publik tidak pernah melihat kata "Timeline", "Gallery", dst di UI publik — semua label memakai judul chapter di atas. Admin panel tetap memakai nama teknis karena itu memudahkan Alex mengelola konten (tidak berubah dari kebiasaan sekarang).
+
+---
+
+## 2. Navigation
+
+> Bentuk visual navigasi di bagian ini diperjelas/diperhalus di section 16 (indeks unobtrusive 01–07). Prinsip non-linear dengan shortcut di bawah ini tidak berubah.
+
+**Pengalaman utama:** chapter-based scroll journey. Halaman `/hub` (yang di v1 adalah grid menu 7 kotak) diubah fungsinya menjadi **intro chapter** — layar pembuka yang mengarahkan ke Chapter 01, bukan lagi pusat pemilihan bebas.
+
+**Navigasi sekunder (shortcut):** chapter drawer — panel navigasi ringan (bukan grid besar) yang bisa dibuka kapan saja untuk lompat langsung ke chapter tertentu. Ini menggantikan peran "grid menu" dari Hub v1, tapi statusnya jadi shortcut, bukan pengalaman utama.
+
+**Urutan akses:** non-linear. Chapter ditampilkan berurutan secara naratif (01 sampai 07), tapi pengguna **tidak dipaksa** membuka chapter 1 dulu sebelum bisa ke chapter 3. Semua chapter yang sudah unlock (yaitu, sudah lewat tanggal 10 Desember 2026) bisa diakses kapan saja lewat chapter drawer. Ini beda dari kesan "harus baca buku dari halaman 1" — lebih ke "buku dengan daftar isi yang selalu bisa diakses".
+
+**Progress indicator:** chapter counter kecil (misal "01 / 07") tetap ditampilkan sebagai bagian dari orientasi, bukan sebagai gate yang mengunci chapter berikutnya.
+
+---
+
+## 3. Screen / page inventory
+
+| Screen | Route | Purpose | Primary role(s) |
+|---|---|---|---|
+| Landing | `/` | First impression, entry point | Publik |
+| Countdown | `/countdown` | Menjaga antisipasi sebelum unlock, trigger Birthday Mode | Publik |
+| Locked notice | `/locked` | Redirect saat akses chapter sebelum unlock | Publik |
+| Hub (intro chapter) | `/hub` | Transisi dari unlock ke chapter journey, bukan lagi grid menu | Publik |
+| Chapter 01 — Sebuah Awal | `/timeline` | Timeline kronologis | Publik |
+| Chapter 02 — Momen Kecil | `/gallery` | Galeri foto asimetris | Publik |
+| Chapter 03 — Yang Aku Ingat | `/letters` | Surat digital | Publik |
+| Chapter 04 — Yang Tak Terucap | `/memory-box` | Kartu kenangan | Publik |
+| Chapter 05 — Tentang Kamu | `/quiz` | Mini quiz | Publik |
+| Chapter 06 — Mungkin Nanti | `/plans` | Rencana ke depan | Publik |
+| Chapter 07 — Untuk Hari Ini | `/final` | Penutup emosional | Publik |
+| Admin login | `/admin` | Autentikasi admin | Admin |
+| Admin dashboard & CRUD | `/admin/*` | Kelola seluruh konten, upload, preview | Admin |
+
+Route tidak berubah dari v1 — hanya presentasi dan framing publiknya yang berubah.
+
+---
+
+## 4. User flows
+
+### Flow: Nona membuka website sebelum tanggal unlock
+
+```mermaid
+flowchart TD
+  A[Buka URL] --> B[Landing Page]
+  B --> C["Klik CTA masuk"]
+  C --> D[Countdown Page]
+  D --> E{Coba akses chapter langsung?}
+  E -->|Ya| F[Locked Page] --> D
+  E -->|Tidak, tunggu| G[Scroll / tutup browser]
+```
+
+- **Trigger:** membuka URL sebelum 10 Desember 2026 00:00 WITA.
+- **Steps:** Landing → Countdown → (opsional) mencoba akses chapter → Locked → kembali ke Countdown.
+- **Success state:** pengguna memahami bahwa konten belum terbuka, tanpa merasa frustrasi (nada pesan tetap hangat, bukan pesan error teknis).
+- **Failure states & recovery:** tidak ada failure state teknis di sini — semua adalah expected state.
+
+### Flow: Unlock otomatis dan masuk ke chapter journey
+
+```mermaid
+flowchart TD
+  A[Countdown Page] --> B{Waktu sekarang >= unlock ISO?}
+  B -->|Ya| C[Birthday Mode: confetti + pesan]
+  C --> D["Klik Buka Hadiahnya"]
+  D --> E[Hub / Intro Chapter]
+  E --> F[Chapter 01: Sebuah Awal]
+  F -->|Scroll lanjut atau buka chapter drawer| G[Chapter lain sesuai pilihan]
+```
+
+- **Trigger:** waktu client mencapai `NEXT_PUBLIC_UNLOCK_ISO` saat pengguna berada di Countdown Page.
+- **Steps:** Birthday Mode trigger → confetti reveal (restrained, sesuai DEC-002/DEC-003) → CTA → Hub/intro chapter → Chapter 01 → chapter berikutnya (linear secara naratif, tapi bisa lompat lewat drawer).
+- **Success state:** pengguna sampai ke Chapter 07 (Untuk Hari Ini) kapan pun, dengan urutan bebas.
+- **Failure states & recovery:** jika reload halaman di tengah chapter journey, state harus tetap konsisten — chapter journey tidak boleh reset ke Chapter 01 secara paksa (progress posisi chapter cukup disimpan di URL/route, tidak perlu server-side state tambahan).
+
+### Flow: Admin mengelola konten
+
+Tidak berubah signifikan dari v1 (Login → Dashboard → CRUD per jenis konten → Preview Mode). Diagram tidak diulang di sini karena flow-nya linear sederhana dan sudah terdokumentasi lengkap di README repository.
+
+---
+
+## 5. Component behavior
+
+> Chapter Drawer dan AudioPlayer di bawah ini diperluas di section 16 (Navigation) dan section 17 (Audio Behavior). Komponen Image di bawah tetap berlaku penuh, ditambah lapisan reveal scroll-driven di section 12 dan 20 (Scene Architecture / Component Architecture).
+
+### Chapter Drawer (baru)
+
+- Trigger: tombol kecil persistent (posisi: pojok, tidak mengambang di tengah layar) yang bisa dibuka dari chapter mana pun setelah unlock.
+- Isi: daftar 7 chapter dengan judul publik, indikator chapter yang sedang aktif, dan status (semua chapter selalu "terbuka" pasca-unlock — tidak ada locking antar-chapter).
+- Perilaku: membuka drawer tidak menavigasi keluar dari state saat ini sampai pengguna memilih chapter tujuan.
+- Ini menggantikan grid menu Hub v1 secara fungsi, tapi ukuran dan bobot visualnya jauh lebih ringan (bukan lagi full-page grid).
+
+### AudioPlayer (redesign — persistent state)
+
+- Kontrol play/pause manual, tidak ada autoplay default (tidak berubah dari prinsip PDF maupun v1).
+- **Perubahan utama:** state play/pause harus bertahan saat pengguna berpindah antar chapter/halaman. Ini berarti `AudioPlayer` perlu dipindah ke level layout yang persisten di seluruh chapter journey (misalnya root layout untuk grup route publik pasca-unlock), bukan diinisialisasi ulang per halaman seperti kemungkinan sekarang.
+- Elemen audio (`<audio>` tag) tidak boleh unmount saat pindah chapter — navigasi antar-chapter harus tetap mempertahankan instance yang sama.
+
+### Image (Gallery, Timeline, Letters — semua tempat yang menampilkan foto)
+
+- Selalu memakai `next/image` dengan custom loader yang mengarah ke Cloudflare Image Transformations (bukan mengirim R2 original langsung).
+- Ukuran yang diminta harus disesuaikan slot tampilan (thumbnail grid, gallery card, hero besar) — tidak pernah meminta ukuran "large/original" untuk slot thumbnail kecil.
+- `loading="lazy"` untuk semua gambar di luar viewport awal; gambar hero/first-impression tetap eager-load supaya tidak ada delay first impression.
+- `sizes` attribute wajib diisi sesuai breakpoint (pola ini sudah ada di `MemoryGrid.tsx`/`Timeline.tsx` sekarang — dipertahankan, hanya sumber URL-nya yang berubah dari Cloudinary ke Cloudflare Image Transformations).
+
+---
+
+## 6. States to account for per relevant screen
+
+- **Loading:** skeleton/placeholder halus (bukan spinner besar) untuk chapter yang sedang fetch data dari D1.
+- **Empty:** dipertahankan dari v1 — pesan hangat, bukan pesan error teknis (contoh v1: "Belum ada foto yang ditambahkan").
+- **Error:** jika D1/R2 gagal, chapter menampilkan pesan lembut yang tidak membocorkan detail teknis ke pengguna publik (khususnya Nona), sementara admin panel boleh menampilkan detail error yang lebih teknis untuk debugging.
+- **Success (admin):** toast notification, pola dari v1 dipertahankan.
+- **Destructive-action confirmation:** dipertahankan dari v1 (hapus konten di admin butuh konfirmasi/opsi undo).
+
+---
+
+## 7. Responsiveness
+
+Mobile-first tetap wajib, bahkan lebih ditekankan di v2 — Nona kemungkinan besar membuka website ini dari smartphone. Aturan dari PDF diadopsi:
+
+| Breakpoint | Perilaku |
 |---|---|
-| **Lembut** | Tidak ada warna keras, tidak ada sudut tajam, tidak ada transisi kasar |
-| **Personal** | Terasa seperti dibuat *oleh seseorang*, bukan oleh mesin |
-| **Premium Sederhana** | Clean, breathing, tidak ramai — tapi terasa mahal secara emosional |
-
-### Anti-Pattern (yang HARUS dihindari)
-- ❌ Warna mencolok / neon
-- ❌ Drop shadow gelap dan tebal
-- ❌ Font display berlebihan
-- ❌ Border radius terlalu kecil (terasa kaku)
-- ❌ Animasi cepat dan agresif
-- ❌ Banyak teks dalam satu layar
-- ❌ CTA lebih dari satu per section
+| Mobile | Hero full-screen, alur vertikal, touch target besar, chapter drawer sebagai floating button/compact pill (bukan bottom navigation ala aplikasi) |
+| Tablet | Mulai melebarkan type scale dan grid, tetap mempertahankan ritme cinematic (tidak buru-buru) |
+| Desktop | Layout asimetris, tipografi besar, ruang napas lebih banyak — tapi hierarki konten harus sama dengan mobile, hanya komposisi yang berbeda |
 
 ---
 
-## 2. Target Pengguna
+## 8. Accessibility
 
-### Pengguna Utama (Nona)
-- **Usia:** Remaja akhir / dewasa awal (perkiraan seusia Alex)
-- **Device:** Smartphone Android/iOS — **mobile-first wajib**
-- **Konteks penggunaan:** Membuka website sebagai kejutan di hari ulang tahunnya
-- **Literasi digital:** Menengah — nyaman dengan smartphone, tidak perlu panduan
-- **Ekspektasi emosional:** Merasa istimewa, tersenyum, mungkin terharu
-- **Pain point:** Konten yang terlalu padat atau membingungkan akan merusak momen
-
-### Pengguna Sekunder (Admin = Alex)
-- **Device:** Laptop/desktop (untuk input konten di admin panel)
-- **Konteks:** Mengisi konten sebelum tanggal 10 Desember 2026
-- **Kebutuhan:** CRUD mudah, tidak perlu banyak klik, form yang efisien
+- `prefers-reduced-motion` wajib dihormati — semua transisi/animasi harus punya fallback tanpa motion yang tetap fungsional (bukan sekadar dipercepat).
+- Kontras warna: karena palet v2 bergeser ke burgundy/ivory yang lebih gelap dari rose/cream v1, kontras teks terhadap background wajib divalidasi ulang (minimal WCAG AA) — ini tidak otomatis terjamin hanya karena warna terlihat elegan.
+- Touch target minimum 44px (dipertahankan dari v1).
+- Semua gambar wajib punya `alt` text bermakna (bukan nama file), diisi dari field admin yang sudah ada (`title` pada `memories`).
 
 ---
 
-## 3. User Flow
+## 9. Visual direction
 
-### Flow A — Sebelum 10 Desember 2026 (Nona membuka website)
-```
-Buka URL
-  └─→ Landing Page
-        └─→ Klik "Masuk ke Cerita Kita"
-              └─→ Countdown Page
-                    ├─→ (Coba akses /timeline, /gallery, dll) → Locked Page → Kembali ke Countdown
-                    └─→ Scroll / tunggu hari H
-```
+### 9.1 Arah warna (DEC-001, DEC-002, DEC-003)
 
-### Flow B — Tepat 10 Desember 2026, 00:00 WITA (Unlock Otomatis)
-```
-Countdown Page → Birthday Mode Trigger (client-side check)
-  └─→ Konfeti + animasi muncul
-        └─→ Klik "Buka Hadiahnya"
-              └─→ Hub Page (menu semua section)
-                    ├─→ /timeline
-                    ├─→ /gallery
-                    ├─→ /letters
-                    ├─→ /memory-box
-                    ├─→ /quiz
-                    ├─→ /plans
-                    └─→ /final (terakhir dikunjungi)
-```
+Basis utama mengikuti PDF (warm editorial, burgundy/ivory/sage), dengan aksen rose/pink dari identitas v1 dipertahankan sebagai *secondary accent*, bukan warna dominan.
 
-### Flow C — Admin (Alex kapan saja)
-```
-/admin
-  └─→ Login Page (input password)
-        └─→ Admin Dashboard
-              ├─→ Kelola Memories (Timeline + Gallery)
-              ├─→ Kelola Letters
-              ├─→ Kelola Memory Cards
-              ├─→ Kelola Quiz
-              ├─→ Kelola Plans
-              └─→ Preview Mode (lihat tampilan public)
-```
-
----
-
-## 4. Sistem Navigasi & Routing
-
-### Route Map
-| Path | Nama Halaman | Status Awal | Keterangan |
-|---|---|---|---|
-| `/` | Landing Page | ✅ Publik | Entry point utama |
-| `/countdown` | Countdown | ✅ Publik | Auto-redirect dari `/` jika sudah pernah masuk |
-| `/locked` | Locked Notice | ✅ Publik | Redirect saat akses halaman terkunci |
-| `/hub` | Hub / Menu Utama | 🔒 Unlock 10 Des | Pusat navigasi setelah unlock |
-| `/timeline` | Timeline | 🔒 Unlock 10 Des | Kenangan kronologis |
-| `/gallery` | Gallery | 🔒 Unlock 10 Des | Grid foto |
-| `/letters` | Letters | 🔒 Unlock 10 Des | Surat digital |
-| `/memory-box` | Memory Box | 🔒 Unlock 10 Des | Kartu interaktif |
-| `/quiz` | Quiz | 🔒 Unlock 10 Des | Mini quiz |
-| `/plans` | Rencana Kita | 🔒 Unlock 10 Des | Wishlist bersama |
-| `/final` | Final Surprise | 🔒 Unlock 10 Des | Penutup emosional |
-| `/admin` | Admin Login | ✅ Admin | Password protected |
-| `/admin/dashboard` | Admin Dashboard | ✅ Admin | Overview konten |
-| `/admin/memories` | Admin Memories | ✅ Admin | CRUD kenangan |
-| `/admin/letters` | Admin Letters | ✅ Admin | CRUD surat |
-| `/admin/cards` | Admin Cards | ✅ Admin | CRUD memory card |
-| `/admin/quiz` | Admin Quiz | ✅ Admin | CRUD pertanyaan quiz |
-| `/admin/plans` | Admin Plans | ✅ Admin | CRUD rencana |
-
-### Navigasi Public (Setelah Unlock)
-- **Tidak ada navbar permanen** — setiap halaman punya back button subtle di kiri atas
-- **Hub Page** jadi pusat navigasi (seperti home menu)
-- **Progress indicator** di hub: tampilkan berapa section sudah dibuka
-- **No hamburger menu** — navigasi kontekstual per halaman
-
-### Navigasi Admin
-- **Sidebar** di desktop (240px lebar)
-- **Bottom sheet / drawer** di mobile
-- Logo "Untuk Nona — Admin" di atas sidebar
-
----
-
-## 5. Design System
-
-### 5.1 Color Palette
-
-```css
-/* === BASE COLORS === */
---background:   #FFF7F3;   /* Latar utama — krem hangat */
---cream:        #FFF1E6;   /* Latar section / card alt */
---soft-pink:    #F5B7C6;   /* Aksen lembut, badge, divider */
---rose:         #E98DA3;   /* Primary CTA, tombol utama */
---rose-dark:    #D4718A;   /* Hover state tombol rose */
---rose-gold:    #C48A6A;   /* Tanggal, label, detail premium */
---maroon:       #6D3B47;   /* Heading utama, teks berat */
---text:         #3B2F2F;   /* Body text */
---muted:        #8B6F6F;   /* Teks sekunder, placeholder, caption */
---card:         #FFFFFF;   /* Surface kartu */
---border:       rgba(196, 138, 106, 0.22); /* Border halus */
-
-/* === SEMANTIC COLORS === */
---success:      #7DAF8C;   /* Hijau sage — rencana tercapai */
---warning:      #E4B96A;   /* Amber — sedang direncanakan */
---error:        #D97070;   /* Merah lembut — form error */
---info:         #7EADC7;   /* Biru lembut — informasi */
-
-/* === LOCKED / UNLOCK STATE === */
---locked-overlay: rgba(255, 247, 243, 0.85); /* Overlay locked page */
---confetti-1:   #F5B7C6;
---confetti-2:   #C48A6A;
---confetti-3:   #E98DA3;
---confetti-4:   #FFF1E6;
---confetti-5:   #6D3B47;
-```
-
-**Aturan Penggunaan Warna:**
-- Background halaman: selalu `--background` atau `--cream`
-- Tombol primary: `--rose`, hover `--rose-dark`
-- Heading: `--maroon`
-- Body teks: `--text`
-- Label/caption/tanggal: `--muted` atau `--rose-gold`
-- Border: `--border`
-- Jangan gunakan warna luar palette kecuali untuk semantic colors
-
----
-
-### 5.2 Typography
-
-**Font Family:**
-```css
-font-family: 'Cormorant Garamond', 'Lora', Georgia, serif;  /* Untuk heading emosional */
-font-family: 'DM Sans', 'Inter', sans-serif;                 /* Untuk body, UI, admin */
-```
-
-**Import (Google Fonts):**
-```html
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-```
-
-**Typography Scale:**
-
-| Token | Font | Size | Weight | Line Height | Digunakan untuk |
-|---|---|---|---|---|---|
-| `display` | Cormorant | 48–64px | 300 | 1.1 | Judul besar (landing, final) |
-| `h1` | Cormorant | 36–40px | 400 | 1.2 | Judul halaman |
-| `h2` | Cormorant | 28–32px | 400 | 1.3 | Section heading |
-| `h3` | DM Sans | 20–22px | 600 | 1.4 | Card title, admin heading |
-| `body-lg` | DM Sans | 17–18px | 400 | 1.7 | Isi surat, teks panjang |
-| `body` | DM Sans | 15–16px | 400 | 1.6 | Konten umum |
-| `body-sm` | DM Sans | 13–14px | 400 | 1.5 | Caption, label form |
-| `label` | DM Sans | 11–12px | 500 | 1.4 | Badge, kategori, uppercase label |
-| `countdown-num` | Cormorant | 56–72px | 300 | 1.0 | Angka countdown |
-
-**Aturan Typography:**
-- Heading emosional → Cormorant Garamond (atau Lora sebagai fallback)
-- Semua teks UI (tombol, form, admin) → DM Sans
-- Maksimal 2 font di satu halaman
-- Italic digunakan hemat — hanya untuk penekanan emosional dalam surat
-- Letter spacing untuk label uppercase: `0.08em`
-
----
-
-### 5.3 Spacing Scale
-
-Base unit: **4px**
-
-```
-4px   → gap sangat kecil (ikon + teks)
-8px   → padding kecil, gap antar elemen rapat
-12px  → padding kompak
-16px  → padding standar card (mobile)
-20px  → padding card (tablet)
-24px  → gap antar section kecil
-32px  → gap antar section sedang
-48px  → gap antar section besar
-64px  → padding top/bottom section utama
-96px  → jarak besar antar block halaman
-```
-
-**Aturan Spacing:**
-- Card padding: `16px` mobile, `20–24px` tablet/desktop
-- Section gap: `48px` mobile, `64–96px` desktop
-- Komponen dalam card: `8–12px` gap
-- Padding container horizontal: `20px` mobile, `40px` tablet, `80px` desktop
-
----
-
-### 5.4 Border Radius Scale
-
-```
-4px   → badge kecil, tag
-8px   → input field
-12px  → card kecil (memory card)
-16px  → card standar, modal
-20px  → card besar, foto
-24px  → tombol pill, counter card
-9999px → fully rounded (tombol pill penuh)
-```
-
----
-
-### 5.5 Shadow Scale
-
-```css
---shadow-xs:  0 1px 3px rgba(109, 59, 71, 0.06);   /* Elemen ringan */
---shadow-sm:  0 2px 8px rgba(109, 59, 71, 0.08);   /* Card default */
---shadow-md:  0 4px 16px rgba(109, 59, 71, 0.10);  /* Card hover, modal */
---shadow-lg:  0 8px 32px rgba(109, 59, 71, 0.12);  /* Modal besar, dropdown */
---shadow-glow: 0 0 24px rgba(233, 141, 163, 0.20); /* Efek sparkle/glow rose */
-```
-
----
-
-### 5.6 Glassmorphism (Landing & Special Pages)
-
-```css
-.glass-card {
-  background: rgba(255, 255, 255, 0.60);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.80);
-  box-shadow: 0 4px 24px rgba(109, 59, 71, 0.08);
-}
-```
-
-Gunakan **hanya** di: Landing Page, Countdown Page, Final Page.  
-Jangan gunakan di Admin Panel.
-
----
-
-## 6. Rancangan Per Halaman — Public
-
----
-
-### 6.1 Landing Page (`/`)
-
-**Tujuan:** Membuka pengalaman pertama dengan WOW moment lembut. Nona belum tahu apa yang akan dia temukan — buat dia penasaran dan hangat sekaligus.
-
-**Layout:**
-```
-[Full Viewport — min-height: 100dvh]
-│
-├── Background: gradient halus dari #FFF7F3 ke #FFF1E6
-│
-├── Sparkle animation (SVG/Canvas, sangat pelan, opacity 0.4)
-│
-└── CENTER CARD (glass-card, max-width 480px, padding 48px 40px)
-     ├── [Ornamen bunga kecil SVG] — atas card, ukuran 32px, warna --rose-gold
-     ├── Label kecil uppercase: "UNTUK NONA" (font DM Sans 11px, --rose-gold, letter-spacing 0.15em)
-     ├── Judul Display: "Untuk Nona" (Cormorant 48px, --maroon, weight 300)
-     ├── Subjudul: "Untuk 10 Desember" (Cormorant italic 20px, --muted)
-     ├── Divider: garis halus 1px --border, lebar 48px, center
-     ├── Body teks: "Untuk seseorang yang lahir pada 10 Desember."
-     │   (DM Sans 16px, --text, text-align center)
-     ├── Tagline: "Sebuah tempat kecil di internet untuk menyimpan hal-hal indah tentang kamu dan kita."
-     │   (DM Sans 14px, --muted, text-align center, max-width 320px, margin auto)
-     ├── Spacer 32px
-     └── Tombol "Masuk ke Cerita Kita" (lihat spesifikasi tombol primary di bawah)
-```
-
-**Elemen Visual:**
-- Background: `linear-gradient(135deg, #FFF7F3 0%, #FFF1E6 50%, #FDEEF7 100%)`
-- Sparkle: titik-titik bintang kecil (4–8px), bergerak sangat pelan, opacity 0.3–0.5
-- Card: glassmorphism dengan border `rgba(255,255,255,0.8)`
-- Animasi masuk: fade-in + translate-up (0.8s ease-out, delay stagger per elemen)
-
-**Interaksi:**
-- Tombol → navigate ke `/countdown`
-- Hover tombol: scale(1.02), shadow glow rose lembut
-
----
-
-### 6.2 Countdown Page (`/countdown`)
-
-**Tujuan:** Menjaga antisipasi dan menyampaikan pesan emosional selama masa tunggu.
-
-**Layout:**
-```
-[Full Viewport]
-│
-├── Background sama dengan Landing (konsistensi)
-│
-├── HEADER SECTION (padding-top 64px)
-│   └── Label: "Menuju hari spesialmu" (Cormorant italic 22px, --muted, center)
-│
-├── COUNTDOWN SECTION (margin-top 48px)
-│   └── Grid 4 kolom (tablet/desktop) / 2 kolom (mobile)
-│       Setiap kartu countdown:
-│       ┌─────────────────┐
-│       │   [nomor besar]  │  Cormorant 64px, --maroon
-│       │   [label kecil]  │  DM Sans 11px uppercase, --muted, letter-spacing
-│       └─────────────────┘
-│       Card: bg #FFFFFF, shadow-sm, border-radius 16px, padding 24px 16px
-│       Label: HARI | JAM | MENIT | DETIK
-│
-├── PESAN SECTION (margin-top 48px)
-│   └── Quote card (max-width 480px, center):
-│       bg --cream, border-left 3px solid --soft-pink, border-radius 0 12px 12px 0
-│       Teks: "Aku siapin sesuatu yang mungkin sederhana, tapi aku buat dengan hati."
-│       (Cormorant italic 19px, --maroon, padding 20px 24px)
-│
-└── LOCKED NOTICE CARD (margin-top 32px, max-width 480px, center)
-    bg #FFFFFF, border 1px --border, border-radius 16px, padding 24px
-    Ikon gembok SVG kecil (--muted, 24px)
-    Teks: "Semua bagian masih terkunci. Nanti, 10 Desember 2026, semua akan terbuka untukmu."
-    (DM Sans 14px, --muted, center)
-```
-
-**State — Birthday Mode (setelah unlock):**
-```
-BIRTHDAY MODE menggantikan countdown section:
-│
-├── KONFETI (canvas, jatuh dari atas, 6 detik, lalu fade out)
-│
-├── HEADING: "Hari ini akhirnya datang." (Cormorant 36px, --maroon, center)
-│
-├── SUBHEADING: "Selamat ulang tahun, sayang." (Cormorant italic 24px, --rose, center)
-│
-├── BODY: "Sekarang kamu boleh membuka semua hal kecil yang aku siapin untuk kamu."
-│   (DM Sans 16px, --text, center, max-width 400px)
-│
-└── Tombol: "Buka Hadiahnya" → navigate ke /hub
-```
-
----
-
-### 6.3 Hub Page (`/hub`) — Setelah Unlock
-
-**Tujuan:** Pusat navigasi yang terasa seperti membuka kotak hadiah.
-
-**Layout:**
-```
-[Page dengan scroll]
-│
-├── HEADER (padding 48px top)
-│   ├── Label: "Selamat Ulang Tahun" (DM Sans 12px uppercase, --rose-gold)
-│   ├── Judul: "Untuk Nona" (Cormorant 40px, --maroon)
-│   └── Sub: "Pilih dari mana kamu ingin memulai." (DM Sans 15px, --muted)
-│
-└── MENU GRID (margin-top 40px)
-    Grid 2 kolom (mobile) / 3 kolom (tablet) / 3 kolom (desktop)
-    Max-width: 720px, center
-    Gap: 16px
-    
-    Setiap Menu Card:
-    ┌─────────────────────┐
-    │  [ikon SVG 32px]    │
-    │  [nomor kecil]      │  e.g. "01"
-    │  [judul section]    │  Cormorant 20px, --maroon
-    │  [desc singkat]     │  DM Sans 12px, --muted
-    └─────────────────────┘
-    bg: #FFFFFF, shadow-sm, border-radius 16px, padding 24px 20px
-    border: 1px solid --border
-    
-    Hover: scale(1.02), shadow-md, border-color --soft-pink
-    Tap animation (mobile): scale(0.97) lalu scale(1.0)
-
-Menu items:
-01 — Timeline      → /timeline       ikon: jam/kalender
-02 — Galeri        → /gallery        ikon: foto/gambar
-03 — Surat         → /letters        ikon: surat/amplop
-04 — Kotak Kenangan→ /memory-box     ikon: kotak/gift
-05 — Quiz          → /quiz           ikon: hati/tanya
-06 — Rencana Kita  → /plans          ikon: bintang/daftar
-07 — Kejutan Terakhir → /final       ikon: sparkle/hadiah (beda style, lebih special)
-```
-
----
-
-### 6.4 Timeline Page (`/timeline`)
-
-**Tujuan:** Menampilkan perjalanan kenangan secara kronologis.
-
-**Header:**
-```
-Back button (← ikon, kiri atas, DM Sans 14px --muted)
-Judul: "Perjalanan Kita" (Cormorant 36px, --maroon, center)
-Sub: "Kenangan-kenangan kecil yang aku ingat." (DM Sans 14px, --muted, center)
-```
-
-**Layout Timeline:**
-
-*Mobile (< 768px):* Satu kolom vertikal
-```
-[Dot kecil --rose] ─── [Card kenangan]
-                    [Garis vertikal --border 1px]
-[Dot kecil --rose] ─── [Card kenangan]
-```
-
-*Desktop (≥ 768px):* Alternating kiri-kanan
-```
-[Card] ─── [Dot] ─── [Card]
-            |
-[Card] ─── [Dot] ─── [Card]
-```
-
-**Struktur Timeline Card:**
-```
-┌─────────────────────────────────────┐
-│  [Tanggal kecil]                    │  DM Sans 12px, --rose-gold, margin-bottom 8px
-│  [Judul kenangan]                   │  Cormorant 22px, --maroon
-│  [Badge kategori]                   │  lihat badge system
-│                                     │
-│  [Foto opsional, rounded-xl]        │  aspect-ratio 16/9, object-fit cover
-│                                     │
-│  [Cerita singkat]                   │  DM Sans 15px, --text, line-height 1.6
-└─────────────────────────────────────┘
-bg: #FFFFFF, shadow-sm, border-radius 16px, padding 20px
-```
-
-**Badge Kategori:**
-| Kategori | Warna bg | Warna teks |
+| Role | Warna | Sumber |
 |---|---|---|
-| Favorit | `#FDE8EF` | `#D4718A` |
-| Lucu | `#FEF3C7` | `#B45309` |
-| Berharga | `#EDE9FE` | `#6D28D9` |
-| Jalan Bareng | `#D1FAE5` | `#065F46` |
-| Momen Kecil | `#FFF7F3` | `#C48A6A` |
+| Base | `#F7F2EA` | PDF |
+| Paper / surface section | `#EEE6DB` | PDF |
+| Ink (body text) | `#272322` | PDF |
+| Heading / dark section | `#5A2834` (burgundy) | PDF |
+| Primary accent / interaksi | `#B47F84` (dusty rose) | PDF |
+| Secondary accent (identitas "Untukmu") | Rose dari v1, versi lebih redup — disarankan `#B94F68` dipakai terbatas (misal micro-interaction, hover state kecil), bukan warna CTA dominan | v1, diredupkan sesuai DEC-001 |
+| Secondary accent (alam) | `#8F9983` (sage) | PDF |
+| Highlight sangat halus | `#B39A6B` (gold) | PDF |
+
+Aturan: warna burgundy/ivory/sage jadi identitas dominan di seluruh chapter journey. Rose accent dari v1 muncul di tempat-tempat kecil dan sengaja (misalnya warna hover tombol sekunder, aksen kecil di chapter tertentu) supaya karakter "Untukmu" tidak hilang total, tapi tidak boleh kembali dominan seperti v1.
+
+### 9.2 Glassmorphism (DEC-002)
+
+Bukan lagi design language utama. Dilarang dipakai sebagai identitas section (berbeda dari v1 section 5.6 yang mewajibkannya di Landing/Countdown/Final). Translucency ringan hanya boleh dipakai kalau memang mendukung komposisi spesifik (misalnya overlay tipis di atas foto hero untuk keterbacaan teks) — bukan sebagai kartu glass yang jadi ciri khas halaman.
+
+### 9.3 Sparkle & confetti (DEC-003)
+
+Sparkle tidak lagi jadi dekorasi global/persistent di background (berbeda dari `.sparkle` di v1 yang tampil di banyak halaman). Confetti hanya muncul sekali, di reveal Chapter 07 (Untuk Hari Ini) atau saat Birthday Mode trigger di Countdown — dengan durasi terbatas dan tidak berulang.
+
+### 9.4 Tipografi
+
+Tidak berubah dari v1 — Cormorant Garamond untuk heading/emosi, DM Sans untuk UI/body. Skala tipografi dari v1 section 5.2 tetap berlaku sebagai baseline, kecuali ada penyesuaian yang muncul saat implementasi visual detail (ditandai TBD jika terjadi).
+
+### 9.5 Spacing, radius, shadow
+
+Skala dari v1 (section 5.3–5.5) dipertahankan sebagai baseline teknis (base unit 4px, radius scale, shadow scale) — PDF tidak memberikan angka spesifik di area ini, jadi tidak ada konflik yang perlu diputuskan. Prinsip guardrail PDF ("whitespace > filling space", "one focal point per viewport") diterapkan di atas skala teknis yang sudah ada, bukan menggantikannya.
+
+### 9.6 Motion
+
+Purposeful, subtle, accessible (prinsip PDF diadopsi penuh, tidak ada konflik dengan v1). Page transition crossfade/slide singkat (400–700ms). Motion yang tidak memberi fungsi atau emosi dihapus, bukan dipertahankan "karena sudah ada".
+
+> Prinsip ini diperluas signifikan di section 15 untuk konteks scroll-driven motion (worldbuilding + scrollytelling direction). Section 9.6 tetap berlaku sebagai baseline untuk motion non-scroll (page transition, micro-interaction UI biasa).
 
 ---
 
-### 6.5 Gallery Page (`/gallery`)
+## 10. Worldbuilding & visual language 2.0
 
-**Header:**
+Bagian ini mengintegrasikan dua design reference eksternal ke dalam identitas Untukmu, murni di level prinsip — bukan meniru artwork, asset, branding, atau layout dari keduanya.
+
+### 10.1 Dari Stardew Valley — prinsip yang diambil (bukan aset)
+
+- **Handcrafted feel, bukan pixel art.** Yang diambil bukan gaya visual game (pixel art, sprite), melainkan *rasa* bahwa dunia ini dibuat dengan tangan untuk satu orang — ini sudah selaras dengan prinsip "human imperfection > sterile perfection" dari PDF v1 (DESIGN.md v2 mengadopsinya lewat tekstur kertas, sedikit offset/rotation pada elemen, yang sudah tercatat di v1 section terkait Memory Box).
+- **Environmental storytelling.** Detail kecil di sekitar konten utama (motif ilustrasi halus, tekstur, elemen dekoratif kecil yang konsisten) memperkuat suasana chapter, tapi tidak boleh mengganggu fokus pada foto/tulisan (tetap tunduk pada guardrail "content > decoration" dari PDF, tidak berubah).
+- **Dunia, bukan kumpulan UI.** Tiap chapter dirasakan sebagai "tempat" yang punya karakter sendiri dalam satu dunia yang sama — dicapai lewat konsep *World Frame* (10.2), bukan lewat tema visual yang benar-benar berbeda per chapter (itu akan merusak DEC-001, konsistensi identitas).
+
+### 10.2 World Frame — elemen worldbuilding original untuk Untukmu
+
+- Motif visual berulang lintas seluruh chapter, berfungsi sebagai penanda "kamu masih berada di dunia kecil yang sama": tekstur kertas hangat (sudah ada di palet v1), elemen ilustrasi kecil dan konsisten (misalnya motif garis tangan/hand-drawn di sudut scene, bukan foto/ilustrasi bertema game), dipakai secukupnya — tunduk pada DEC-002/DEC-003 (no visual overload).
+- Tiap chapter adalah "tempat kecil" berbeda dalam dunia yang sama: atmosfer background boleh bergeser pelan sesuai suasana chapter (contoh: "Untuk Hari Ini" terasa lebih intim/dalam dibanding "Momen Kecil" yang lebih terang), tapi tetap dalam satu keluarga palet section 9.1 — tidak ada palet baru per chapter.
+
+### 10.3 Dari The Boat — prinsip yang diambil (bukan aset)
+
+- **Scroll sebagai mekanisme narasi**, bukan sekadar cara berpindah dari satu blok konten ke blok lain.
+- **Foto/konten sebagai pemeran utama scene penuh** (full-bleed), bukan dibingkai jadi card kecil di tengah halaman kosong — ini memperkuat guardrail "one focal point per viewport" yang sudah ada di PDF v1.
+- **Layered depth** (background/midground/foreground) untuk memberi kesan kedalaman tanpa harus jadi ilustrasi kompleks — detail teknisnya di section 11.
+- **Pacing cinematic-emosional**, terutama di chapter penutup — sejalan dengan arahan "Final Surprise paling tenang" yang sudah ada sejak PDF v1.
+
+### 10.4 Gabungan arah visual final
+
 ```
-Back button
-Judul: "Galeri Kenangan" (Cormorant 36px, --maroon, center)
-Sub: "Foto-foto kecil yang menyimpan banyak cerita." (DM Sans 14px, --muted, center)
+Handcrafted illustrated world (prinsip, bukan gaya pixel-art)
++ Warm romantic storytelling (identitas Untukmu, section 9.1)
++ Digital scrapbook (seasoning, bukan tema dominan — prinsip PDF v1 tidak berubah)
++ Editorial typography (Cormorant Garamond + DM Sans, tidak berubah)
++ Cinematic scrollytelling (section 11–15)
 ```
 
-**Filter Bar:**
-```
-Scroll horizontal (mobile) / flex wrap (desktop)
-Chip filter: [Semua] [Favorit] [Lucu] [Jalan Bareng] [Momen Kecil] [Ulang Tahun]
+### 10.5 Layout — strict invisible grid
 
-Chip default: bg --cream, border --border, radius 9999px, padding 8px 16px
-Chip active: bg --rose, border --rose, text #FFFFFF
-```
-
-**Foto Grid:**
-```
-Mobile:  2 kolom, gap 8px
-Tablet:  3 kolom, gap 12px
-Desktop: 4 kolom, gap 12px
-
-Setiap foto:
-- aspect-ratio: 1/1 (square) atau auto untuk vertikal
-- object-fit: cover
-- border-radius: 12px
-- Loading: skeleton shimmer
-- Hover/tap: overlay gelap tipis dengan ikon mata (🔍)
-```
-
-**Modal Foto (saat klik):**
-```
-Overlay: rgba(59, 47, 47, 0.85)
-Modal: max-width 560px, bg #FFFFFF, border-radius 20px
-  ├── Foto besar (aspect auto, object-fit contain, max-height 60vh)
-  ├── Divider
-  ├── Judul foto (Cormorant 22px, --maroon)
-  ├── Tanggal (DM Sans 12px, --rose-gold)
-  └── Cerita (DM Sans 14px, --text)
-Tutup: × di pojok kanan atas, atau klik di luar modal
-```
+Seluruh Scene (section 11) disusun di atas grid tak terlihat yang konsisten untuk menjaga alignment, spacing, tipografi, proporsi, dan hierarki visual. Asimetri visual boleh dan disarankan untuk kesan handcrafted (foto dengan ukuran/posisi berbeda, teks yang tidak selalu center), tapi **setiap elemen tetap harus align terhadap grid** — asimetri yang disengaja dan terkontrol, bukan penempatan bebas/acak. Prinsip yang dipegang: *handcrafted, tetapi sangat terkontrol* — grid spesifik (jumlah kolom, breakpoint) adalah keputusan implementasi visual, bukan diputuskan di level spesifikasi ini.
 
 ---
 
-### 6.6 Letters Page (`/letters`)
+## 11. Scene architecture (reusable component system)
 
-**Header:**
-```
-Back button
-Judul: "Surat Untukmu" (Cormorant 36px, --maroon, center)
-Sub: "Buka yang kamu rasa perlu." (Cormorant italic 18px, --muted, center)
-```
+Untuk menjawab kebutuhan "jangan membuat setiap chapter dengan sistem animasi yang sepenuhnya berbeda", seluruh chapter journey dibangun di atas satu struktur reusable bernama **Scene**:
 
-**Daftar Surat (sebelum dibuka):**
 ```
-Setiap kartu surat:
-┌─────────────────────────────────────┐
-│  [Ikon amplop kecil --rose-gold]    │
-│  [Judul surat]                      │  Cormorant 22px, --maroon
-│  [Keterangan singkat]               │  DM Sans 13px, --muted (optional)
-│  [Tombol "Buka Surat"]              │  Outline style, --rose
-└─────────────────────────────────────┘
-bg: #FFFFFF
-border: 1px solid --border
-border-left: 3px solid --soft-pink
-border-radius: 0 16px 16px 0
-padding: 20px 24px
+Scene
+├── background     — warna dasar/tekstur/atmosfer chapter, bergerak paling lambat saat scroll
+├── midground       — elemen ilustrasi pendukung suasana (opsional, boleh kosong di scene sederhana), bergerak medium
+├── foreground/media — foto/konten utama (fokus pembaca), bergerak paling sedikit atau statis
+├── text           — narasi/caption terkait scene, reveal terkontrol (section 12)
+├── animation timeline — definisi keyframe berbasis scroll-progress untuk tiap layer di atas
+└── audio cue (opsional) — trigger suara/ambience halus saat scene ini aktif (section 17)
 ```
 
-**Surat Terbuka (setelah klik "Buka Surat"):**
-```
-Expand animasi (accordion atau navigate ke halaman baru):
-Max-width: 720px, margin auto
-bg: #FFFAF7 (sedikit krem)
-border: 1px solid --border
-border-radius: 16px
-padding: 40px (desktop) / 24px (mobile)
-│
-├── Tanggal: (DM Sans 12px, --muted, kanan atas)
-├── Salam: "Hei Nona," (Cormorant italic 22px, --maroon)
-├── Isi surat (typing effect / fade-in per paragraf)
-│   DM Sans 16-17px, --text, line-height 1.8
-│   Spasi antar paragraf: 24px
-└── Penutup: "Dari Alex" (Cormorant italic, --rose-gold, align kanan)
+**Prinsip reusability:** satu definisi komponen Scene dipakai di seluruh 7 chapter, dikonfigurasi lewat data/props — bukan ditulis ulang per chapter. Variasi antar chapter dicapai lewat konten dan parameter (warna atmosfer, jumlah layer aktif, jenis transisi), bukan lewat sistem animasi yang berbeda-beda. Detail struktur komponen konkret ada di section 20.
 
-Typing effect: karakter muncul satu-satu, speed 30ms/char, bisa di-skip dengan klik
-```
+Satu chapter terdiri dari satu atau beberapa Scene tersusun berurutan (section 13).
 
 ---
 
-### 6.7 Memory Box Page (`/memory-box`)
+## 12. Scroll interaction model
 
-**Header:**
+Model umum, berlaku di semua Scene:
+
 ```
-Back button
-Judul: "Kotak Kenangan" (Cormorant 36px, --maroon, center)
-Sub: "Kartu-kartu kecil dari aku untuk kamu." (DM Sans 14px, --muted, center)
+scroll progress (0 → 1, relatif terhadap tinggi scene aktif)
+  ↓
+background        : translateY halus, parallax lambat, magnitude kecil
+midground          : translateY sedang + fade in/out di batas scene
+foreground/media   : scale halus (mis. 1.0 → 1.03) dan/atau translateY minimal — tetap jadi fokus, tidak "ikut terbang"
+text               : reveal bertahap (staggered), terikat threshold progress tertentu (mis. muncul di progress 0.2, selesai di 0.5)
+scene transition   : crossfade/reveal di sekitar batas antar scene (progress mendekati 0 atau 1)
+audio cue          : trigger sekali saat progress melewati threshold tertentu, tidak berulang tiap scroll
 ```
 
-**Grid Kartu:**
-```
-Mobile:  2 kolom, gap 12px
-Tablet:  3 kolom, gap 16px
-Desktop: 4 kolom, gap 16px
+Ini sengaja berbeda dari pola "reveal saat elemen masuk viewport" yang dipakai PDF v1 — pergerakan di sini terikat pada *seberapa jauh* scroll di dalam scene, bukan sekadar *apakah* elemen sudah terlihat.
 
-Setiap kartu (sebelum dibuka):
-┌─────────────┐
-│    [?]       │  Ikon sparkle atau amplop kecil
-│  [judul]    │  DM Sans 13px, --maroon, font-weight 500
-└─────────────┘
-bg: gradient halus dari --cream ke --soft-pink (opacity 30%)
-border: 1px solid --border
-border-radius: 12px
-padding: 20px 16px
-aspect-ratio: ~3/4
-text-align: center
-Cursor: pointer
-
-Setelah diklik → animasi flip 3D (rotateY 180deg, 400ms ease)
-Sisi belakang:
-bg: #FFFFFF
-Isi: teks kartu (DM Sans 14px, --text, text-align center)
-Padding: 16px
-Scroll jika teks panjang
-```
+Prinsip implementasi (bukan keputusan kode final, sebagai batas performa wajib — lihat section 19): deteksi scene aktif sebaiknya berbasis Intersection Observer, pergerakan visual berbasis CSS transform, bukan penghitungan ulang seluruh elemen di setiap event scroll.
 
 ---
 
-### 6.8 Quiz Page (`/quiz`)
+## 13. Chapter experience structure
 
-**Header:**
-```
-Back button
-Judul: "Quiz Kita" (Cormorant 36px, --maroon, center)
-Sub: "Seberapa hapal kamu tentang kita?" (DM Sans 14px, --muted, center)
-```
+Tiap chapter (01–07) disusun sebagai rangkaian Scene, jumlahnya menyesuaikan kepadatan konten aktual (data dari admin), bukan angka tetap yang di-hardcode:
 
-**Layout Satu Pertanyaan:**
-```
-Progress bar atas: "Pertanyaan 2 dari 5" + progress bar --rose
-(DM Sans 13px, --muted, progress bar height 4px, bg --cream, fill --rose)
-
-[Card pertanyaan]
-bg: #FFFFFF, shadow-sm, border-radius 16px, padding 28px 24px
-Teks pertanyaan: Cormorant 24px, --maroon, text-align center
-
-[Grid opsi jawaban] — 1 kolom (mobile) / 2 kolom (desktop)
-gap: 12px
-
-Setiap opsi:
-┌─────────────────────────────────────┐
-│  [A]  Teks jawaban                  │
-└─────────────────────────────────────┘
-bg: --cream, border: 1.5px solid --border, border-radius: 12px, padding: 16px
-Letter badge [A/B/C/D]: 
-  bg --soft-pink, warna --maroon, border-radius 50%, size 28px, font 13px bold
-
-State setelah pilih:
-- Benar: bg #D1FAE5, border #7DAF8C, ikon centang hijau
-- Salah: bg #FEE2E2, border #D97070, ikon silang merah
-- Jawaban benar (jika pilih salah): bg #FEF3C7
-```
-
-**Hasil Akhir:**
-```
-[Animasi sparkle + score display]
-Score: "5 / 5" (Cormorant 56px, --rose)
-Feedback teks (sesuai score):
-  100%: "Tentu saja. Kamu pemeran utama di cerita ini."
-  80%:  "Hampir sempurna — seperti biasa."
-  <80%: "Tidak apa-apa. Yang penting kamu tetap orang favoritku."
-Tombol: "Ulangi Quiz" + "Kembali ke Menu"
-```
-
----
-
-### 6.9 Plans Page (`/plans`)
-
-**Header:**
-```
-Back button
-Judul: "Rencana Kita" (Cormorant 36px, --maroon, center)
-Sub: "Hal-hal yang ingin kita lakukan bersama." (DM Sans 14px, --muted, center)
-```
-
-**Layout Checklist:**
-```
-Setiap item rencana:
-┌─────────────────────────────────────────┐
-│  [Status Badge]  [Judul Rencana]        │  Cormorant 20px, --maroon
-│                  [Deskripsi singkat]    │  DM Sans 13px, --muted
-└─────────────────────────────────────────┘
-bg: #FFFFFF, shadow-xs, border-radius: 12px, padding: 16px 20px
-border-left: 3px solid [warna status]
-
-Status Badge:
-  "Ingin dilakukan"      → bg #FFF7F3, warna --rose-gold, border --soft-pink
-  "Sedang direncanakan"  → bg #FEF3C7, warna #B45309, border #E4B96A
-  "Sudah tercapai"       → bg #D1FAE5, warna #065F46, border #7DAF8C
-  + ikon centang (✓) untuk "Sudah tercapai" dengan animasi muncul
-
-Animasi: saat "Sudah tercapai" muncul → ikon centang scale dari 0 ke 1 dengan bounce
-```
-
----
-
-### 6.10 Final Surprise Page (`/final`)
-
-**Sebelum Klik (setelah unlock):**
-```
-[Full viewport, center]
-bg: gradient warm, sparkle sangat pelan
-
-Ikon: kotak hadiah SVG (animated, bergetar pelan)
-Judul: "Satu lagi yang aku simpan untukmu." (Cormorant italic 28px, --maroon)
-Sub: "Ini bagian terakhir." (DM Sans 15px, --muted)
-Tombol: "Buka Kejutan Terakhir" (primary, ukuran besar)
-```
-
-**Setelah Klik:**
-```
-Fase 1 (0–3 detik): Konfeti meledak + layar flash lembut
-Fase 2 (1–5 detik): Foto utama fade in (full width, border-radius 20px, shadow-lg)
-Fase 3 (3–6 detik): Pesan ulang tahun typing effect
-
-Layout setelah terbuka:
-│
-├── Foto utama (max-width 480px, center, aspect 4/5 atau bebas)
-│   Shadow: --shadow-lg + glow rose lembut
-│
-├── [Spacer 40px]
-│
-├── Teks pesan (typing effect, Cormorant 22px, --maroon, center, max-width 560px):
-│   "Selamat ulang tahun, sayang."
-│   [jeda 1 detik]
-│   "Aku tidak tahu semua hal yang akan terjadi sampai hari ini,"
-│   "tapi aku tahu satu hal: aku bersyukur karena kamu ada di hidupku."
-│
-├── [Spacer 32px]
-│
-├── Tanda tangan: "Dari Alex" (Cormorant italic 24px, --rose-gold, center)
-│
-└── [Spacer 48px]
-    Tombol kecil: "← Kembali ke Menu" (ghost/text style)
-
-Musik opsional: autoplay tidak disarankan (UX). 
-Gunakan tombol "▶ Putar Musik" di pojok bawah kanan (floating, 48px, shadow-md)
-```
-
----
-
-### 6.11 Locked Page (`/locked`)
-
-**Tujuan:** Redirect halaman terkunci yang cantik, bukan error 404.
-
-```
-[Full viewport, center]
-bg: --background
-
-[Ikon gembok SVG — animated, gentle pulse]
-Ukuran ikon: 64px, warna --muted
-
-Judul: "Belum saatnya." (Cormorant 32px, --maroon, center)
-
-Teks:
-"Bagian ini sedang aku siapkan pelan-pelan.
-Nanti, 10 Desember 2026, kamu bisa melihat semua hal kecil
-yang aku kumpulkan untukmu."
-(DM Sans 15px, --text, center, max-width 400px, line-height 1.7)
-
-Tombol: "Kembali ke Countdown" (primary, medium)
-```
-
----
-
-## 7. Rancangan Per Halaman — Admin
-
-### 7.1 Admin Login (`/admin`)
-
-```
-[Full viewport, center]
-bg: --background (sama dengan public — konsisten)
-
-CARD (max-width: 400px, bg #FFFFFF, shadow-md, border-radius 16px, padding 40px)
-│
-├── Label kecil: "ADMIN" (DM Sans 11px uppercase, --rose-gold, letter-spacing)
-├── Judul: "Untuk Nona" (Cormorant 32px, --maroon)
-├── Sub: "Masuk sebagai admin" (DM Sans 14px, --muted)
-├── [Spacer 24px]
-├── Field Password:
-│   Label: "Password"
-│   Input: type="password", rounded-lg, border --border
-│   Focus: border --rose, ring rose/20
-│   Error: border --error, text merah di bawah: "Password salah. Coba lagi."
-├── [Spacer 16px]
-└── Tombol: "Masuk" (primary full-width)
-```
-
----
-
-### 7.2 Admin Dashboard (`/admin/dashboard`)
-
-**Layout:**
-```
-DESKTOP: Sidebar (240px) + Content Area (flex-1)
-MOBILE:  Hamburger/drawer sidebar + Content Area
-
-SIDEBAR:
-bg: --maroon
-Teks: #FFF7F3 (cream terang)
-
-├── Logo area: "Untuk Nona" (Cormorant 20px) + "admin panel" (DM Sans 11px, opacity 0.6)
-├── [Spacer]
-├── Nav items (DM Sans 14px, padding 12px 20px):
-│   ├── 📊 Dashboard (active: bg rgba(255,255,255,0.15), border-radius 8px)
-│   ├── 🕐 Kenangan
-│   ├── ✉️ Surat
-│   ├── 🎁 Memory Cards
-│   ├── ❤️ Quiz
-│   └── ⭐ Rencana
-├── [Spacer auto]
-└── Bottom: "← Lihat Public" + "🚪 Keluar" (DM Sans 13px, opacity 0.7)
-
-CONTENT AREA:
-Header: "Selamat datang, Alex 👋" (DM Sans 20px, --text)
-Sub: "Ringkasan konten yang sudah kamu tambahkan." (DM Sans 14px, --muted)
-
-STATS GRID (3 kolom desktop, 2 kolom tablet, 1 kolom mobile):
-┌─────────────────┐
-│  [nomor besar]  │  DM Sans 36px bold, --maroon
-│  [label]        │  DM Sans 13px, --muted
-└─────────────────┘
-bg: #FFFFFF, shadow-xs, border-radius: 12px, padding: 20px
-Border-top: 3px solid [warna unik per stat]
-
-Stats: Kenangan | Foto | Surat | Memory Cards | Pertanyaan Quiz | Rencana
-
-QUICK ACTIONS (grid 2–3 kolom):
-Tombol outline + ikon untuk: Tambah Kenangan, Tambah Surat, Tambah Kartu, dst.
-
-PREVIEW BUTTON:
-Full width, outline --rose, ikon 👁, teks "Preview Tampilan Public (Mode Unlock)"
-```
-
----
-
-### 7.3 Admin Memories (`/admin/memories`)
-
-**Layout:**
-```
-HEADER: "Kelola Kenangan" + tombol "+ Tambah Kenangan" (primary, kanan atas)
-
-TABEL (desktop) / LIST (mobile):
-
-Desktop table:
-| Foto | Judul | Tanggal | Kategori | Status | Aksi |
-|---|---|---|---|---|---|
-| thumbnail 48px round | teks | teks | badge | badge | Edit | Hapus |
-
-Mobile list:
-Card per item dengan info esensial + menu 3 titik (⋮)
-
-FORM TAMBAH / EDIT (Modal atau halaman baru):
-┌──────────────────────────────────────┐
-│  [Upload Foto] — drag & drop area    │
-│  Teks: "Klik atau seret foto ke sini"│
-│  Max: 10MB, format: JPG/PNG/WEBP    │
-│  Preview foto setelah upload         │
-├──────────────────────────────────────┤
-│  Judul Kenangan *                    │
-│  [Input text]                        │
-├──────────────────────────────────────┤
-│  Tanggal Kejadian *                  │
-│  [Date picker]                       │
-├──────────────────────────────────────┤
-│  Kategori *                          │
-│  [Select: Favorit/Lucu/Berharga/...] │
-├──────────────────────────────────────┤
-│  Cerita                              │
-│  [Textarea, min 4 baris]             │
-├──────────────────────────────────────┤
-│  Status *                            │
-│  [Radio: Draft / Aktif / Sembunyikan]│
-├──────────────────────────────────────┤
-│  [Batal]        [Simpan Kenangan]    │
-└──────────────────────────────────────┘
-```
-
----
-
-### 7.4 Admin Letters (`/admin/letters`)
-
-```
-HEADER: "Kelola Surat" + tombol "+ Tambah Surat"
-
-LIST SURAT:
-Card per surat, flex row:
-[Judul] [Status badge] [Edit] [Hapus]
-
-FORM:
-- Judul Surat *
-- Isi Surat * (Textarea besar, min 8 baris, monospace jika diinginkan)
-- Status * (Draft / Aktif / Sembunyikan)
-- [Simpan]
-```
-
----
-
-### 7.5 Admin Memory Cards (`/admin/cards`)
-
-```
-HEADER: "Kelola Kartu Kenangan" + tombol "+ Tambah Kartu"
-
-GRID preview kartu (2–3 kolom):
-Kartu kecil dengan nomor urut, judul, dan tombol edit/hapus
-
-FORM:
-- Nomor Urut * (number input)
-- Judul Kartu *
-- Isi Kartu * (textarea)
-- Kategori (select)
-- Status *
-```
-
----
-
-### 7.6 Admin Quiz (`/admin/quiz`)
-
-```
-HEADER: "Kelola Quiz" + tombol "+ Tambah Pertanyaan"
-
-LIST pertanyaan: numbered, drag handle untuk reorder
-
-FORM:
-- Pertanyaan * (textarea)
-- Opsi A * | Opsi B * | Opsi C * | Opsi D *
-- Jawaban Benar * (radio: A / B / C / D)
-- Feedback Benar * (textarea kecil)
-- Feedback Salah * (textarea kecil)
-- Status *
-```
-
----
-
-### 7.7 Admin Plans (`/admin/plans`)
-
-```
-HEADER: "Kelola Rencana" + tombol "+ Tambah Rencana"
-
-LIST: card per rencana dengan badge status
-
-FORM:
-- Judul Rencana *
-- Deskripsi (textarea)
-- Status Rencana * (select: Ingin dilakukan / Sedang direncanakan / Sudah tercapai)
-- Status Publik * (select: Draft / Aktif / Sembunyikan)
-```
-
----
-
-## 8. Sistem Lock / Unlock
-
-### Logic Implementasi (Client-side)
-
-```typescript
-// lib/unlock.ts
-
-export const UNLOCK_DATE = new Date('2026-12-09T16:00:00.000Z'); // 10 Des 2026, 00:00 WITA
-
-export function isUnlocked(): boolean {
-  return new Date() >= UNLOCK_DATE;
-}
-
-export const LOCKED_ROUTES = [
-  '/hub',
-  '/timeline', 
-  '/gallery', 
-  '/letters', 
-  '/memory-box', 
-  '/quiz', 
-  '/plans', 
-  '/final'
-];
-```
-
-### Middleware Next.js
-
-```typescript
-// middleware.ts
-// Cek di setiap request apakah route termasuk LOCKED_ROUTES
-// Jika belum unlock DAN bukan admin → redirect ke /locked
-// Admin diidentifikasi via cookie session
-```
-
-### Admin Bypass
-- Admin login menghasilkan cookie `admin_session=true` (httpOnly, secure)
-- Middleware memeriksa cookie ini sebelum cek unlock date
-- Admin bisa akses semua halaman kapan saja
-
----
-
-## 9. Komponen UI Reusable
-
-### 9.1 Button
-
-```
-VARIANTS:
-Primary:  bg --rose, text #FFFFFF, hover bg --rose-dark
-Outline:  bg transparent, border 1.5px --rose, text --rose, hover bg --soft-pink/20
-Ghost:    bg transparent, text --muted, hover text --rose
-Danger:   bg #D97070, text #FFFFFF (admin only)
-
-SIZES:
-sm: padding 8px 16px, font 13px, border-radius 8px
-md: padding 12px 24px, font 15px, border-radius 12px (default)
-lg: padding 16px 32px, font 16px, border-radius 14px
-
-STATES:
-Loading: spinner (20px) + "Menyimpan..."
-Disabled: opacity 0.5, cursor not-allowed
-
-Min height semua size: 44px (aksesibilitas touch)
-```
-
-### 9.2 Input Field
-
-```
-Label: DM Sans 13px, --text, font-weight 500, margin-bottom 6px
-Input: 
-  bg #FFFFFF, border 1.5px --border, border-radius 8px
-  padding 12px 14px, font 15px --text
-  Focus: border --rose, box-shadow 0 0 0 3px rgba(233,141,163,0.15)
-  Error: border --error
-  Disabled: bg --cream, opacity 0.7
-
-Error message: DM Sans 12px, --error, margin-top 4px
-Required marker: * warna --rose, margin-left 2px
-```
-
-### 9.3 Badge / Status Chip
-
-```
-Padding: 4px 10px
-Border-radius: 9999px (pill)
-Font: DM Sans 11px, font-weight 500
-```
-
-### 9.4 Modal / Dialog
-
-```
-Overlay: rgba(59,47,47,0.7), backdrop-blur(4px)
-Modal container: bg #FFFFFF, border-radius 20px, padding 32px
-Max-width: 540px (standard), 720px (foto/surat)
-Animation masuk: scale(0.95) opacity(0) → scale(1) opacity(1), 200ms ease-out
-Tombol tutup: × pojok kanan atas, 32px, --muted, hover --maroon
-```
-
-### 9.5 Skeleton Loader
-
-```
-bg: linear-gradient(90deg, #F5E8E0 25%, #EDD9CD 50%, #F5E8E0 75%)
-background-size: 200% 100%
-animation: shimmer 1.5s infinite
-border-radius: sama dengan elemen asli
-```
-
-### 9.6 Empty State
-
-```
-Ikon: 48px, --muted (opacity 0.5)
-Teks utama: DM Sans 16px, --muted, center
-Teks sub: DM Sans 13px, --muted/70, center
-CTA (opsional): tombol outline
-```
-
----
-
-## 10. Animasi & Micro-interaction
-
-### Prinsip Animasi
-- **Lambat dan lembut** — duration minimum 200ms, maksimum 800ms untuk transisi halaman
-- **Ease-out untuk masuk**, ease-in-out untuk state change
-- **Tidak ada animasi yang mengganggu** (tidak ada bounce agresif, tidak ada flash)
-- **Dapat di-skip** — animasi panjang (typing effect) harus ada tombol skip
-
-### Daftar Animasi
-
-| Nama | Element | Duration | Easing | Trigger |
-|---|---|---|---|---|
-| `fadeIn` | Konten halaman | 400ms | ease-out | Page load |
-| `slideUp` | Card / section | 500ms | ease-out | Scroll into view |
-| `sparkle` | Bintang background | 3–6s per bintang | linear | Continuous (loop) |
-| `flipCard` | Memory card | 400ms | ease-in-out | Klik kartu |
-| `typing` | Teks surat / final | 30ms/char | linear | Buka surat |
-| `confetti` | Kanvas confetti | 6s | physics | Birthday mode |
-| `scaleIn` | Modal | 200ms | ease-out | Buka modal |
-| `countdownTick` | Angka countdown | 300ms | ease-in-out | Setiap detik |
-| `glow` | Tombol CTA | pulse 2s | ease-in-out | Continuous (idle) |
-| `checkmark` | ✓ Rencana tercapai | 400ms | spring | Mount |
-
-### Implementasi Confetti
-
-```typescript
-// Gunakan library: canvas-confetti
-// npm install canvas-confetti @types/canvas-confetti
-
-import confetti from 'canvas-confetti';
-
-export function launchBirthdayConfetti() {
-  const colors = ['#F5B7C6', '#C48A6A', '#E98DA3', '#FFF1E6', '#6D3B47'];
-  
-  confetti({
-    particleCount: 120,
-    spread: 80,
-    origin: { y: 0.4 },
-    colors,
-    scalar: 0.9,
-  });
-  
-  // Dua gelombang tambahan
-  setTimeout(() => confetti({ particleCount: 60, angle: 60, spread: 55, origin: { x: 0 }, colors }), 500);
-  setTimeout(() => confetti({ particleCount: 60, angle: 120, spread: 55, origin: { x: 1 }, colors }), 700);
-}
-```
-
----
-
-## 11. Responsivitas
-
-### Breakpoints (Tailwind CSS)
-
-```javascript
-// tailwind.config.ts
-screens: {
-  'xs':  '380px',   // Smartphone kecil
-  'sm':  '640px',   // Smartphone besar
-  'md':  '768px',   // Tablet portrait
-  'lg':  '1024px',  // Tablet landscape / laptop kecil
-  'xl':  '1280px',  // Laptop / desktop
-  '2xl': '1536px',  // Desktop besar
-}
-```
-
-### Responsive Behavior Per Halaman
-
-| Halaman | Mobile | Tablet | Desktop |
-|---|---|---|---|
-| Landing | Card full width, padding 24px | Card max-w 480px | Card max-w 480px, background lebih terlihat |
-| Countdown | 2 kolom (hari+jam, menit+detik) | 4 kolom | 4 kolom + lebih besar |
-| Hub | 2 kolom menu | 3 kolom | 3 kolom max-w 720px center |
-| Timeline | 1 kolom vertikal | 1 kolom + lebih lebar | Alternating 2 kolom |
-| Gallery | 2 kolom | 3 kolom | 4 kolom |
-| Letters | Full width card | Max-w 640px | Max-w 720px |
-| Memory Box | 2 kolom | 3 kolom | 4 kolom |
-| Admin | Drawer sidebar | Collapsible sidebar | Fixed sidebar |
-
-### Mobile-First Rules
-- Touch target minimum: 44×44px
-- Tidak ada hover-only interactions
-- Scroll horizontal hanya pada komponen yang jelas (chip filter, galeri)
-- Font size minimum body: 15px (bukan 12–13px seperti desktop)
-- Tombol full-width pada mobile untuk CTA penting
-
----
-
-## 12. Aksesibilitas
-
-### Kontras Warna (WCAG AA)
-| Foreground | Background | Rasio | Status |
-|---|---|---|---|
-| `--text` (#3B2F2F) | `--background` (#FFF7F3) | ~12:1 | ✅ AA+ |
-| `--maroon` (#6D3B47) | `#FFFFFF` | ~9.5:1 | ✅ AA+ |
-| `--muted` (#8B6F6F) | `#FFFFFF` | ~4.5:1 | ✅ AA |
-| `#FFFFFF` | `--rose` (#E98DA3) | ~3.2:1 | ⚠️ Cukup untuk teks besar |
-| `--rose-gold` (#C48A6A) | `#FFFFFF` | ~3.0:1 | ⚠️ Gunakan hanya untuk label kecil |
-
-**Catatan:** Warna rose (#E98DA3) sebagai background tombol dengan teks putih masih dalam batas yang bisa diterima untuk teks large (18px+). Untuk teks body, pastikan kontras cukup.
-
-### Praktik Aksesibilitas
-- `alt` text deskriptif untuk semua foto
-- `aria-label` untuk tombol ikon (tutup modal, navigasi)
-- `aria-live` untuk area countdown (update setiap detik)
-- Typing effect: tambahkan teks ke DOM secara utuh tapi tersembunyi untuk screen reader
-- Focus ring visible (Tailwind: `focus:ring-2 focus:ring-rose/50`)
-- Semua form input punya label yang benar (bukan hanya placeholder)
-- Modal: focus trap saat terbuka, return focus saat ditutup
-
----
-
-## 13. State & Feedback
-
-### Loading States
-```
-Halaman pertama kali load → Skeleton shimmer (per komponen)
-Foto gallery → Skeleton 1:1 square per slot
-Surat terbuka → Skeleton 3 baris teks
-Submit form admin → Tombol disabled + spinner
-Upload foto → Progress bar + persentase
-```
-
-### Error States
-```
-Koneksi gagal → Card error: ikon wifi ⚠️ + "Gagal memuat. Coba lagi." + tombol Retry
-Form invalid → Highlight field + pesan di bawah field
-Admin login gagal → Shake animation card + pesan error inline
-Upload gagal → Reset upload area + pesan error
-```
-
-### Empty States
-```
-Gallery kosong (belum ada foto di admin) → Ikon foto abu + "Belum ada foto yang ditambahkan."
-Timeline kosong → Ikon kalender abu + "Belum ada kenangan yang ditambahkan."
-```
-
-### Success States
-```
-Admin simpan konten → Toast notification hijau sage (pojok kanan bawah, 3 detik)
-Admin hapus konten → Toast merah dengan opsi "Urungkan" (5 detik)
-Quiz selesai → Animasi sparkle + score tampil
-Rencana dicentang → Animasi centang + warna berubah ke hijau
-```
-
----
-
-## 14. Prompt untuk AI Design Builder
-
-### Prompt untuk v0.dev (Next.js + Tailwind)
-
-```
-[MULAI SALIN]
-
-Build a romantic birthday gift website called "Untuk Nona" (For Nona) in Next.js with Tailwind CSS.
-
-App Purpose: A digital birthday gift website for a girlfriend, featuring locked content that unlocks on December 10, 2026. Premium, soft, romantic, clean — like a handmade digital scrapbook.
-
-Design Language:
-- Soft romantic aesthetic, NOT kitschy or overly pink
-- Glassmorphism for hero sections (light, not heavy)
-- Serif display font (Cormorant Garamond) for emotional headings
-- Sans-serif (DM Sans) for body and UI elements
-- Very gentle animations: fade, float, sparkle
-- Rounded cards with soft shadows
-
-Color Palette:
-- Background:  #FFF7F3
-- Cream:       #FFF1E6
-- Soft Pink:   #F5B7C6
-- Rose (CTA):  #E98DA3
-- Rose Gold:   #C48A6A
-- Maroon:      #6D3B47
-- Text:        #3B2F2F
-- Muted:       #8B6F6F
-- Border:      rgba(196, 138, 106, 0.22)
-
-Page 1 — Landing (/):
-- Full viewport, warm gradient background with gentle floating sparkles
-- Glassmorphism card center (max-width 480px)
-- Small ornament icon top
-- Small uppercase label: "UNTUK NONA" rose-gold
-- Display heading: "Untuk Nona" Cormorant 48px maroon
-- Subtitle italic: "Untuk 10 Desember"
-- Horizontal divider 48px
-- Body text centered
-- Tagline smaller muted text
-- Large CTA button: "Masuk ke Cerita Kita" rose color, pill shape
-
-Page 2 — Countdown (/countdown):
-- Same background as landing
-- "Menuju hari spesialmu" italic heading top
-- 4-card countdown grid (days, hours, minutes, seconds) - 2 col mobile / 4 col desktop
-- Large Cormorant numbers in each card
-- Quote card with left border accent
-- Locked notice card below
-
-Page 3 — Locked Page (/locked):
-- Centered, animated lock icon with gentle pulse
-- Soft heading: "Belum saatnya."
-- Explanation text max-width 400px
-- CTA back to countdown
-
-Typography rules:
-- Headings/display: Cormorant Garamond (Google Fonts)
-- Body/UI: DM Sans (Google Fonts)
-- Minimum body size: 15px
-- Line height body: 1.6–1.7
-
-Avoid:
-- Bright/neon colors
-- Heavy shadows
-- Aggressive animations
-- Comic/cute illustration style
-- Multiple CTAs per screen
-- Small touch targets (<44px)
-
-[SELESAI SALIN]
-```
-
----
-
-### Prompt untuk Figma AI (Desain Mockup)
-
-```
-[MULAI SALIN]
-
-Design a romantic digital gift website UI for mobile and desktop.
-
-Project: "Untuk Nona" — Birthday gift website
-Tone: Romantic, warm, soft, premium minimal
-
-Create these screens:
-1. Landing Page (mobile + desktop)
-2. Countdown Page (mobile)
-3. Hub/Menu Page (mobile)
-4. Gallery Page (mobile)
-5. Letter Open State (mobile)
-6. Admin Dashboard (desktop)
-
-Style Guide:
-- Colors: Background #FFF7F3, Rose #E98DA3, Maroon #6D3B47, Rose Gold #C48A6A, Muted #8B6F6F
-- Fonts: Cormorant Garamond for headings, DM Sans for body
-- Cards: White background, border-radius 16px, soft shadow
-- Buttons: Rose pill-shaped, 44px min height
-- Glassmorphism: Only for landing hero card
-- Sparkle elements: Tiny star particles, very subtle
-
-Mobile frame: 390 x 844 (iPhone 14)
-Desktop frame: 1440 x 900
-
-Visual mood references: soft editorial, love letter aesthetic, premium stationery
-Do NOT use: cartoon illustrations, bubble fonts, bright gradients, heavy textures
-
-[SELESAI SALIN]
-```
-
----
-
-## 15. Prioritas Implementasi
-
-### Phase 1 — MVP Fungsional (Wajib sebelum 10 Des 2026)
-| Prioritas | Halaman / Fitur | Keterangan |
+| Chapter | Perkiraan jumlah scene | Catatan |
 |---|---|---|
-| 🔴 P0 | Landing Page | Entry point, harus sempurna |
-| 🔴 P0 | Countdown Page + Birthday Mode | Fungsi utama sebelum unlock |
-| 🔴 P0 | Sistem Lock/Unlock | Core logic, client-side |
-| 🔴 P0 | Locked Page | UX penting |
-| 🔴 P0 | Admin Login + CRUD Letters | Konten emosional |
-| 🔴 P0 | Letters Page | Bagian paling personal |
-| 🟠 P1 | Admin CRUD Memories | Konten utama timeline/gallery |
-| 🟠 P1 | Timeline Page | Kenangan kronologis |
-| 🟠 P1 | Gallery Page | Foto kenangan |
-| 🟠 P1 | Final Surprise Page | Puncak emosional |
-| 🟡 P2 | Memory Box Page | Interaksi menyenangkan |
-| 🟡 P2 | Quiz Page | Fun interaction |
-| 🟡 P2 | Plans Page | Rencana ke depan |
-| 🟢 P3 | Hub Page | Pusat navigasi post-unlock |
-| 🟢 P3 | Musik (Final Page) | Nice-to-have |
-| 🟢 P3 | Admin Preview Mode | Debugging |
-
-### Catatan Akhir
-
-> **Ingat:** Nona akan membuka website ini di smartphone, mungkin sendirian, mungkin malam hari. Setiap detail kecil — dari waktu loading, urutan animasi, sampai ukuran teks — membentuk momen yang dia rasakan.
->
-> Desain yang bagus untuk website ini bukan yang paling kompleks. Tapi yang **paling terasa**.
->
-> — dibuat dengan hati, untuk Alex.
+| 01 — Sebuah Awal (Timeline) | Multi-scene: 1 scene intro + 1 scene per kelompok kronologis kenangan | Selaras sifat timeline yang berurutan |
+| 02 — Momen Kecil (Gallery) | Multi-scene, foto dikelompokkan | Foto terasa "ditemukan" satu-satu, bukan grid statis panjang |
+| 03 — Yang Aku Ingat (Letters) | 1 scene per surat aktif | Selaras pengalaman "amplop dibuka" (section 1, DESIGN.md v2 awal) |
+| 04 — Yang Tak Terucap (Memory Box) | 1–2 scene, interaksi flip di dalam scene | |
+| 05 — Tentang Kamu (Quiz) | 1 scene per pertanyaan | Progress quiz selaras posisi scroll |
+| 06 — Mungkin Nanti (Plans) | 1–2 scene, dikelompokkan per status (ingin dilakukan/direncanakan/tercapai) | |
+| 07 — Untuk Hari Ini (Final Surprise) | 1 scene tunggal, pacing paling lambat | Puncak emosional, tidak terburu-buru |
 
 ---
 
-*design.md v1.0 — Untukmu Project*  
-*Last updated: Juni 2026*
+## 14. Scene transition model
+
+**Antar-scene dalam satu chapter:** menyatu dengan scroll (bagian dari section 12) — tidak ada tombol "lanjut" terpisah, murni discroll.
+
+**Antar-chapter** (misalnya user lompat dari Chapter 02 ke Chapter 05 lewat navigasi, section 16): crossfade singkat 400–700ms (konsisten dengan durasi motion di section 9.6), disertai pergeseran World Frame (section 10.2) untuk memberi kesan berpindah "tempat" dalam dunia yang sama — bukan berpindah ke halaman lain yang tidak berhubungan.
+
+---
+
+## 15. Motion principles (revisi & perluasan section 9.6)
+
+- Smooth, cinematic, intentional — setiap motion punya alasan naratif/fungsional, tidak ada yang murni dekoratif.
+- Motion terikat scroll progress untuk elemen yang menerjemahkan cerita (section 12), bukan animasi berbasis timer yang berjalan sendiri lepas dari tindakan pembaca.
+- **Dilarang secara eksplisit:** random floating effect, sparkle berlebihan (menegaskan kembali DEC-003), bounce berlebihan, parallax berlebihan (batas magnitude konkret ada di section 19), motion yang murni dekoratif tanpa fungsi naratif.
+- `prefers-reduced-motion`: seluruh scroll-linked motion (parallax, scale, staggered text reveal) diganti transisi opacity sederhana atau instant state change — konten tetap 100% dapat diakses tanpa kehilangan informasi.
+
+---
+
+## 16. Navigation (revisi & perluasan section 2 dan Chapter Drawer di section 5)
+
+Prinsip inti dari DEC-004 tidak berubah: chapter naratif berurutan, tapi akses tetap non-linear lewat shortcut. Yang berubah adalah bentuk visualnya, menjadi lebih unobtrusive (DEC-014):
+
+- **Bentuk:** indeks angka kecil persistent (01–07) di tepi viewport — bukan drawer besar yang menutupi layar. Highlight otomatis mengikuti chapter/scene yang sedang aktif.
+- **Interaksi:** klik/tap salah satu angka langsung membawa ke chapter tersebut lewat crossfade transition (section 14), tanpa membuka panel besar dulu.
+- **Mobile:** bentuk paling ringkas (mis. dot/angka kecil di tepi, expandable saat disentuh). Prinsip wajib: navigasi tidak boleh menutupi konten utama secara default.
+
+---
+
+## 17. Audio behavior (revisi & perluasan DEC-007)
+
+- AudioPlayer utama ("Our Song") tetap persistent lintas chapter sesuai DEC-007 — tidak berubah.
+- Scene transition **boleh** memiliki audio cue halus tambahan — lapisan tipis di atas musik utama, bukan menggantikannya. Opsional per chapter, tidak wajib ada di semua scene.
+- **Batasan tegas:** maksimal satu audio cue aktif dalam satu waktu (tidak menumpuk beberapa suara sekaligus), volume audio cue jauh lebih rendah dari musik utama, tidak dipaksakan di tiap scene hanya demi kelengkapan. Tujuannya tetap suasana hangat-intim, bukan kesan horror game atau multimedia overload.
+
+---
+
+## 18. Mobile adaptation
+
+- Midground layer (layer dekoratif tambahan, section 11) disederhanakan jadi statis atau dihilangkan di breakpoint mobile secara default — pendekatan "konsisten ringan" dipilih dibanding deteksi kapabilitas device yang rumit.
+- Magnitude parallax dan scale dikurangi signifikan dibanding desktop (bukan dihilangkan total, kecuali `prefers-reduced-motion` aktif).
+- Auto-scroll (jika diimplementasikan sama sekali) tidak pernah default aktif di perangkat apa pun — harus opt-in eksplisit lewat tombol, terutama penting di mobile karena kontrol scroll yang lebih sensitif terhadap gerakan otomatis.
+
+---
+
+## 19. Performance constraints
+
+Wajib dipatuhi karena target pengguna (Nona) bisa berada di koneksi/perangkat yang tidak selalu prima:
+
+- Scene di luar viewport (plus buffer kecil di sekitarnya) tidak menjalankan animasi aktif — lazy activation, bukan sekadar lazy loading.
+- Maksimal 3 layer bergerak aktif bersamaan per scene (background, midground, foreground/media) — tidak ada layer animasi tambahan di atas ini.
+- Pipeline gambar tetap mengikuti ARCHITECTURE.md/DEC-009 (Cloudflare Image Transformations, responsive sizing, lazy loading) — scrollytelling menambah efek reveal halus saat scene aktif, tapi ukuran file yang di-load tetap sesuai viewport, tidak pernah ukuran besar yang di-crop secara visual saja.
+- Initial load (Chapter 01 / scene pertama) diprioritaskan; aset chapter lain dimuat progresif seiring user mendekati chapter tersebut (scroll atau navigasi), tidak semua chapter dimuat sekaligus di awal.
+- Audio cue (section 17) memakai file pendek/ringan, di-preload minimal — audio cue chapter lain tidak ikut ter-load di awal.
+
+---
+
+## 20. Component architecture
+
+Struktur komponen indikatif untuk perencanaan (nama final adalah keputusan implementasi):
+
+```
+<ChapterJourney>                 // shell utama: chapter aktif + state global (termasuk AudioPlayer persistent, DEC-007)
+  <ChapterIndexNav />            // navigasi unobtrusive 01-07 (section 16)
+  <PersistentAudioPlayer />      // dipindah ke level shell, DEC-007
+  <Chapter chapterId="...">
+    <Scene sceneId="...">
+      <SceneBackground />
+      <SceneMidground />         // opsional
+      <SceneMedia />             // foto/konten utama, memakai image loader DEC-009
+      <SceneText />              // reveal bertahap, section 12
+      // animation timeline: konfigurasi data, bukan komponen terpisah
+    </Scene>
+    <!-- Scene berulang sesuai jumlah scene chapter, section 13 -->
+  </Chapter>
+</ChapterJourney>
+```
+
+**Prinsip:** `<Scene>` adalah satu komponen reusable dipakai di seluruh chapter, dikonfigurasi lewat props/data — bukan diturunkan jadi komponen berbeda per chapter. Konten spesifik tiap chapter (foto Timeline, teks surat, pertanyaan quiz, dst) masuk sebagai data yang dirender lewat slot `SceneMedia`/`SceneText`, bukan lewat percabangan komponen. Ini konsisten dengan DEC-013 dan menjawab langsung permintaan "jangan membuat setiap chapter dengan sistem animasi yang sepenuhnya berbeda".
