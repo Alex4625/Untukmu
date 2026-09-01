@@ -1,3 +1,5 @@
 export function previewPath(path: string, preview?: boolean): string {
-  return preview ? `${path}?preview=unlocked` : path;
+  if (!preview) return path;
+  return path.includes('?') ? `${path}&preview=unlocked` : `${path}?preview=unlocked`;
 }
+

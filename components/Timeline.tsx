@@ -1,85 +1,102 @@
+'use client';
+
 import { getMediaUrl } from '@/lib/media';
 import { formatDateID } from '@/lib/date';
 import type { Memory } from '@/lib/types';
-import Image from 'next/image';
-import { Calendar } from 'lucide-react';
+import { Scene, SceneMedia } from '@/components/scene';
+import { Calendar, Compass } from 'lucide-react';
+
+export function sortMemoriesChronologically(memories: Memory[]): Memory[] {
+  return [...memories].sort((a, b) => {
+    const dateA = a.memory_date ? new Date(a.memory_date).getTime() : 0;
+    const dateB = b.memory_date ? new Date(b.memory_date).getTime() : 0;
+    return dateA - dateB;
+  });
+}
 
 export default function Timeline({ memories }: { memories: Memory[] }) {
-  if (!memories.length) {
+  const sortedMemories = sortMemoriesChronologically(memories);
+
+  if (!sortedMemories.length) {
     return (
       <div className="card mx-auto max-w-lg p-10 text-center">
-        <p className="font-display text-xl italic text-ink-muted">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-paper text-burgundy shadow-subtle">
+          <Compass size={20} className="text-dustyrose" />
+        </div>
+        <p className="font-display text-2xl italic text-burgundy">
           Belum ada cerita yang ditambahkan di sini.
         </p>
-        <p className="mt-2 text-xs text-ink-muted">
+        <p className="mt-2 text-xs text-ink-muted leading-relaxed">
           Admin bisa menambahkan momen-momen awal melalui panel kelola.
         </p>
       </div>
     );
   }
 
+  // Choose opening photo from favorite or first memory if available
+  const introMemory = sortedMemories.find((m) => Boolean(m.is_favorite)) || sortedMemories[0];
+  const introImageUrl = introMemory ? getMediaUrl(introMemory.media_key || introMemory.image_url, 1200) : null;
+
   return (
-    <div className="relative mx-auto max-w-4xl py-6">
-      {/* Central Timeline Spine */}
-      <div className="absolute left-4 top-0 h-full w-px bg-[rgba(90,40,52,0.15)] md:left-1/2" />
+    <div className="space-y-6 sm:space-y-8">
+      {/* Scene 1: Chapter 01 Intro Scene (DESIGN.md section 13: 1 scene intro) */}
+      <Scene
+        id="timeline-intro"
+        eyebrow="Prolog Cerita"
+        title="Bagaimana Semua Ini Bermula"
+        body="Setiap cerita yang indah tidak pernah terburu-buru. Di babak ini, mari berjalan kembali melewati jejak-jejak waktu pertama yang mengawali perjalanan kita."
+        align="center"
+        tone="base"
+        media={
+          introImageUrl ? (
+            <SceneMedia
+              src={introImageUrl}
+              alt={introMemory.title}
+              priority
+              aspectRatio="16/11"
+              sizes="(max-width: 1024px) 92vw, 55vw"
+            />
+          ) : null
+        }
+      />
 
-      <div className="space-y-12 sm:space-y-16">
-        {memories.map((memory, index) => {
-          const isEven = index % 2 === 1;
-          const imageUrl = getMediaUrl(memory.media_key || memory.image_url, 900);
+      {/* Dynamic Chronological Scenes: 1 scene per memory/chronological point (DESIGN.md section 13) */}
+      {sortedMemories.map((memory, index) => {
+        const imageUrl = getMediaUrl(memory.media_key || memory.image_url, 1100);
+        // Alternate alignment left / right for rhythmic scrollytelling feel
+        const align = index % 2 === 0 ? 'left' : 'right';
+        // Alternate tones between paper, base, and sage for visual variety
+        const tone = index % 3 === 1 ? 'paper' : index % 3 === 2 ? 'sage' : 'base';
 
-          return (
-            <article
-              key={memory.id}
-              className={`relative md:flex ${isEven ? 'md:justify-end' : 'md:justify-start'}`}
-            >
-              {/* Spine Node Marker */}
-              <div className="absolute left-[9px] top-6 h-3.5 w-3.5 rounded-full border-2 border-base bg-burgundy shadow-subtle md:left-1/2 md:-ml-[7px]" />
-
-              {/* Memory Card */}
-              <div
-                className={`ml-10 w-[calc(100%-2.5rem)] rounded-2xl border border-[rgba(90,40,52,0.10)] bg-[#FDFBF7] p-6 shadow-card transition-all duration-300 hover:shadow-elevated md:ml-0 md:w-[46%] sm:p-7 ${
-                  isEven ? 'md:mr-0' : 'md:ml-0'
-                }`}
-              >
-                <div className="flex items-center justify-between gap-2 border-b border-[rgba(90,40,52,0.08)] pb-3">
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-dustyrose">
-                    <Calendar size={13} />
-                    {formatDateID(memory.memory_date)}
-                  </span>
-                  {memory.category && (
-                    <span className="rounded-full bg-paper px-2.5 py-0.5 text-[11px] font-medium text-ink-muted">
-                      {memory.category}
-                    </span>
-                  )}
-                </div>
-
-                <h3 className="mt-4 font-display text-3xl font-normal leading-tight text-burgundy">
-                  {memory.title}
-                </h3>
-
-                {memory.story && (
-                  <p className="mt-3.5 text-[15px] leading-relaxed text-ink whitespace-pre-line">
-                    {memory.story}
-                  </p>
-                )}
-
-                {imageUrl && (
-                  <div className="relative mt-5 aspect-[16/10] overflow-hidden rounded-xl bg-paper">
-                    <Image
-                      src={imageUrl}
-                      alt={memory.title}
-                      fill
-                      className="object-cover transition-transform duration-500 hover:scale-105"
-                      sizes="(max-width: 768px) 90vw, 42vw"
-                    />
-                  </div>
-                )}
-              </div>
-            </article>
-          );
-        })}
-      </div>
+        return (
+          <Scene
+            key={memory.id}
+            id={`memory-${memory.id}`}
+            eyebrow={`Jejak ${String(index + 1).padStart(2, '0')} · ${formatDateID(memory.memory_date)}`}
+            title={memory.title}
+            body={memory.story}
+            align={align}
+            tone={tone}
+            media={
+              imageUrl ? (
+                <SceneMedia
+                  src={imageUrl}
+                  alt={memory.title}
+                  priority={index === 0}
+                  sizes="(max-width: 1024px) 92vw, 48vw"
+                />
+              ) : null
+            }
+            meta={
+              <span className="inline-flex items-center gap-1.5 text-xs text-dustyrose">
+                <Calendar size={13} />
+                <span>{formatDateID(memory.memory_date)}</span>
+                {memory.category && <span className="text-ink-muted">· {memory.category}</span>}
+              </span>
+            }
+          />
+        );
+      })}
     </div>
   );
 }

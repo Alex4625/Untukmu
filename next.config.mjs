@@ -28,6 +28,7 @@ const securityHeaders = [
 const nextConfig = {
   poweredByHeader: false,
   images: {
+    unoptimized: true,
     remotePatterns: [
       { protocol: 'https', hostname: '*.workers.dev' },
       { protocol: 'https', hostname: '*.pages.dev' }

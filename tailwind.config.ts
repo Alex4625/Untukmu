@@ -5,7 +5,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        base: '#F7F2EA',
+        canvas: '#F7F2EA',
         paper: '#EEE6DB',
         'paper-light': '#FDFBF7',
         ink: '#272322',
@@ -22,11 +22,25 @@ const config: Config = {
         gold: '#B39A6B',
         'gold-light': '#D8C59F',
         muted: '#7A6F6B',
-        error: '#A33C3C'
+        error: '#A33C3C',
+        stardew: {
+          sky: '#5ca6e8',
+          night: '#154794',
+          parchment: '#FFF3CC',
+          'parchment-dark': '#F2E2B0',
+          'wood-dark': '#4A2411',
+          wood: '#8C4E28',
+          'wood-light': '#C87D43',
+          gold: '#F9EC88',
+          blue: '#0066CC',
+          brown: '#663300',
+          ink: '#252525'
+        }
       },
       fontFamily: {
         display: ['var(--font-display)', 'Cormorant Garamond', 'serif'],
-        sans: ['var(--font-sans)', 'DM Sans', 'sans-serif']
+        sans: ['var(--font-nunito)', 'var(--font-sans)', 'Nunito', 'sans-serif'],
+        nunito: ['var(--font-nunito)', 'Nunito', 'sans-serif']
       },
       boxShadow: {
         subtle: '0 1px 3px rgba(39, 35, 34, 0.04)',

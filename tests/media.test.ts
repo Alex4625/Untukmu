@@ -9,22 +9,16 @@ describe('Media & Image Pipeline (R2 + Cloudflare Image Transformations)', () =>
     assert.strictEqual(getMediaUrl(undefined), '');
   });
 
-  it('should transform R2 object keys to Cloudflare Image Transformation URLs', () => {
+  it('should transform R2 object keys to internal media route URLs', () => {
     const key = 'originals/memories/test-uuid-123.jpg';
     const url = getMediaUrl(key, 900);
-    assert.strictEqual(
-      url,
-      '/cdn-cgi/image/format=auto,quality=85,width=900/originals/memories/test-uuid-123.jpg'
-    );
+    assert.strictEqual(url, '/api/media/originals/memories/test-uuid-123.jpg');
   });
 
-  it('should handle custom width parameters for responsive sizing', () => {
+  it('should handle custom width parameters gracefully', () => {
     const key = 'originals/memories/sample.png';
-    const thumbUrl = getMediaUrl(key, 400);
-    const heroUrl = getMediaUrl(key, 1200);
-
-    assert.ok(thumbUrl.includes('width=400'));
-    assert.ok(heroUrl.includes('width=1200'));
+    const url = getMediaUrl(key, 400);
+    assert.strictEqual(url, '/api/media/originals/memories/sample.png');
   });
 
   it('should preserve external HTTP/HTTPS URLs', () => {

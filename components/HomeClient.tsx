@@ -1,48 +1,50 @@
-import Link from 'next/link';
-import { Sparkles, ArrowRight } from 'lucide-react';
+'use client';
 
-export default function HomeClient() {
+import Link from 'next/link';
+import { ArrowRight, Heart } from 'lucide-react';
+import { previewPath } from '@/lib/publicUrl';
+
+export default function HomeClient({ preview = false }: { preview?: boolean }) {
+  const countdownHref = previewPath('/countdown', preview);
+
   return (
     <main className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-4 py-12 text-center sm:px-6">
-      {/* Background ambient warmth */}
-      <div className="pointer-events-none absolute -top-24 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-dustyrose/10 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 left-1/3 h-96 w-96 rounded-full bg-paper/60 blur-3xl" />
-
-      <section className="card fade-in relative z-10 w-full max-w-lg px-6 py-12 sm:px-12 sm:py-16">
-        <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-paper text-burgundy">
-          <Sparkles size={20} className="text-dustyrose" />
+      {/* Stardew Valley Wooden Plaque Main Card */}
+      <section className="card world-frame-enter relative z-10 w-full max-w-xl px-6 py-10 sm:px-12 sm:py-14">
+        {/* Cozy Heart Emblem */}
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border-2 border-[#8C4E28] bg-[#FFE8A3] text-[#B53000] shadow-sm">
+          <Heart size={22} className="fill-[#B53000]/30 text-[#B53000]" />
         </div>
 
-        <p className="eyebrow">Sebuah Hadiah Kecil</p>
-        <h1 className="mt-3.5 font-display text-5xl font-light leading-none text-burgundy sm:text-6xl">
+        {/* Date & Title */}
+        <p className="font-nunito text-xs sm:text-sm font-extrabold uppercase tracking-[0.18em] text-[#B53000]">
+          10 Desember 2026
+        </p>
+
+        <h1 className="mt-2 font-nunito text-4xl sm:text-5xl md:text-6xl font-black text-[#663300] drop-shadow-sm">
           Untuk Nona
         </h1>
-        <p className="mt-2.5 font-display text-xl sm:text-2xl italic text-ink-muted">
-          Untuk 10 Desember
-        </p>
 
-        <div className="mx-auto my-6 sm:my-7 h-px w-14 bg-burgundy/15" />
+        {/* Stardew Valley Spike Divider */}
+        <div className="stardew-divider my-4" />
 
-        <p className="text-[15px] sm:text-base leading-relaxed text-ink">
-          Untuk seseorang yang lahir pada 10 Desember.
-        </p>
-        <p className="mx-auto mt-2 max-w-sm text-xs sm:text-sm leading-relaxed text-ink-muted">
+        <p className="mx-auto max-w-md font-nunito text-base sm:text-[17px] font-semibold leading-relaxed text-[#5A3E2D]">
           Sebuah tempat kecil di internet untuk menyimpan hal-hal indah tentang kamu dan kita.
         </p>
 
-        <div className="mt-9 sm:mt-10">
+        <div className="mt-8 flex justify-center">
           <Link
-            href="/countdown"
-            className="btn-primary group w-full gap-2.5 sm:w-auto"
+            href={countdownHref}
+            className="btn-primary group w-full gap-2 text-base font-extrabold tracking-wide sm:w-auto"
           >
             <span>Masuk ke Cerita Kita</span>
-            <ArrowRight size={16} className="text-dustyrose-light transition-transform duration-300 group-hover:translate-x-1" />
+            <ArrowRight size={18} className="text-[#F9EC88] transition-transform duration-200 group-hover:translate-x-1" />
           </Link>
         </div>
       </section>
 
-      <footer className="relative z-10 mt-8 text-center text-xs text-ink-muted">
-        10 Desember 2026 · Dibuat oleh Alex
+      <footer className="relative z-10 mt-8 font-nunito text-xs font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+        10 Desember 2026 · Dibuat dengan hati oleh Alex
       </footer>
     </main>
   );

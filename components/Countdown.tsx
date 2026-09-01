@@ -1,8 +1,11 @@
 'use client';
 
-import { useMemo, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useSyncExternalStore } from 'react';
 
-type Props = { unlockIso: string };
+type Props = {
+  unlockIso: string;
+  onComplete?: () => void;
+};
 
 type Remaining = { days: number; hours: number; minutes: number; seconds: number; done: boolean };
 
@@ -49,10 +52,16 @@ function getServerSnapshot() {
   return 0;
 }
 
-export default function Countdown({ unlockIso }: Props) {
+export default function Countdown({ unlockIso, onComplete }: Props) {
   const now = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
   const mounted = now > 0;
   const time = mounted ? getRemaining(unlockIso, now) : initialRemaining;
+
+  useEffect(() => {
+    if (time.done && onComplete) {
+      onComplete();
+    }
+  }, [time.done, onComplete]);
 
   const items = useMemo(
     () => [
@@ -65,7 +74,11 @@ export default function Countdown({ unlockIso }: Props) {
   );
 
   if (time.done) {
-    return <p className="font-display text-2xl italic text-burgundy">Hari ini akhirnya datang.</p>;
+    return (
+      <div className="card p-6 text-center">
+        <p className="font-nunito text-3xl font-extrabold text-[#663300]">Hari ini akhirnya datang!</p>
+      </div>
+    );
   }
 
   return (
@@ -75,12 +88,12 @@ export default function Countdown({ unlockIso }: Props) {
         return (
           <div
             key={String(label)}
-            className="rounded-2xl border border-[rgba(90,40,52,0.09)] bg-[#FDFBF7] px-3 py-5 text-center shadow-card sm:px-4 sm:py-7"
+            className="rounded-xl border-2 border-[#8C4E28] bg-[#FFF3CC] px-3 py-4 text-center shadow-[0_4px_10px_rgba(0,0,0,0.25)] sm:px-4 sm:py-6"
           >
-            <div className="font-display text-4xl sm:text-5xl md:text-6xl font-light leading-none text-burgundy">
+            <div className="font-nunito text-4xl sm:text-5xl font-black leading-none text-[#663300] drop-shadow-sm">
               {display}
             </div>
-            <div className="mt-2.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.14em] text-dustyrose">
+            <div className="mt-2 text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#B53000]">
               {label}
             </div>
           </div>

@@ -56,7 +56,7 @@ flowchart TD
 - **Implementation Scope:** Hanya skeleton/proof-of-concept. Tidak menyentuh kode production repo ini.
 - **Acceptance Criteria:** Semua fitur di atas berfungsi tanpa downgrade Next.js atau workaround struktural besar (setara masalah middleware yang dialami di project Alumni SYP-33-6).
 - **Testing Expectations:** Manual verification tiap fitur di deployment preview Cloudflare.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-002: Cloudflare project & binding setup
 
@@ -67,7 +67,7 @@ flowchart TD
 - **Implementation Scope:** Konfigurasi infrastruktur saja, belum ada migrasi data/kode aplikasi.
 - **Acceptance Criteria:** Worker kosong berhasil deploy dengan binding D1 dan R2 terpasang dan bisa diakses (baca/tulis test sederhana).
 - **Testing Expectations:** Test binding lewat endpoint sementara/log, dihapus setelah verifikasi.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-003: D1 schema + Drizzle ORM setup
 
@@ -78,7 +78,7 @@ flowchart TD
 - **Implementation Scope:** Skema tabel `memories`, `letters`, `memory_cards`, `quiz_questions`, `plans`, `site_settings` sesuai spesifikasi. Tidak termasuk kolom CMS lanjutan (DEC-006).
 - **Acceptance Criteria:** Semua tabel, constraint, dan index di DATABASE.md berhasil dibuat di D1 dan bisa di-query lewat Drizzle client.
 - **Testing Expectations:** Unit test insert/query dasar per tabel.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-004: Migrasi data Supabase → D1
 
@@ -89,7 +89,7 @@ flowchart TD
 - **Implementation Scope:** Transformasi dan migrasi data, tidak termasuk media (lihat TASK-006).
 - **Acceptance Criteria:** Row count di D1 sama dengan Supabase per tabel; spot-check isi minimal 3 baris per tabel cocok dengan sumber.
 - **Testing Expectations:** Script verifikasi row count otomatis + review manual sampel data.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-005: R2 bucket setup
 
@@ -100,7 +100,7 @@ flowchart TD
 - **Implementation Scope:** Infrastruktur storage saja.
 - **Acceptance Criteria:** Worker bisa melakukan put/get object test ke bucket lewat binding.
 - **Testing Expectations:** Test upload/download file dummy.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-006: Backfill media Cloudinary → R2
 
@@ -111,7 +111,7 @@ flowchart TD
 - **Implementation Scope:** Migrasi file media yang sudah ada. Tidak termasuk upload baru dari admin (lihat TASK-008).
 - **Acceptance Criteria:** Setiap foto lama bisa diakses dari R2 dengan `media_key` baru dan menghasilkan file identik (checksum/ukuran cocok) dengan sumber Cloudinary.
 - **Testing Expectations:** Verifikasi checksum atau minimal ukuran file dan preview visual sampel foto.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-007: Rewrite data access layer (`lib/db.ts`)
 
@@ -122,7 +122,7 @@ flowchart TD
 - **Implementation Scope:** Layer akses data saja, belum termasuk perubahan pada `publicContent.ts`/`adminContent.ts` (lihat TASK-009).
 - **Acceptance Criteria:** Semua fungsi query yang dipakai `publicContent.ts` dan admin API routes punya padanan di layer baru dengan interface yang sama atau setara.
 - **Testing Expectations:** Unit test per fungsi query.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-008: Rewrite upload route + image loader
 
@@ -133,7 +133,7 @@ flowchart TD
 - **Implementation Scope:** Route upload dan loader gambar. Validasi tipe/ukuran file dipertahankan dari perilaku sekarang.
 - **Acceptance Criteria:** Upload foto baru dari admin tersimpan di R2 dan bisa ditampilkan lewat `next/image` dengan variant ukuran sesuai breakpoint, tanpa pernah mengirim file original untuk kebutuhan thumbnail.
 - **Testing Expectations:** Test upload end-to-end + verifikasi ukuran file yang benar-benar dikirim ke browser pada tiap breakpoint (lewat network inspector).
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-009: Rewrite public content fetching
 
@@ -144,7 +144,7 @@ flowchart TD
 - **Implementation Scope:** Logic fetching, bukan tampilan (styling ditangani di Phase 5+).
 - **Acceptance Criteria:** Seluruh halaman publik menampilkan data yang sama seperti sebelum migrasi, bersumber dari D1/R2.
 - **Testing Expectations:** Regression check manual per halaman publik dengan data hasil migrasi.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-010: Rewrite admin auth ke Web Crypto API
 
@@ -155,7 +155,7 @@ flowchart TD
 - **Implementation Scope:** Fungsi signing/verifikasi saja, tidak mengubah flow login/logout route.
 - **Acceptance Criteria:** Login admin, verifikasi sesi, dan logout berfungsi identik dari sisi perilaku dibanding implementasi lama.
 - **Testing Expectations:** Unit test sign/verify (termasuk kasus token invalid/expired), test manual flow login-logout.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-011: Design tokens v2
 
@@ -166,7 +166,7 @@ flowchart TD
 - **Implementation Scope:** Token dan utility class global. Tidak termasuk penerapan ke tiap komponen (itu tersebar di task Phase 6+).
 - **Acceptance Criteria:** Kontras warna baru (burgundy/ivory) tervalidasi minimal WCAG AA untuk kombinasi teks/background yang dipakai.
 - **Testing Expectations:** Automated contrast check (misalnya axe atau lighthouse) pada palet baru.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-012: Scene component system (reusable)
 
@@ -178,7 +178,7 @@ flowchart TD
 - **Implementation Scope:** Sistem komponen Scene generik dan konfigurasinya lewat data/props. Tidak termasuk konten spesifik tiap chapter (itu di TASK-014 ke bawah).
 - **Acceptance Criteria:** Satu instance `<Scene>` bisa dikonfigurasi lewat props untuk menghasilkan variasi tampilan berbeda tanpa mengubah kode komponen; animasi scene di luar viewport terbukti tidak berjalan (diverifikasi lewat profiler); `prefers-reduced-motion` menghasilkan versi tanpa parallax/scale yang tetap menampilkan seluruh konten.
 - **Testing Expectations:** Unit test konfigurasi props Scene dengan beberapa varian; manual performance profiling (CPU/GPU) saat banyak Scene ada di DOM tapi hanya satu yang aktif di viewport; manual test dengan `prefers-reduced-motion` aktif.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-013: Chapter navigation shell (Chapter Index Nav + World Frame transition)
 
@@ -190,7 +190,7 @@ flowchart TD
 - **Implementation Scope:** Shell navigasi dan transisi antar-chapter, bukan konten tiap chapter.
 - **Acceptance Criteria:** Semua 7 chapter bisa diakses lewat indeks kapan saja pasca-unlock tanpa gate linear paksa; indeks tidak menutupi konten utama secara default (khususnya di mobile); transisi antar-chapter menampilkan crossfade + pergeseran World Frame, bukan hard-cut.
 - **Testing Expectations:** Manual test navigasi antar-chapter dari indeks dan dari scroll linear; manual test di viewport mobile sempit untuk memastikan indeks tidak menutupi konten.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-014: Redesign Landing + Countdown
 
@@ -201,7 +201,7 @@ flowchart TD
 - **Implementation Scope:** Dua halaman ini saja.
 - **Acceptance Criteria:** Birthday Mode trigger, confetti restrained, dan CTA ke Hub berfungsi sesuai flow di DESIGN.md v2 section 4.
 - **Testing Expectations:** Manual test trigger unlock (simulasi waktu) dan tampilan responsif mobile/desktop.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-015: Redesign Chapter Sebuah Awal (Timeline) + Momen Kecil (Gallery) sebagai multi-scene
 
@@ -212,7 +212,7 @@ flowchart TD
 - **Implementation Scope:** Dua chapter ini saja.
 - **Acceptance Criteria:** Nama publik yang tampil adalah "Sebuah Awal"/"Momen Kecil", bukan "Timeline"/"Gallery"; gambar memakai responsive image sesuai TASK-008; jumlah scene menyesuaikan jumlah data aktual (bukan hardcoded); mematuhi batas performa TASK-012.
 - **Testing Expectations:** Manual test tampilan dengan data foto hasil migrasi, termasuk kasus jumlah foto sangat sedikit dan banyak.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-016: Redesign Chapter Yang Aku Ingat (Letters) sebagai scene per surat
 
@@ -223,7 +223,7 @@ flowchart TD
 - **Implementation Scope:** Chapter Letters saja.
 - **Acceptance Criteria:** Interaksi buka surat berfungsi dengan `prefers-reduced-motion` fallback yang tetap usable; jumlah scene sama dengan jumlah surat berstatus aktif.
 - **Testing Expectations:** Manual test dengan reduced-motion aktif dan nonaktif.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-017: Redesign Chapter Yang Tak Terucap (Memory Box)
 
@@ -234,7 +234,7 @@ flowchart TD
 - **Implementation Scope:** Chapter Memory Box saja.
 - **Acceptance Criteria:** Interaksi flip/reveal berfungsi di touch (mobile) dan klik (desktop).
 - **Testing Expectations:** Manual test di kedua mode input.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-018: Redesign Chapter Tentang Kamu (Quiz) sebagai scene per pertanyaan
 
@@ -245,7 +245,7 @@ flowchart TD
 - **Implementation Scope:** Chapter Quiz saja.
 - **Acceptance Criteria:** Progress dan feedback tetap terasa personal, hasil quiz tetap masuk ke narasi (bukan skor generik).
 - **Testing Expectations:** Manual test alur quiz penuh.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-019: Redesign Chapter Mungkin Nanti (Plans)
 
@@ -256,7 +256,7 @@ flowchart TD
 - **Implementation Scope:** Chapter Plans saja.
 - **Acceptance Criteria:** Ketiga status rencana punya representasi visual berbeda yang jelas, bukan task list generik.
 - **Testing Expectations:** Manual test dengan data rencana di ketiga status.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-020: Final Surprise + AudioPlayer persistent + audio cue
 
@@ -267,7 +267,7 @@ flowchart TD
 - **Implementation Scope:** Chapter Final Surprise + refactor posisi AudioPlayer di layout + implementasi audio cue opsional.
 - **Acceptance Criteria:** State play/pause AudioPlayer tidak reset saat berpindah antar chapter mana pun (bukan cuma menuju Final); tidak pernah lebih dari satu audio cue aktif bersamaan; volume audio cue jelas lebih rendah dari musik utama.
 - **Testing Expectations:** Manual test: mulai putar musik di Chapter 01, navigasi ke Chapter 07 lewat indeks, verifikasi musik tetap berjalan tanpa jeda/reset; manual test scene transition dengan audio cue aktif untuk memastikan tidak menumpuk.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-021: Adaptasi Admin CMS ke D1/R2
 
@@ -278,7 +278,7 @@ flowchart TD
 - **Implementation Scope:** Fungsionalitas admin yang sudah ada, dipindah ke backend baru. Tidak termasuk fitur featured/theme/crop baru.
 - **Acceptance Criteria:** Semua operasi CRUD yang ada sekarang berfungsi identik di stack baru.
 - **Testing Expectations:** Regression test manual seluruh alur admin.
-- **Status:** Not Started
+- **Status:** Done
 
 ### TASK-022: Cutover & QA penuh
 
@@ -289,7 +289,7 @@ flowchart TD
 - **Implementation Scope:** Verifikasi dan cutover, bukan fitur baru.
 - **Acceptance Criteria:** Website berjalan penuh di Cloudflare dengan data asli, tidak ada regresi fungsional atau visual dibanding checklist DESIGN.md v2, initial load Chapter 01 tetap cepat pada simulasi koneksi lambat (network throttling), dan rollback plan tervalidasi bisa dijalankan bila diperlukan.
 - **Testing Expectations:** Full manual QA pass (mobile + desktop), Lighthouse/accessibility audit, network throttling test untuk performa scrollytelling, review checklist guardrail PDF dan worldbuilding (content>decoration, one focal point per viewport, world frame konsisten, dst) sebagai bagian dari sign-off visual.
-- **Status:** Not Started
+- **Status:** In Progress (Tahap A selesai, menunggu konfirmasi cutover)
 
 ---
 

@@ -70,15 +70,15 @@ describe('Production Smoke Test & Content Verification', () => {
 
     assert.strictEqual(
       thumbUrl,
-      '/cdn-cgi/image/format=auto,quality=85,width=400/originals/memories/cavohv3geer6f21n22gq.jpg'
+      '/api/media/originals/memories/cavohv3geer6f21n22gq.jpg'
     );
     assert.strictEqual(
       gridUrl,
-      '/cdn-cgi/image/format=auto,quality=85,width=900/originals/memories/cavohv3geer6f21n22gq.jpg'
+      '/api/media/originals/memories/cavohv3geer6f21n22gq.jpg'
     );
     assert.strictEqual(
       heroUrl,
-      '/cdn-cgi/image/format=auto,quality=85,width=1400/originals/memories/cavohv3geer6f21n22gq.jpg'
+      '/api/media/originals/memories/cavohv3geer6f21n22gq.jpg'
     );
   });
 });

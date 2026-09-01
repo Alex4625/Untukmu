@@ -1,8 +1,8 @@
 import PublicNav from './PublicNav';
 import PreviewBanner from './PreviewBanner';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
-import { getNextChapter } from './chapters';
+import { ArrowLeft, ArrowRight, BookOpen } from 'lucide-react';
+import { getNextChapter, getPrevChapter } from './chapters';
 import { previewPath } from '@/lib/publicUrl';
 
 export default function SectionShell({
@@ -21,45 +21,85 @@ export default function SectionShell({
   children: React.ReactNode;
 }) {
   const nextChapter = chapterNumber ? getNextChapter(chapterNumber) : null;
+  const prevChapter = chapterNumber ? getPrevChapter(chapterNumber) : null;
 
   return (
-    <main className="container-page min-h-dvh pt-6 sm:pt-10">
+    <main className="min-h-dvh pt-20 pb-28 px-3 sm:px-6">
       <PublicNav preview={preview} currentChapterNumber={chapterNumber} />
-      {preview && <PreviewBanner />}
-
-      {/* Chapter Editorial Header */}
-      <header className="mb-10 text-center sm:mb-14 fade-in">
-        {chapterNumber && (
-          <p className="font-display text-sm sm:text-base italic text-gold tracking-widest mb-1.5">
-            Chapter {chapterNumber}
-          </p>
-        )}
-        <p className="eyebrow">{eyebrow}</p>
-        <h1 className="mt-2.5 section-title">{title}</h1>
-        <div className="mx-auto my-4 sm:my-5 h-px w-12 bg-burgundy/15" />
-        <p className="mx-auto max-w-xl text-sm sm:text-base leading-relaxed text-ink-muted px-2">
-          {description}
-        </p>
-      </header>
-
-      {/* Main Content Area */}
-      <section className="fade-in">{children}</section>
-
-      {/* Next Chapter Footer Navigation */}
-      {nextChapter && (
-        <footer className="mt-16 sm:mt-20 border-t border-[rgba(90,40,52,0.10)] pt-8 sm:pt-10 text-center">
-          <p className="text-xs uppercase tracking-widest text-dustyrose mb-2 font-medium">Lanjut ke Babak Berikutnya</p>
-          <Link
-            href={previewPath(nextChapter.href, preview)}
-            className="group inline-flex items-center gap-3 font-display text-2xl sm:text-3xl text-burgundy transition hover:text-burgundy-dark active:scale-[0.99]"
-          >
-            <span>
-              <span className="italic text-gold">{nextChapter.number}</span>. {nextChapter.publicTitle}
-            </span>
-            <ArrowRight size={20} className="text-dustyrose transition-transform duration-300 group-hover:translate-x-1.5" />
-          </Link>
-        </footer>
+      {preview && (
+        <div className="mx-auto max-w-4xl mb-4">
+          <PreviewBanner />
+        </div>
       )}
+
+      {/* Main Central Stardew Valley Parchment Container */}
+      <div className="mx-auto max-w-4xl">
+        <div className="card p-6 sm:p-10 md:p-12 shadow-2xl">
+          {/* Chapter Editorial Header with smooth entrance */}
+          <header className="mb-6 text-center chapter-header-enter">
+            {chapterNumber && (
+              <p className="font-nunito text-xs sm:text-sm font-black uppercase tracking-widest text-[#B53000]">
+                {eyebrow}
+              </p>
+            )}
+            <h1 className="mt-1 font-nunito text-3xl sm:text-4xl md:text-5xl font-black text-[#663300]">
+              {title}
+            </h1>
+            <div className="stardew-divider my-4" />
+            <p className="mx-auto max-w-xl font-nunito text-sm sm:text-base font-bold text-[#5A3E2D] leading-relaxed">
+              {description}
+            </p>
+          </header>
+
+          {/* Main Content Area */}
+          <section className="my-6">{children}</section>
+
+          {/* Bidirectional Chapter Footer Navigation */}
+          {chapterNumber && (
+            <footer className="mt-10 border-t-2 border-[#8C4E28]/25 pt-8">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                {/* Previous Navigation */}
+                {prevChapter ? (
+                  <Link
+                    href={previewPath(prevChapter.href, preview)}
+                    className="btn-secondary group w-full sm:w-auto justify-center gap-2 text-sm sm:text-base font-extrabold"
+                  >
+                    <ArrowLeft size={18} className="text-[#8C4E28] transition-transform duration-200 group-hover:-translate-x-1" />
+                    <span>Ch. {prevChapter.number}: {prevChapter.publicTitle}</span>
+                  </Link>
+                ) : (
+                  <Link
+                    href={previewPath('/hub', preview)}
+                    className="btn-secondary group w-full sm:w-auto justify-center gap-2 text-sm sm:text-base font-extrabold"
+                  >
+                    <BookOpen size={16} className="text-[#8C4E28]" />
+                    <span>Daftar Cerita</span>
+                  </Link>
+                )}
+
+                {/* Next Navigation */}
+                {nextChapter ? (
+                  <Link
+                    href={previewPath(nextChapter.href, preview)}
+                    className="btn-primary group w-full sm:w-auto justify-center gap-2 text-sm sm:text-base font-extrabold"
+                  >
+                    <span>Ch. {nextChapter.number}: {nextChapter.publicTitle}</span>
+                    <ArrowRight size={18} className="text-[#F9EC88] transition-transform duration-200 group-hover:translate-x-1" />
+                  </Link>
+                ) : (
+                  <Link
+                    href={previewPath('/hub', preview)}
+                    className="btn-primary group w-full sm:w-auto justify-center gap-2 text-sm sm:text-base font-extrabold"
+                  >
+                    <BookOpen size={16} className="text-[#F9EC88]" />
+                    <span>Selesai Membaca</span>
+                  </Link>
+                )}
+              </div>
+            </footer>
+          )}
+        </div>
+      </div>
     </main>
   );
 }

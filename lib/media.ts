@@ -15,7 +15,7 @@ export function getMediaUrl(mediaKeyOrUrl?: string | null, width = 1200): string
     return mediaKeyOrUrl;
   }
 
-  // Cloudflare Image Transformations URL pattern: /cdn-cgi/image/<params>/<r2-path>
+  // Internal R2 media endpoint
   const cleanKey = mediaKeyOrUrl.replace(/^\/+/, '');
-  return `/cdn-cgi/image/format=auto,quality=85,width=${width}/${cleanKey}`;
+  return `/api/media/${cleanKey}`;
 }

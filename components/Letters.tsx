@@ -1,20 +1,140 @@
 'use client';
 
-import type { Letter } from '@/lib/types';
 import { useState } from 'react';
+import type { Letter } from '@/lib/types';
+import { Scene, useReducedMotion } from '@/components/scene';
 import { Mail, MailOpen, Feather } from 'lucide-react';
 
-export default function Letters({ letters }: { letters: Letter[] }) {
-  const [openId, setOpenId] = useState<string | null>(letters[0]?.id ?? null);
-  const selected = letters.find((letter) => letter.id === openId);
+export function getActiveLetters(letters: Letter[]): Letter[] {
+  return letters.filter((l) => l.status === 'active');
+}
 
-  if (!letters.length) {
+function SingleLetterScene({ letter, index }: { letter: Letter; index: number }) {
+  const reducedMotion = useReducedMotion();
+  const [isManuallyOpened, setIsManuallyOpened] = useState(false);
+  const isOpened = isManuallyOpened || reducedMotion;
+
+  // Alternate tones across scenes for visual warmth
+  const tone = index % 3 === 0 ? 'paper' : index % 3 === 1 ? 'base' : 'ivory';
+
+  return (
+    <Scene
+      id={`letter-${letter.id}`}
+      eyebrow={`Chapter 03 · Surat ${String(index + 1).padStart(2, '0')}${
+        letter.unlock_label ? ` · ${letter.unlock_label}` : ''
+      }`}
+      title={letter.title}
+      align="center"
+      tone={tone}
+    >
+      <div className="mx-auto mt-6 w-full max-w-2xl">
+        {!isOpened ? (
+          /* State 1: Amplop Tertutup (Tactile Closed Envelope Experience) */
+          <div
+            role="region"
+            aria-label={`Amplop tertutup: ${letter.title}`}
+            className="card group relative mx-auto w-full max-w-lg cursor-pointer p-8 text-center shadow-[0_8px_24px_rgba(0,0,0,0.4)] transition-all duration-200 hover:-translate-y-1 hover:brightness-105 active:scale-[0.99] sm:p-10"
+            onClick={() => setIsManuallyOpened(true)}
+          >
+            {/* Tactile Wax Seal Stamp */}
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border-2 border-[#4A2411] bg-gradient-to-b from-[#A05A2C] to-[#7A3C18] text-[#F9EC88] shadow-md transition-transform duration-200 group-hover:scale-105">
+              <Mail size={24} className="text-[#F9EC88]" />
+            </div>
+
+            <p className="font-nunito text-xs font-extrabold uppercase tracking-wider text-[#B53000]">
+              {letter.unlock_label || 'Surat Tertutup'}
+            </p>
+
+            <h3 className="mt-1 font-nunito text-2xl sm:text-3xl font-black text-[#663300]">
+              {letter.title}
+            </h3>
+
+            <p className="mt-1 font-nunito text-sm font-bold italic text-[#8C4E28]">
+              Ditulis khusus untuk Nona
+            </p>
+
+            <div className="stardew-divider my-4" />
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsManuallyOpened(true);
+              }}
+              className="btn-primary group/btn gap-2 px-6 py-2.5 text-sm font-extrabold"
+            >
+              <span>Buka Surat</span>
+              <MailOpen size={16} className="text-[#F9EC88] transition-transform group-hover/btn:scale-110" />
+            </button>
+          </div>
+        ) : (
+          /* State 2: Surat Terbuka (Unfolded Parchment Letter View) */
+          <article
+            role="region"
+            aria-label={`Surat terbuka: ${letter.title}`}
+            className={`card relative w-full overflow-hidden border border-[rgba(90,40,52,0.12)] bg-[#FDFBF7] p-7 text-left shadow-elevated transition-all sm:p-12 md:p-14 ${
+              reducedMotion ? '' : 'animate-in fade-in zoom-in-95 duration-400'
+            }`}
+          >
+            {/* Subtle Watermark Feather */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute right-6 top-6 text-burgundy/10 sm:right-10 sm:top-10"
+            >
+              <Feather size={64} />
+            </div>
+
+            {/* Header of the letter */}
+            <div className="flex items-center justify-between border-b-2 border-[#8C4E28]/30 pb-3 text-xs">
+              <span className="font-nunito font-extrabold uppercase tracking-wider text-[#B53000]">
+                {letter.unlock_label || 'Surat'}
+              </span>
+              <span className="font-nunito text-xs font-bold text-[#8C4E28]">
+                Untuk Nona
+              </span>
+            </div>
+
+            {/* Letter Title */}
+            <h3 className="mt-4 font-nunito text-2xl sm:text-3xl font-black text-[#663300]">
+              {letter.title}
+            </h3>
+
+            <div className="stardew-divider my-4" />
+
+            {/* Body of the letter */}
+            <div className="font-nunito text-base sm:text-lg font-bold leading-relaxed text-[#3E2723] whitespace-pre-line">
+              {letter.body}
+            </div>
+
+            {/* Signature */}
+            <div className="mt-8 border-t-2 border-[#8C4E28]/30 pt-4 text-right">
+              <p className="font-nunito text-base font-black italic text-[#8C4E28]">
+                Dengan segenap hati,
+              </p>
+              <p className="font-nunito text-lg font-black text-[#663300]">
+                Alex
+              </p>
+            </div>
+          </article>
+        )}
+      </div>
+    </Scene>
+  );
+}
+
+export default function Letters({ letters }: { letters: Letter[] }) {
+  const activeLetters = getActiveLetters(letters);
+
+  if (!activeLetters.length) {
     return (
       <div className="card mx-auto max-w-lg p-10 text-center">
-        <p className="font-display text-xl italic text-ink-muted">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-paper text-burgundy shadow-subtle">
+          <Mail size={20} className="text-dustyrose" />
+        </div>
+        <p className="font-display text-2xl italic text-burgundy">
           Belum ada surat yang disimpan di sini.
         </p>
-        <p className="mt-2 text-xs text-ink-muted">
+        <p className="mt-2 text-xs text-ink-muted leading-relaxed">
           Admin bisa menuliskan surat-surat baru melalui panel kelola.
         </p>
       </div>
@@ -22,80 +142,11 @@ export default function Letters({ letters }: { letters: Letter[] }) {
   }
 
   return (
-    <div className="mx-auto grid max-w-5xl gap-6 sm:gap-8 lg:grid-cols-[280px_1fr] items-start">
-      {/* Letter Selectors / Envelopes */}
-      <div className="space-y-2.5">
-        <p className="text-xs uppercase tracking-wider text-dustyrose font-semibold px-1 mb-2">
-          Daftar Surat ({letters.length})
-        </p>
-        {letters.map((letter) => {
-          const isOpen = openId === letter.id;
-          return (
-            <button
-              key={letter.id}
-              type="button"
-              onClick={() => setOpenId(letter.id)}
-              className={`group w-full rounded-2xl border p-4 sm:p-5 text-left transition-all duration-300 ${
-                isOpen
-                  ? 'border-burgundy/40 bg-paper/80 shadow-card'
-                  : 'border-[rgba(90,40,52,0.08)] bg-[#FDFBF7] hover:border-dustyrose/40 hover:bg-paper-light'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${
-                    isOpen ? 'bg-burgundy text-white' : 'bg-paper text-dustyrose group-hover:bg-burgundy group-hover:text-white'
-                  }`}
-                >
-                  {isOpen ? <MailOpen size={16} /> : <Mail size={16} />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.10em] text-dustyrose">
-                    {letter.unlock_label || 'Surat'}
-                  </p>
-                  <h3 className="mt-0.5 line-clamp-1 font-display text-lg sm:text-xl font-normal leading-tight text-burgundy">
-                    {letter.title}
-                  </h3>
-                </div>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Parchment Letter Paper View */}
-      <article className="card relative min-h-[380px] p-6 sm:p-10 md:p-14 shadow-elevated">
-        {/* Subtle Watermark Ornament */}
-        <div className="absolute right-6 top-6 sm:right-8 sm:top-8 opacity-10 pointer-events-none text-burgundy">
-          <Feather size={56} />
-        </div>
-
-        {selected ? (
-          <div className="fade-in max-w-prose">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-dustyrose">
-              <span>{selected.unlock_label || 'Surat'}</span>
-            </div>
-
-            <h2 className="mt-3 font-display text-3xl font-normal leading-tight text-burgundy sm:text-4xl md:text-5xl">
-              {selected.title}
-            </h2>
-
-            <div className="my-6 sm:my-8 h-px w-14 bg-burgundy/15" />
-
-            <div className="prose-letter font-sans text-[15px] sm:text-[16px] md:text-[17px] leading-relaxed text-ink whitespace-pre-line">
-              {selected.body}
-            </div>
-
-            <div className="mt-10 sm:mt-12 border-t border-[rgba(90,40,52,0.10)] pt-5 sm:pt-6 text-right font-display text-lg sm:text-xl italic text-dustyrose">
-              Dari seseorang yang selalu mendoakanmu.
-            </div>
-          </div>
-        ) : (
-          <div className="flex min-h-[260px] items-center justify-center text-center text-sm text-ink-muted">
-            Pilih surat dari daftar di sebelah kiri untuk membacanya.
-          </div>
-        )}
-      </article>
+    <div className="space-y-6 sm:space-y-8">
+      {/* Dynamic Scenes: Exactly 1 <Scene> per active letter (DESIGN.md section 13) */}
+      {activeLetters.map((letter, index) => (
+        <SingleLetterScene key={letter.id} letter={letter} index={index} />
+      ))}
     </div>
   );
 }

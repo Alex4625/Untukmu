@@ -81,26 +81,28 @@ export function PersistentAudioWidget() {
 
   return (
     <aside className="fixed bottom-5 left-4 z-40 sm:bottom-6 sm:left-6" aria-label="Pemutar musik latar">
-      <div className="flex items-center gap-2 rounded-full border border-burgundy/15 bg-[#FDFBF7]/95 p-1.5 pr-3.5 shadow-card backdrop-blur-md transition-all duration-300 hover:border-burgundy/30 hover:shadow-elevated">
+      <div className="flex items-center gap-2.5 rounded-2xl border-2 border-[#8C4E28] bg-[#FFF3CC]/95 p-2 pr-4 shadow-[0_6px_20px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-150">
         <button
           type="button"
           onClick={togglePlay}
           aria-label={isPlaying ? 'Jeda musik cerita' : 'Putar musik cerita'}
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white shadow-subtle transition duration-300 hover:scale-105 active:scale-95 ${
-            isPlaying ? 'bg-burgundy ring-2 ring-dustyrose/40' : 'bg-dustyrose hover:bg-dustyrose-dark'
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-[#4A2411] text-[#FFF3CC] shadow-md transition duration-150 active:scale-95 ${
+            isPlaying
+              ? 'bg-gradient-to-b from-[#A05A2C] to-[#7A3C18] ring-2 ring-[#F9EC88]'
+              : 'bg-gradient-to-b from-[#8C4E28] to-[#663300] hover:brightness-110'
           }`}
         >
-          {isPlaying ? <Pause size={14} /> : <Play size={14} className="ml-0.5" />}
+          {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5 text-[#F9EC88]" />}
         </button>
 
         <div className="flex flex-col text-left">
-          <span className="flex items-center gap-1 text-[11px] font-semibold text-burgundy sm:text-xs">
-            <Music2 size={11} className="text-dustyrose shrink-0" />
-            <span className="truncate max-w-[90px] sm:max-w-[130px]">
-              {isPlaying ? 'Memutar musik' : 'Musik cerita'}
+          <span className="flex items-center gap-1 font-nunito text-xs font-black text-[#663300] sm:text-sm">
+            <Music2 size={13} className="text-[#B53000] shrink-0" />
+            <span className="truncate max-w-[100px] sm:max-w-[140px]">
+              {isPlaying ? 'Memutar Musik' : 'Musik Cerita'}
             </span>
           </span>
-          <span className="text-[9px] sm:text-[10px] text-ink-muted leading-none">
+          <span className="font-nunito text-[10px] sm:text-[11px] font-bold text-[#8C4E28] leading-tight">
             {error ? error : isPlaying ? 'Klik untuk jeda' : 'Klik dengarkan'}
           </span>
         </div>

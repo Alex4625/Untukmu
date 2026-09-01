@@ -1,8 +1,15 @@
 import type { Metadata, Viewport } from 'next';
-import { Cormorant_Garamond, DM_Sans } from 'next/font/google';
+import { Cormorant_Garamond, DM_Sans, Nunito } from 'next/font/google';
 import './globals.css';
 import { AudioProvider, PersistentAudioWidget } from '@/components/PersistentAudioPlayer';
-import ChapterDrawer from '@/components/ChapterDrawer';
+import ChapterIndexNav from '@/components/ChapterIndexNav';
+
+const nunitoFont = Nunito({
+  subsets: ['latin'],
+  weight: ['400', '600', '700', '800', '900'],
+  variable: '--font-nunito',
+  display: 'swap'
+});
 
 const displayFont = Cormorant_Garamond({
   subsets: ['latin'],
@@ -49,17 +56,17 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#F7F2EA'
+  themeColor: '#5ca6e8'
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id">
-      <body className={`${sansFont.variable} ${displayFont.variable} font-sans bg-base text-ink antialiased selection:bg-dustyrose selection:text-white`}>
+      <body className={`${nunitoFont.variable} ${sansFont.variable} ${displayFont.variable} font-nunito bg-stardew-sky text-stardew-ink antialiased selection:bg-stardew-gold selection:text-stardew-wood-dark`}>
         <AudioProvider>
           {children}
           <PersistentAudioWidget />
-          <ChapterDrawer />
+          <ChapterIndexNav />
         </AudioProvider>
       </body>
     </html>

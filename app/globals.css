@@ -4,23 +4,37 @@
 
 :root {
   color-scheme: light;
-  --base: #F7F2EA;
-  --paper: #EEE6DB;
-  --paper-light: #FDFBF7;
-  --ink: #272322;
-  --ink-muted: #5C5451;
-  --burgundy: #5A2834;
-  --burgundy-dark: #3F1C24;
-  --burgundy-light: #743443;
-  --dustyrose: #B47F84;
-  --dustyrose-dark: #9A666B;
-  --rose-accent: #B94F68;
-  --sage: #8F9983;
-  --gold: #B39A6B;
-  --border: rgba(90, 40, 52, 0.10);
-  --shadow-subtle: 0 1px 3px rgba(39, 35, 34, 0.04);
-  --shadow-card: 0 2px 10px rgba(90, 40, 52, 0.05), 0 1px 2px rgba(90, 40, 52, 0.03);
-  --shadow-elevated: 0 10px 30px rgba(90, 40, 52, 0.07), 0 2px 8px rgba(90, 40, 52, 0.03);
+  --stardew-sky: #5ca6e8;
+  --stardew-night: #154794;
+  --stardew-parchment: #FFF3CC;
+  --stardew-parchment-light: #FFFDF4;
+  --stardew-parchment-dark: #F2E2B0;
+  --stardew-wood-dark: #4A2411;
+  --stardew-wood-mid: #8C4E28;
+  --stardew-wood-light: #C87D43;
+  --stardew-gold: #F9EC88;
+  --stardew-blue: #0066CC;
+  --stardew-brown-text: #663300;
+  --stardew-body-text: #252525;
+
+  /* Legacy aliases for backward compatibility */
+  --base: #5ca6e8;
+  --paper: #FFF3CC;
+  --paper-light: #FFFDF4;
+  --ink: #252525;
+  --ink-muted: #5A3E2D;
+  --burgundy: #663300;
+  --burgundy-dark: #4A2411;
+  --burgundy-light: #8C4E28;
+  --dustyrose: #A83B19;
+  --dustyrose-dark: #8C2E10;
+  --rose-accent: #B53000;
+  --sage: #4E7C38;
+  --gold: #D4A325;
+  --border: #C8A870;
+  --shadow-subtle: 0 2px 4px rgba(0, 0, 0, 0.15);
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-elevated: 0 12px 36px rgba(0, 0, 0, 0.45);
 }
 
 * {
@@ -29,83 +43,339 @@
 
 html {
   scroll-behavior: smooth;
-  background-color: var(--base);
+  background-color: #5ca6e8;
 }
 
 body {
   margin: 0;
-  background-color: var(--base);
-  color: var(--ink);
+  background-color: #5ca6e8;
+  background-image: url('/images/stardew/stardewbackground.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-attachment: fixed;
+  background-size: 1920px auto;
+  min-height: 100vh;
+  color: #252525;
   overflow-x: hidden;
-  font-size: 15px;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 16px;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-  background: var(--dustyrose);
-  color: #FFFFFF;
+  background: #F9EC88;
+  color: #4A2411;
 }
 
-/* Base Container Primitive with bottom spacing for floating action pills */
+/* Base Container Primitive */
 .container-page {
   @apply mx-auto w-full max-w-5xl px-4 sm:px-6 md:px-8 lg:px-12 pb-28 sm:pb-32;
 }
 
-/* Editorial Paper Cards */
-.card {
-  @apply rounded-2xl border border-[rgba(90,40,52,0.09)] bg-[#FDFBF7] shadow-card transition-all duration-300;
+/* Stardew Valley Wooden Menu Frame Panel */
+.card,
+.stardew-panel {
+  background-color: #FFF3CC;
+  border-style: solid;
+  border-width: 16px;
+  border-image-source: url('/images/stardew/menu_border.png');
+  border-image-slice: 34% fill;
+  border-image-repeat: stretch;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(102, 51, 0, 0.2);
+  color: #3E2723;
+  transition: all 0.2s ease;
+}
+
+.card p,
+.stardew-panel p {
+  color: #3E2723;
+}
+
+.card h1,
+.card h2,
+.card h3,
+.stardew-panel h1,
+.stardew-panel h2,
+.stardew-panel h3 {
+  color: #663300;
 }
 
 .card-paper {
-  @apply rounded-2xl border border-[rgba(90,40,52,0.07)] bg-[#EEE6DB] shadow-card;
+  background-color: #FFF3CC;
+  border-style: solid;
+  border-width: 14px;
+  border-image-source: url('/images/stardew/menu_border.png');
+  border-image-slice: 34% fill;
+  border-image-repeat: stretch;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+  color: #252525;
 }
 
-/* Interactive Buttons */
-.btn-primary {
-  @apply inline-flex min-h-[44px] items-center justify-center rounded-full bg-burgundy px-7 py-3 text-[15px] font-medium text-white shadow-card transition duration-300 hover:-translate-y-0.5 hover:bg-burgundy-dark hover:shadow-elevated focus:outline-none focus:ring-2 focus:ring-burgundy/40 focus:ring-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+/* Stardew Valley Authentic Wooden Plank Buttons */
+.btn-primary,
+.stardew-btn {
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-weight: 800;
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #A05A2C 0%, #7A3C18 100%);
+  color: #FFF3CC;
+  border: 3px solid #4A2411;
+  box-shadow: inset 0 2px 0 #C87D43, inset 0 -2px 0 #32140A, 0 4px 10px rgba(0, 0, 0, 0.35);
+  text-shadow: 1px 1px 0 #32140A;
+  padding: 10px 24px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-primary:hover,
+.stardew-btn:hover {
+  background: linear-gradient(180deg, #B56733 0%, #8C451D 100%);
+  color: #F9EC88;
+  box-shadow: inset 0 2px 0 #E2965D, inset 0 -2px 0 #32140A, 0 6px 14px rgba(0, 0, 0, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active,
+.stardew-btn:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 0 #32140A, 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .btn-secondary {
-  @apply inline-flex min-h-[44px] items-center justify-center rounded-full border border-burgundy/25 bg-[#FDFBF7] px-6 py-3 text-[15px] font-medium text-burgundy shadow-subtle transition duration-300 hover:border-burgundy/50 hover:bg-paper/50 focus:outline-none focus:ring-2 focus:ring-burgundy/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-weight: 700;
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #FFF3CC;
+  color: #663300;
+  border: 2px solid #8C4E28;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-secondary:hover {
+  background: #FFE8A3;
+  color: #4A2411;
+  border-color: #4A2411;
 }
 
 .btn-ghost {
-  @apply inline-flex min-h-[40px] items-center justify-center rounded-xl px-4 py-2 text-sm font-medium text-ink-muted transition hover:text-burgundy focus:outline-none focus:ring-2 focus:ring-burgundy/30;
+  @apply inline-flex min-h-[40px] items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold text-[#663300] transition hover:bg-[#FFE8A3]/70;
 }
 
 .btn-accent {
-  @apply inline-flex min-h-[44px] items-center justify-center rounded-full bg-dustyrose px-6 py-3 text-[15px] font-medium text-white shadow-card transition duration-300 hover:-translate-y-0.5 hover:bg-dustyrose-dark focus:outline-none focus:ring-2 focus:ring-dustyrose/40;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-weight: 800;
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #D4A325 0%, #A67812 100%);
+  color: #FFFDF4;
+  border: 3px solid #664808;
+  box-shadow: inset 0 2px 0 #F9EC88, inset 0 -2px 0 #4A3304, 0 4px 10px rgba(0, 0, 0, 0.35);
+  text-shadow: 1px 1px 0 #4A3304;
+  padding: 10px 24px;
+  transition: all 0.15s ease;
+}
+
+.btn-accent:hover {
+  background: linear-gradient(180deg, #E6B435 0%, #BA8917 100%);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+/* Stardew Valley Spike / Divider */
+.stardew-divider {
+  height: 16px;
+  width: 100%;
+  background: url('/images/stardew/hrspike.png') repeat-x center;
+  background-size: contain;
+  margin: 20px 0;
+  opacity: 0.9;
+}
+
+/* Stardew Valley Royal Blue Header */
+.stardew-header {
+  background-color: rgba(21, 71, 148, 0.88);
+  backdrop-filter: blur(8px);
+  border-bottom: 3px solid #F9EC88;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 /* Typography Hierarchy Tokens */
 .section-title {
-  @apply font-display text-4xl font-normal leading-tight text-burgundy sm:text-5xl md:text-6xl;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 2.25rem;
+  line-height: 1.25;
+  color: #663300;
+  text-shadow: 1px 1px 0 rgba(255, 243, 204, 0.8);
+}
+
+@media (min-width: 640px) {
+  .section-title {
+    font-size: 3rem;
+  }
 }
 
 .eyebrow {
-  @apply text-xs font-semibold uppercase tracking-[0.14em] text-dustyrose;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #B53000;
 }
 
 .chapter-number {
-  @apply font-display text-base italic text-gold;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #D4A325;
 }
 
 /* Form Inputs */
 .input {
-  @apply w-full rounded-xl border border-[rgba(90,40,52,0.14)] bg-white px-4 py-3 text-[15px] text-ink outline-none transition focus:border-burgundy focus:ring-2 focus:ring-burgundy/20;
+  width: 100%;
+  border-radius: 8px;
+  border: 2px solid #8C4E28;
+  background-color: #FFFDF4;
+  padding: 10px 14px;
+  font-size: 15px;
+  color: #252525;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.input:focus {
+  border-color: #0066CC;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.25);
 }
 
 .label {
-  @apply mb-1.5 block text-[13px] font-medium text-ink;
+  margin-bottom: 6px;
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #663300;
 }
 
 /* Motion & Animation */
+.stardew-page-enter {
+  animation: stardewPageEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+@keyframes stardewPageEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.99);
+    filter: blur(2px);
+  }
+  60% {
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
+}
+
+/* Shimmer Progress Line at Top of Viewport during route transitions */
+.route-transition-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #D4A325 0%, #F9EC88 50%, #B53000 100%);
+  z-index: 100;
+  pointer-events: none;
+  animation: routeShimmer 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  box-shadow: 0 0 10px rgba(249, 236, 136, 0.8), 0 0 4px rgba(212, 163, 37, 0.6);
+}
+
+@keyframes routeShimmer {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left;
+    opacity: 1;
+  }
+  70% {
+    transform: scaleX(1);
+    transform-origin: left;
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    transform-origin: left;
+    opacity: 0;
+  }
+}
+
+.chapter-header-enter {
+  animation: chapterHeaderEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes chapterHeaderEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-1 {
+  animation-delay: 0.05s;
+}
+
+.stagger-2 {
+  animation-delay: 0.1s;
+}
+
+.stagger-3 {
+  animation-delay: 0.15s;
+}
+
 .fade-in {
-  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.world-frame-enter {
+  animation: worldFrameEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes worldFrameEnter {
   from {
     opacity: 0;
     transform: translateY(8px);
@@ -117,7 +387,7 @@ body {
 }
 
 .soft-pulse {
-  animation: softPulse 3s ease-in-out infinite;
+  animation: softPulse 2.5s ease-in-out infinite;
 }
 
 @keyframes softPulse {
@@ -126,6 +396,44 @@ body {
   }
   50% {
     transform: scale(1.03);
+  }
+}
+
+/* Chapter Transition Toast / Badge Pulse */
+.animate-chapter-toast {
+  animation: chapterToastFade 2.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes chapterToastFade {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -6px);
+  }
+}
+
+.chapter-badge-glow {
+  box-shadow: 0 0 12px rgba(249, 236, 136, 0.5), inset 0 0 8px rgba(249, 236, 136, 0.3);
+  animation: badgeGlowPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes badgeGlowPulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(249, 236, 136, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(249, 236, 136, 0.8), 0 0 24px rgba(212, 163, 37, 0.4);
   }
 }
 

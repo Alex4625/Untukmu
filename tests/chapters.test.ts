@@ -1,8 +1,10 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { CHAPTERS, getChapterByPath, getNextChapter, getPrevChapter } from '../components/chapters';
+import ChapterDrawer from '../components/ChapterDrawer';
+import ChapterIndexNav from '../components/ChapterIndexNav';
 
-describe('Chapter Navigation & Metadata (DESIGN.md v2)', () => {
+describe('Chapter Navigation & Metadata (DESIGN.md v2, DEC-014, TASK-013)', () => {
   it('should have exactly 7 chapters matching specification', () => {
     assert.strictEqual(CHAPTERS.length, 7);
   });
@@ -46,5 +48,18 @@ describe('Chapter Navigation & Metadata (DESIGN.md v2)', () => {
     assert.strictEqual(getPrevChapter('07')?.number, '06');
     assert.strictEqual(getPrevChapter('02')?.number, '01');
     assert.strictEqual(getPrevChapter('01'), null);
+  });
+
+  it('should export ChapterDrawer and ChapterIndexNav cleanly as functions', () => {
+    assert.strictEqual(typeof ChapterDrawer, 'function');
+    assert.strictEqual(typeof ChapterIndexNav, 'function');
+  });
+
+  it('should allow non-linear navigation to any of the 7 chapters at any time', () => {
+    // Non-linear rule: all chapters are defined with valid accessible URLs
+    CHAPTERS.forEach((ch) => {
+      assert.ok(ch.href.startsWith('/'));
+      assert.ok(ch.number.length === 2);
+    });
   });
 });
