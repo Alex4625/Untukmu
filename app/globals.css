@@ -497,10 +497,118 @@ body {
   }
 }
 
-/* Prose for letters */
-.prose-letter p {
-  margin-bottom: 1.25rem;
-  line-height: 1.85;
+/* Storybook Page Turn Transition Animations (Artisanal, Zero AI Slop) */
+.animate-storybook-enter-forward {
+  animation: storybookEnterForward 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform, opacity;
+  transform-origin: left center;
+}
+
+.animate-storybook-leave-forward {
+  animation: storybookLeaveForward 0.35s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+  will-change: transform, opacity;
+  transform-origin: left center;
+}
+
+.animate-storybook-enter-backward {
+  animation: storybookEnterBackward 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform, opacity;
+  transform-origin: right center;
+}
+
+.animate-storybook-leave-backward {
+  animation: storybookLeaveBackward 0.35s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+  will-change: transform, opacity;
+  transform-origin: right center;
+}
+
+.animate-storybook-fade-in {
+  animation: storybookFadeIn 0.3s ease-out forwards;
+}
+
+.animate-storybook-fade-out {
+  animation: storybookFadeOut 0.3s ease-in forwards;
+}
+
+.animate-storybook-content-bloom {
+  animation: storybookContentBloom 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes storybookEnterForward {
+  0% {
+    transform: perspective(1600px) rotateY(-26deg) translateX(40px) scale(0.94);
+    opacity: 0;
+  }
+  100% {
+    transform: perspective(1600px) rotateY(0deg) translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes storybookLeaveForward {
+  0% {
+    transform: perspective(1600px) rotateY(0deg) translateX(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: perspective(1600px) rotateY(24deg) translateX(-45px) scale(0.95);
+    opacity: 0;
+  }
+}
+
+@keyframes storybookEnterBackward {
+  0% {
+    transform: perspective(1600px) rotateY(26deg) translateX(-40px) scale(0.94);
+    opacity: 0;
+  }
+  100% {
+    transform: perspective(1600px) rotateY(0deg) translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes storybookLeaveBackward {
+  0% {
+    transform: perspective(1600px) rotateY(0deg) translateX(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: perspective(1600px) rotateY(-24deg) translateX(45px) scale(0.95);
+    opacity: 0;
+  }
+}
+
+@keyframes storybookFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes storybookFadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes storybookContentBloom {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Accessibility */

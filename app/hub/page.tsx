@@ -2,10 +2,8 @@ import LockedNotice from '@/components/LockedNotice';
 import PreviewBanner from '@/components/PreviewBanner';
 import { getPublicContent } from '@/lib/publicContent';
 import { isPreviewRequest, previewPath, type PageSearchParams } from '@/lib/publicPreview';
-import { CHAPTERS } from '@/components/chapters';
-import { ArrowRight, BookOpen, Sparkles } from 'lucide-react';
-import Link from 'next/link';
-
+import { BookOpen } from 'lucide-react';
+import HubChapterCards from '@/components/HubChapterCards';
 import PublicNav from '@/components/PublicNav';
 
 export const dynamic = 'force-dynamic';
@@ -48,54 +46,10 @@ export default async function HubPage({ searchParams }: { searchParams?: PageSea
           Kamu bisa mulai membaca secara berurutan dari chapter pertama, atau membuka chapter mana pun yang ingin kamu lihat lebih dulu.
         </p>
 
-        {/* Primary CTA leading to Chapter 01 */}
-        <div className="mt-6 sm:mt-8 flex justify-center">
-          <Link
-            href={firstChapterHref}
-            className="btn-primary group w-full sm:w-auto gap-2 px-6 py-3 sm:px-8 sm:py-3.5 text-sm sm:text-base font-extrabold"
-          >
-            <span>Mulai Membaca</span>
-            <span className="text-[#F9EC88]">01. Sebuah Awal</span>
-            <ArrowRight size={18} className="text-[#F9EC88] transition-transform duration-200 group-hover:translate-x-1" />
-          </Link>
-        </div>
-      </section>
-
-      {/* Chapter Table of Contents Overview */}
-      <section className="mx-auto mt-8 sm:mt-10 max-w-3xl">
-        <div className="mb-3 sm:mb-4 flex items-center justify-between px-2">
-          <h2 className="font-nunito text-xl sm:text-3xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-            Daftar Isi Cerita
-          </h2>
-          <span className="rounded-lg border border-[#F9EC88] bg-[#154794]/85 px-2.5 py-0.5 sm:px-3 sm:py-1 font-nunito text-[11px] sm:text-xs font-black text-[#F9EC88] shadow-sm">
-            7 Chapter Lengkap
-          </span>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          {CHAPTERS.map((ch) => (
-            <Link
-              key={ch.number}
-              href={previewPath(ch.href, content.preview)}
-              className="card-inner group flex items-start gap-3 p-3.5 sm:p-5 transition hover:brightness-105 active:scale-[0.99]"
-            >
-              <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-lg border-2 border-[#4A2411] bg-gradient-to-b from-[#A05A2C] to-[#7A3C18] font-nunito text-base sm:text-lg font-black text-[#F9EC88] shadow-md transition group-hover:scale-105">
-                {ch.number}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-nunito text-base sm:text-xl font-black text-[#663300] leading-tight group-hover:text-[#B53000]">
-                    {ch.publicTitle}
-                  </h3>
-                  {ch.number === '07' && <Sparkles size={15} className="text-[#D4A325] shrink-0" />}
-                </div>
-                <p className="mt-1 font-nunito text-xs font-bold text-[#5A3E2D] leading-relaxed line-clamp-2">
-                  {ch.description}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
+        <HubChapterCards
+          firstChapterHref={firstChapterHref}
+          preview={content.preview}
+        />
       </section>
     </main>
   );

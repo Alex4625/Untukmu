@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, BookOpen, Sparkles, Heart, CheckCircle2 } from 'lucide-react';
-import { CHAPTERS, getNextChapter, getPrevChapter } from './chapters';
+import { CHAPTERS, ChapterInfo, getNextChapter, getPrevChapter } from './chapters';
 import { previewPath } from '@/lib/publicUrl';
+import { useChapterTransition } from './StorybookTransition';
 
 export default function ChapterTransitionPortal({
   currentChapterNumber,
@@ -12,10 +13,22 @@ export default function ChapterTransitionPortal({
   currentChapterNumber: string;
   preview?: boolean;
 }) {
+  const { transitionTo, isTransitioning } = useChapterTransition();
   const nextChapter = getNextChapter(currentChapterNumber);
   const prevChapter = getPrevChapter(currentChapterNumber);
   const currentChapterIndex = CHAPTERS.findIndex((ch) => ch.number === currentChapterNumber);
   const currentChapter = CHAPTERS[currentChapterIndex];
+
+  const handleNavigate = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+    targetChapter?: ChapterInfo,
+    direction: 'forward' | 'backward' | 'hub' = 'forward'
+  ) => {
+    e.preventDefault();
+    if (isTransitioning) return;
+    transitionTo(href, targetChapter, direction);
+  };
 
   return (
     <nav
@@ -39,11 +52,14 @@ export default function ChapterTransitionPortal({
           {CHAPTERS.map((ch, idx) => {
             const isCompleted = idx < currentChapterIndex;
             const isCurrent = idx === currentChapterIndex;
+            const targetUrl = previewPath(ch.href, preview);
+            const direction = idx >= currentChapterIndex ? 'forward' : 'backward';
 
             return (
               <Link
                 key={ch.number}
-                href={previewPath(ch.href, preview)}
+                href={targetUrl}
+                onClick={(e) => handleNavigate(e, targetUrl, ch, direction)}
                 title={`Babak ${ch.number}: ${ch.publicTitle}`}
                 className={`group relative flex flex-col items-center py-1 rounded transition-all duration-150 ${
                   isCurrent
@@ -83,6 +99,14 @@ export default function ChapterTransitionPortal({
           {/* Large Interactive Gateway Card to Next Chapter */}
           <Link
             href={previewPath(nextChapter.href, preview)}
+            onClick={(e) =>
+              handleNavigate(
+                e,
+                previewPath(nextChapter.href, preview),
+                nextChapter,
+                'forward'
+              )
+            }
             className="group relative block overflow-hidden rounded-2xl border-2 border-[#8C4E28] bg-gradient-to-br from-[#FFFDF4] via-[#FFF3CC] to-[#FFE8A3] p-5 sm:p-7 text-left shadow-[0_6px_20px_rgba(0,0,0,0.15)] transition-all duration-200 hover:-translate-y-1 hover:border-[#4A2411] hover:shadow-[0_12px_28px_rgba(0,0,0,0.25)] active:scale-[0.99]"
           >
             {/* Ambient gold glow highlight on hover */}
@@ -124,6 +148,14 @@ export default function ChapterTransitionPortal({
             {prevChapter ? (
               <Link
                 href={previewPath(prevChapter.href, preview)}
+                onClick={(e) =>
+                  handleNavigate(
+                    e,
+                    previewPath(prevChapter.href, preview),
+                    prevChapter,
+                    'backward'
+                  )
+                }
                 className="btn-secondary group gap-2 text-xs sm:text-sm font-black text-[#663300]"
               >
                 <ArrowLeft size={16} className="text-[#8C4E28] transition-transform duration-200 group-hover:-translate-x-1" />
@@ -132,6 +164,9 @@ export default function ChapterTransitionPortal({
             ) : (
               <Link
                 href={previewPath('/hub', preview)}
+                onClick={(e) =>
+                  handleNavigate(e, previewPath('/hub', preview), undefined, 'hub')
+                }
                 className="btn-secondary group gap-2 text-xs sm:text-sm font-black text-[#663300]"
               >
                 <BookOpen size={15} className="text-[#8C4E28]" />
@@ -141,6 +176,9 @@ export default function ChapterTransitionPortal({
 
             <Link
               href={previewPath('/hub', preview)}
+              onClick={(e) =>
+                handleNavigate(e, previewPath('/hub', preview), undefined, 'hub')
+              }
               className="text-xs font-black text-[#8C4E28] hover:text-[#B53000] underline underline-offset-4"
             >
               Lihat Semua Babak
@@ -163,6 +201,9 @@ export default function ChapterTransitionPortal({
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link
               href={previewPath('/hub', preview)}
+              onClick={(e) =>
+                handleNavigate(e, previewPath('/hub', preview), undefined, 'hub')
+              }
               className="btn-primary gap-2 text-xs sm:text-sm font-extrabold"
             >
               <BookOpen size={16} className="text-[#F9EC88]" />
@@ -170,6 +211,15 @@ export default function ChapterTransitionPortal({
             </Link>
             <Link
               href={previewPath('/timeline', preview)}
+              onClick={(e) => {
+                const firstChapter = CHAPTERS[0];
+                handleNavigate(
+                  e,
+                  previewPath(firstChapter.href, preview),
+                  firstChapter,
+                  'backward'
+                );
+              }}
               className="btn-secondary gap-2 text-xs sm:text-sm font-extrabold"
             >
               <ArrowLeft size={16} />

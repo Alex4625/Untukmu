@@ -3,6 +3,7 @@ import { Cormorant_Garamond, DM_Sans, Nunito } from 'next/font/google';
 import './globals.css';
 import { AudioProvider, PersistentAudioWidget } from '@/components/PersistentAudioPlayer';
 import ChapterIndexNav from '@/components/ChapterIndexNav';
+import { StorybookTransitionProvider } from '@/components/StorybookTransition';
 
 const nunitoFont = Nunito({
   subsets: ['latin'],
@@ -64,9 +65,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="id">
       <body className={`${nunitoFont.variable} ${sansFont.variable} ${displayFont.variable} font-nunito bg-stardew-sky text-stardew-ink antialiased selection:bg-stardew-gold selection:text-stardew-wood-dark`}>
         <AudioProvider>
-          {children}
-          <PersistentAudioWidget />
-          <ChapterIndexNav />
+          <StorybookTransitionProvider>
+            {children}
+            <PersistentAudioWidget />
+            <ChapterIndexNav />
+          </StorybookTransitionProvider>
         </AudioProvider>
       </body>
     </html>

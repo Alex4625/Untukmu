@@ -3,8 +3,9 @@
 import { Suspense, useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { CHAPTERS, getChapterByPath } from './chapters';
+import { CHAPTERS, ChapterInfo, getChapterByPath, getChapterTransitionDirection } from './chapters';
 import { previewPath } from '@/lib/publicUrl';
+import { useChapterTransition } from './StorybookTransition';
 import { Compass, X } from 'lucide-react';
 
 const JOURNEY_PATHS = new Set([
@@ -17,9 +18,24 @@ function ChapterIndexNavInner() {
   const searchParams = useSearchParams();
   const isPreview = searchParams.get('preview') === 'unlocked';
   const currentChapter = getChapterByPath(pathname);
+  const { transitionTo, isTransitioning } = useChapterTransition();
   const [mobileExpanded, setMobileExpanded] = useState(false);
   const [prevPath, setPrevPath] = useState(pathname);
   const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const handleNavigate = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+    targetChapter?: ChapterInfo
+  ) => {
+    e.preventDefault();
+    if (isTransitioning) return;
+    setMobileExpanded(false);
+    const direction = targetChapter
+      ? getChapterTransitionDirection(currentChapter?.number, targetChapter.number)
+      : 'hub';
+    transitionTo(href, targetChapter, direction);
+  };
 
   // Reset mobile expanded state when pathname changes (canonical React state adjustment pattern)
   if (prevPath !== pathname) {
@@ -60,6 +76,7 @@ function ChapterIndexNavInner() {
           {/* Hub / Intro link */}
           <Link
             href={previewPath('/hub', isPreview)}
+            onClick={(e) => handleNavigate(e, previewPath('/hub', isPreview))}
             aria-label="Halaman pembuka (Hub)"
             aria-current={pathname === '/hub' ? 'page' : undefined}
             title="Pengantar Cerita"
@@ -78,11 +95,13 @@ function ChapterIndexNavInner() {
           {CHAPTERS.map((chapter) => {
             const isActive = currentChapter?.number === chapter.number;
             const isKnown = JOURNEY_PATHS.has(pathname);
+            const targetUrl = previewPath(chapter.href, isPreview);
 
             return (
               <Link
                 key={chapter.number}
-                href={previewPath(chapter.href, isPreview)}
+                href={targetUrl}
+                onClick={(e) => handleNavigate(e, targetUrl, chapter)}
                 aria-label={`Chapter ${chapter.number}: ${chapter.publicTitle}`}
                 aria-current={isActive ? 'page' : undefined}
                 title={`${chapter.number}. ${chapter.publicTitle}`}
@@ -118,7 +137,7 @@ function ChapterIndexNavInner() {
           >
             <Link
               href={previewPath('/hub', isPreview)}
-              onClick={() => setMobileExpanded(false)}
+              onClick={(e) => handleNavigate(e, previewPath('/hub', isPreview))}
               className={`flex h-8 w-8 items-center justify-center rounded-lg font-nunito text-xs font-black ${
                 pathname === '/hub' ? 'bg-[#8C4E28] text-[#F9EC88] border border-[#4A2411] chapter-badge-glow' : 'text-[#663300] hover:bg-[#FFE8A3]'
               }`}
@@ -128,11 +147,12 @@ function ChapterIndexNavInner() {
 
             {CHAPTERS.map((ch) => {
               const isActive = currentChapter?.number === ch.number;
+              const targetUrl = previewPath(ch.href, isPreview);
               return (
                 <Link
                   key={ch.number}
-                  href={previewPath(ch.href, isPreview)}
-                  onClick={() => setMobileExpanded(false)}
+                  href={targetUrl}
+                  onClick={(e) => handleNavigate(e, targetUrl, ch)}
                   className={`flex h-8 w-8 items-center justify-center rounded-lg font-nunito text-xs font-black ${
                     isActive ? 'bg-[#8C4E28] text-[#F9EC88] border border-[#4A2411] shadow-inner chapter-badge-glow' : 'text-[#663300] hover:bg-[#FFE8A3]'
                   }`}

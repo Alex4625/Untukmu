@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CHAPTERS, getChapterByPath, getNextChapter, getPrevChapter } from '../components/chapters';
+import { CHAPTERS, getChapterByPath, getNextChapter, getPrevChapter, getChapterTransitionDirection } from '../components/chapters';
 import { previewPath } from '../lib/publicUrl';
 
 test('Page Transitions & 7 Chapter Narrative Routing (TASK-TRANSITIONS)', async (t) => {
@@ -66,5 +66,21 @@ test('Page Transitions & 7 Chapter Narrative Routing (TASK-TRANSITIONS)', async 
     assert.equal(previewPath('/timeline', true), '/timeline?preview=unlocked');
     assert.equal(previewPath('/timeline', false), '/timeline');
     assert.equal(previewPath('/gallery?sort=asc', true), '/gallery?sort=asc&preview=unlocked');
+  });
+
+  await t.test('should define prologueQuote and romanNumeral for all 7 chapters', () => {
+    CHAPTERS.forEach((ch) => {
+      assert.ok(ch.prologueQuote && ch.prologueQuote.length > 10, `Chapter ${ch.number} should have meaningful prologue quote`);
+      assert.ok(ch.romanNumeral && ch.romanNumeral.length >= 1, `Chapter ${ch.number} should have valid roman numeral`);
+    });
+  });
+
+  await t.test('should compute chapter transition direction correctly', () => {
+    assert.equal(getChapterTransitionDirection('01', '02'), 'forward');
+    assert.equal(getChapterTransitionDirection('01', '07'), 'forward');
+    assert.equal(getChapterTransitionDirection('04', '02'), 'backward');
+    assert.equal(getChapterTransitionDirection('07', '01'), 'backward');
+    assert.equal(getChapterTransitionDirection('02', undefined), 'forward');
+    assert.equal(getChapterTransitionDirection(undefined, '03'), 'forward');
   });
 });

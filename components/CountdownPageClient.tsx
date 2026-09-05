@@ -9,9 +9,11 @@ import Countdown from './Countdown';
 import type { PublicContent } from '@/lib/types';
 import { previewPath } from '@/lib/publicUrl';
 import PublicNav from './PublicNav';
+import { useChapterTransition } from './StorybookTransition';
 
 export default function CountdownPageClient({ content }: { content: PublicContent }) {
   const [isUnlocked, setIsUnlocked] = useState(content.unlocked);
+  const { transitionTo } = useChapterTransition();
   const hasFiredConfetti = useRef(false);
 
   const hubHref = previewPath('/hub', content.preview);
@@ -66,7 +68,14 @@ export default function CountdownPageClient({ content }: { content: PublicConten
 
             {/* CTAs per DESIGN.md section 4: Hub intro CTA + restrained celebration */}
             <div className="mt-6 sm:mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link href={hubHref} className="btn-primary group gap-2 w-full sm:w-auto">
+              <Link
+                href={hubHref}
+                onClick={(e) => {
+                  e.preventDefault();
+                  transitionTo(hubHref, undefined, 'forward');
+                }}
+                className="btn-primary group gap-2 w-full sm:w-auto"
+              >
                 <span>Buka Hadiahnya</span>
                 <ArrowRight size={16} className="text-[#F9EC88] transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
