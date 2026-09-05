@@ -40,8 +40,8 @@ export default function FinalSurprise({
         tone="burgundy"
         worldFrame={true}
       >
-        <div className="mx-auto w-full max-w-3xl py-8 sm:py-16">
-          <div className="card mx-auto max-w-2xl px-6 py-10 sm:px-12 sm:py-14 text-center">
+        <div className="mx-auto w-full max-w-3xl py-4 sm:py-16">
+          <div className="card mx-auto max-w-2xl px-4 py-8 sm:px-12 sm:py-14 text-center">
             {/* Ambient center emblem */}
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#8C4E28] bg-[#FFE8A3] text-[#D4A325] shadow-md soft-pulse">
               <Sparkles size={32} className="text-[#D4A325]" />

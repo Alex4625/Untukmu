@@ -17,7 +17,7 @@ export default async function FinalPage({ searchParams }: { searchParams?: PageS
   const finalMessage = content.site_settings?.final_message || defaultFinalMessage;
 
   return (
-    <main className="container-page relative min-h-dvh pt-6 sm:pt-10">
+    <main className="container-page relative min-h-dvh pt-16 sm:pt-20 pb-36 sm:pb-32 px-2 sm:px-6">
       {/* World Frame corner anchors */}
       <div
         aria-hidden="true"

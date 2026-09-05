@@ -10,10 +10,10 @@ export default function HomeClient({ preview = false }: { preview?: boolean }) {
   return (
     <main className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-4 py-12 text-center sm:px-6">
       {/* Stardew Valley Wooden Plaque Main Card */}
-      <section className="card world-frame-enter relative z-10 w-full max-w-xl px-6 py-10 sm:px-12 sm:py-14">
+      <section className="card world-frame-enter relative z-10 w-full max-w-xl px-4 py-8 sm:px-12 sm:py-14">
         {/* Cozy Heart Emblem */}
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border-2 border-[#8C4E28] bg-[#FFE8A3] text-[#B53000] shadow-sm">
-          <Heart size={22} className="fill-[#B53000]/30 text-[#B53000]" />
+        <div className="mx-auto mb-3 sm:mb-4 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full border-2 border-[#8C4E28] bg-[#FFE8A3] text-[#B53000] shadow-sm">
+          <Heart size={20} className="fill-[#B53000]/30 text-[#B53000]" />
         </div>
 
         {/* Date & Title */}
@@ -21,7 +21,7 @@ export default function HomeClient({ preview = false }: { preview?: boolean }) {
           10 Desember 2026
         </p>
 
-        <h1 className="mt-2 font-nunito text-4xl sm:text-5xl md:text-6xl font-black text-[#663300] drop-shadow-sm">
+        <h1 className="mt-1 sm:mt-2 font-nunito text-3xl sm:text-5xl md:text-6xl font-black text-[#663300] drop-shadow-sm">
           Untuk Nona
         </h1>
 

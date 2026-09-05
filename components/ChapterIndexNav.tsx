@@ -108,18 +108,18 @@ function ChapterIndexNavInner() {
       </nav>
 
       {/* MOBILE COMPACT TOGGLE: Unobtrusive, does not cover content by default (DESIGN.md section 16) */}
-      <div className="fixed bottom-5 right-4 sm:hidden">
+      <div className="fixed bottom-4 right-3 z-40 sm:hidden">
         {/* Expanded mobile navigation tray */}
         {mobileExpanded && (
           <div
             role="menu"
             aria-label="Pilih chapter"
-            className="mb-2.5 flex flex-col items-center gap-1.5 rounded-2xl border-2 border-[#8C4E28] bg-[#FFF3CC] p-2 shadow-[0_8px_24px_rgba(0,0,0,0.5)] backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-150"
+            className="mb-2 flex flex-col items-center gap-1.5 rounded-2xl border-2 border-[#8C4E28] bg-[#FFF3CC] p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.5)] backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-150"
           >
             <Link
               href={previewPath('/hub', isPreview)}
               onClick={() => setMobileExpanded(false)}
-              className={`flex h-9 w-9 items-center justify-center rounded-lg font-nunito text-xs font-black ${
+              className={`flex h-8 w-8 items-center justify-center rounded-lg font-nunito text-xs font-black ${
                 pathname === '/hub' ? 'bg-[#8C4E28] text-[#F9EC88] border border-[#4A2411] chapter-badge-glow' : 'text-[#663300] hover:bg-[#FFE8A3]'
               }`}
             >
@@ -133,7 +133,7 @@ function ChapterIndexNavInner() {
                   key={ch.number}
                   href={previewPath(ch.href, isPreview)}
                   onClick={() => setMobileExpanded(false)}
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg font-nunito text-xs font-black ${
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg font-nunito text-xs font-black ${
                     isActive ? 'bg-[#8C4E28] text-[#F9EC88] border border-[#4A2411] shadow-inner chapter-badge-glow' : 'text-[#663300] hover:bg-[#FFE8A3]'
                   }`}
                 >
@@ -150,12 +150,12 @@ function ChapterIndexNavInner() {
           onClick={() => setMobileExpanded(!mobileExpanded)}
           aria-expanded={mobileExpanded}
           aria-label={mobileExpanded ? 'Tutup navigasi chapter' : 'Buka navigasi chapter'}
-          className="flex h-11 items-center gap-2 rounded-xl border-2 border-[#4A2411] bg-gradient-to-b from-[#A05A2C] to-[#7A3C18] px-3.5 text-xs font-black text-[#FFF3CC] shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-transform active:scale-95"
+          className="flex h-9 sm:h-10 items-center gap-1.5 rounded-xl border-2 border-[#4A2411] bg-gradient-to-b from-[#A05A2C] to-[#7A3C18] px-3 text-xs font-black text-[#FFF3CC] shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-transform active:scale-95"
         >
           {mobileExpanded ? (
-            <X size={16} className="text-[#F9EC88]" />
+            <X size={15} className="text-[#F9EC88]" />
           ) : (
-            <Compass size={16} className="text-[#F9EC88]" />
+            <Compass size={15} className="text-[#F9EC88]" />
           )}
           <span>
             {currentChapter ? (

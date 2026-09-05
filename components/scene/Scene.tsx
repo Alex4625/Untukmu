@@ -194,7 +194,7 @@ export function SceneMedia({
       className={`relative mx-auto w-full max-w-2xl transition-transform duration-100 ease-out ${className}`}
       style={{ transform: reducedMotion ? undefined : `scale(${mediaScale})` }}
     >
-      <div className={`relative overflow-hidden rounded-2xl border-4 border-[#8C4E28] bg-[#FFF3CC] shadow-[0_10px_28px_rgba(0,0,0,0.45)] ${aspectClass}`}>
+      <div className={`relative overflow-hidden rounded-xl sm:rounded-2xl border-2 sm:border-4 border-[#8C4E28] bg-[#FFF3CC] shadow-[0_6px_20px_rgba(0,0,0,0.35)] ${aspectClass}`}>
         <Image
           src={src}
           alt={alt}

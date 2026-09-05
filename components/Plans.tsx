@@ -114,14 +114,14 @@ function JournalCard({ plan, index }: { plan: Plan; index: number }) {
   if (status === 'tercapai') {
     return (
       <article
-        className={`card group relative flex flex-col justify-between p-6 text-left transition-all duration-150 hover:-translate-y-0.5 sm:p-7 ${
+        className={`card-inner group relative flex flex-col justify-between p-4 sm:p-6 text-left shadow-md transition-all duration-150 hover:-translate-y-0.5 ${
           reducedMotion ? '' : 'hover:brightness-105'
         }`}
       >
         <div>
-          <div className="flex items-center justify-between gap-3 border-b-2 border-[#8C4E28]/30 pb-3">
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#4E7C38] px-3 py-1 font-nunito text-xs font-black uppercase tracking-wider text-white shadow-sm">
-              <BookmarkCheck size={14} />
+          <div className="flex items-center justify-between gap-3 border-b-2 border-[#8C4E28]/20 pb-2.5">
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#4E7C38] px-2.5 py-0.5 sm:px-3 sm:py-1 font-nunito text-[11px] sm:text-xs font-black uppercase tracking-wider text-white shadow-sm">
+              <BookmarkCheck size={13} />
               <span>Telah Terwujud</span>
             </span>
             <span className="font-nunito text-xs font-bold text-[#8C4E28]">
@@ -129,19 +129,19 @@ function JournalCard({ plan, index }: { plan: Plan; index: number }) {
             </span>
           </div>
 
-          <h4 className="mt-4 font-nunito text-2xl sm:text-3xl font-black text-[#663300]">
+          <h4 className="mt-3 sm:mt-4 font-nunito text-xl sm:text-2xl font-black text-[#663300]">
             {plan.title}
           </h4>
 
           {plan.note && (
-            <p className="mt-3 font-nunito text-sm sm:text-base font-bold leading-relaxed text-[#3E2723] whitespace-pre-line">
+            <p className="mt-2.5 font-nunito text-xs sm:text-sm font-bold leading-relaxed text-[#3E2723] whitespace-pre-line">
               {plan.note}
             </p>
           )}
         </div>
 
-        <div className="mt-6 flex items-center gap-1.5 border-t-2 border-[#8C4E28]/20 pt-3 text-xs font-bold text-[#4E7C38]">
-          <BookmarkCheck size={14} />
+        <div className="mt-5 flex items-center gap-1.5 border-t-2 border-[#8C4E28]/15 pt-2.5 text-xs font-bold text-[#4E7C38]">
+          <BookmarkCheck size={13} />
           <span>Alhamdulillah, telah menjadi kenangan indah</span>
         </div>
       </article>
@@ -151,14 +151,14 @@ function JournalCard({ plan, index }: { plan: Plan; index: number }) {
   if (status === 'direncanakan') {
     return (
       <article
-        className={`card group relative flex flex-col justify-between p-6 text-left transition-all duration-150 hover:-translate-y-0.5 sm:p-7 ${
+        className={`card-inner group relative flex flex-col justify-between p-4 sm:p-6 text-left shadow-md transition-all duration-150 hover:-translate-y-0.5 ${
           reducedMotion ? '' : 'hover:brightness-105'
         }`}
       >
         <div>
-          <div className="flex items-center justify-between gap-3 border-b-2 border-[#8C4E28]/30 pb-3">
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#0066CC] px-3 py-1 font-nunito text-xs font-black uppercase tracking-wider text-white shadow-sm">
-              <Compass size={14} />
+          <div className="flex items-center justify-between gap-3 border-b-2 border-[#8C4E28]/20 pb-2.5">
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#0066CC] px-2.5 py-0.5 sm:px-3 sm:py-1 font-nunito text-[11px] sm:text-xs font-black uppercase tracking-wider text-white shadow-sm">
+              <Compass size={13} />
               <span>Sedang Direncanakan</span>
             </span>
             <span className="font-nunito text-xs font-bold text-[#8C4E28]">
@@ -166,19 +166,19 @@ function JournalCard({ plan, index }: { plan: Plan; index: number }) {
             </span>
           </div>
 
-          <h4 className="mt-4 font-nunito text-2xl sm:text-3xl font-black text-[#663300]">
+          <h4 className="mt-3 sm:mt-4 font-nunito text-xl sm:text-2xl font-black text-[#663300]">
             {plan.title}
           </h4>
 
           {plan.note && (
-            <p className="mt-3 font-nunito text-sm sm:text-base font-bold leading-relaxed text-[#3E2723] whitespace-pre-line">
+            <p className="mt-2.5 font-nunito text-xs sm:text-sm font-bold leading-relaxed text-[#3E2723] whitespace-pre-line">
               {plan.note}
             </p>
           )}
         </div>
 
-        <div className="mt-6 flex items-center gap-1.5 border-t-2 border-[#8C4E28]/20 pt-3 text-xs font-bold text-[#0066CC]">
-          <Compass size={14} />
+        <div className="mt-5 flex items-center gap-1.5 border-t-2 border-[#8C4E28]/15 pt-2.5 text-xs font-bold text-[#0066CC]">
+          <Compass size={13} />
           <span>Langkah kecil yang sedang kita persiapkan bersama</span>
         </div>
       </article>
@@ -188,14 +188,14 @@ function JournalCard({ plan, index }: { plan: Plan; index: number }) {
   // Fallback: 'ingin_dilakukan'
   return (
     <article
-      className={`card group relative flex flex-col justify-between p-6 text-left transition-all duration-150 hover:-translate-y-0.5 sm:p-7 ${
+      className={`card-inner group relative flex flex-col justify-between p-4 sm:p-6 text-left shadow-md transition-all duration-150 hover:-translate-y-0.5 ${
         reducedMotion ? '' : 'hover:brightness-105'
       }`}
     >
       <div>
-        <div className="flex items-center justify-between gap-3 border-b-2 border-[#8C4E28]/30 pb-3">
-          <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#D4A325] px-3 py-1 font-nunito text-xs font-black uppercase tracking-wider text-white shadow-sm">
-            <Sparkles size={14} />
+        <div className="flex items-center justify-between gap-3 border-b-2 border-[#8C4E28]/20 pb-2.5">
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#D4A325] px-2.5 py-0.5 sm:px-3 sm:py-1 font-nunito text-[11px] sm:text-xs font-black uppercase tracking-wider text-white shadow-sm">
+            <Sparkles size={13} />
             <span>Angan & Impian</span>
           </span>
           <span className="font-nunito text-xs font-bold text-[#8C4E28]">
@@ -203,19 +203,19 @@ function JournalCard({ plan, index }: { plan: Plan; index: number }) {
           </span>
         </div>
 
-        <h4 className="mt-4 font-nunito text-2xl sm:text-3xl font-black text-[#663300]">
+        <h4 className="mt-3 sm:mt-4 font-nunito text-xl sm:text-2xl font-black text-[#663300]">
           {plan.title}
         </h4>
 
         {plan.note && (
-          <p className="mt-3 font-nunito text-sm sm:text-base font-bold leading-relaxed text-[#3E2723] whitespace-pre-line">
+          <p className="mt-2.5 font-nunito text-xs sm:text-sm font-bold leading-relaxed text-[#3E2723] whitespace-pre-line">
             {plan.note}
           </p>
         )}
       </div>
 
-      <div className="mt-6 flex items-center gap-1.5 border-t-2 border-[#8C4E28]/20 pt-3 text-xs font-bold text-[#D4A325]">
-        <Sparkles size={14} />
+      <div className="mt-5 flex items-center gap-1.5 border-t-2 border-[#8C4E28]/15 pt-2.5 text-xs font-bold text-[#D4A325]">
+        <Sparkles size={13} />
         <span>Suatu saat nanti, mari kita wujudkan</span>
       </div>
     </article>

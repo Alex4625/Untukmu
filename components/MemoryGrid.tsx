@@ -204,11 +204,11 @@ export default function MemoryGrid({ memories }: { memories: Memory[] }) {
                             <span className="text-ink-muted">{formatDateID(item.memory_date)}</span>
                           )}
                         </div>
-                        <h3 className="mt-1.5 font-display text-xl sm:text-2xl font-normal leading-snug text-burgundy group-hover:text-burgundy-dark">
+                        <h3 className="mt-1.5 font-nunito text-lg sm:text-2xl font-black leading-snug text-[#663300] group-hover:text-[#B53000]">
                           {item.title}
                         </h3>
                         {item.story && (
-                          <p className="mt-2 text-xs sm:text-sm leading-relaxed text-ink-muted line-clamp-2">
+                          <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-[#5A3E2D] line-clamp-2">
                             {item.story}
                           </p>
                         )}
@@ -228,25 +228,25 @@ export default function MemoryGrid({ memories }: { memories: Memory[] }) {
           role="dialog"
           aria-modal="true"
           aria-label={selectedPhoto.title}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-burgundy-dark/75 p-4 backdrop-blur-md animate-in fade-in duration-200 sm:p-6"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-2 sm:p-6 backdrop-blur-md animate-in fade-in duration-200"
           onClick={() => setSelectedPhoto(null)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="card relative flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden bg-[#FDFBF7] shadow-2xl"
+            className="card relative flex max-h-[86dvh] w-full max-w-3xl flex-col overflow-hidden bg-[#FFFDF4] shadow-2xl"
           >
             {/* Close Button */}
             <button
               type="button"
               onClick={() => setSelectedPhoto(null)}
               aria-label="Tutup pratinjau foto"
-              className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-[#FDFBF7]/90 text-burgundy shadow-card backdrop-blur-sm transition hover:bg-burgundy hover:text-white"
+              className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-[#8C4E28] bg-[#FFE8A3] text-[#663300] shadow-md transition hover:bg-[#8C4E28] hover:text-[#FFF3CC]"
             >
               <X size={18} />
             </button>
 
             {/* Large Image View with DEC-009 high quality resolution */}
-            <div className="relative aspect-[4/3] w-full bg-paper sm:aspect-[16/10]">
+            <div className="relative aspect-[4/3] w-full bg-[#FFE8A3]/40 sm:aspect-[16/10] shrink-0">
               {selectedPhoto.media_key || selectedPhoto.image_url ? (
                 <Image
                   src={getMediaUrl(selectedPhoto.media_key || selectedPhoto.image_url, 1400)}

@@ -95,7 +95,7 @@ function QuestionScene({
         {/* Emotional Personal Feedback (reveals upon answering, reduced-motion friendly) */}
         {hasAnswered && (
           <div
-            className={`card mt-6 p-5 text-left ${
+            className={`card-inner mt-5 p-4 sm:p-5 text-left shadow-md ${
               reducedMotion ? '' : 'animate-in fade-in duration-200'
             }`}
           >
@@ -104,7 +104,7 @@ function QuestionScene({
               <span>{isCorrect ? 'Catatan Hangat' : 'Cerita di Baliknya'}</span>
             </div>
 
-            <p className="mt-2 font-nunito text-sm sm:text-base font-bold leading-relaxed text-[#3E2723]">
+            <p className="mt-2 font-nunito text-xs sm:text-base font-bold leading-relaxed text-[#3E2723]">
               {question.feedback
                 ? question.feedback
                 : isCorrect
@@ -171,30 +171,30 @@ export default function Quiz({ questions }: { questions: QuizQuestion[] }) {
           align="center"
           tone="paper"
         >
-          <div className="card mx-auto mt-6 w-full max-w-lg p-7 text-center shadow-elevated sm:p-10">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-paper text-burgundy shadow-subtle">
-              <Heart size={20} className="text-dustyrose fill-dustyrose/20" />
+          <div className="card-inner mx-auto mt-6 w-full max-w-lg p-5 sm:p-8 text-center shadow-md">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#8C4E28] bg-[#FFE8A3] text-[#B53000]">
+              <Heart size={20} className="text-[#B53000] fill-[#B53000]/20" />
             </div>
 
-            <p className="font-display text-sm italic text-gold">
+            <p className="font-nunito text-xs sm:text-sm font-black italic text-[#D4A325]">
               {correctCount} dari {total} ingatan selaras
             </p>
 
-            <h3 className="mt-2 font-display text-2xl font-normal text-burgundy sm:text-3xl">
+            <h3 className="mt-2 font-nunito text-xl font-black text-[#663300] sm:text-2xl">
               {correctCount === total
                 ? 'Ingatanmu begitu indah dan teliti.'
                 : 'Setiap jawabanmu adalah bagian terbaik dari cerita ini.'}
             </h3>
 
-            <div className="mx-auto my-5 h-px w-12 bg-burgundy/15" />
+            <div className="mx-auto my-4 h-px w-12 bg-[#8C4E28]/25" />
 
-            <p className="font-sans text-sm leading-relaxed text-ink-muted sm:text-base">
+            <p className="font-nunito text-xs sm:text-sm font-bold leading-relaxed text-[#5A3E2D]">
               {correctCount === total
                 ? 'Kamu mengingat hampir setiap detail kecil dengan begitu rapi. Tentu saja, kamu adalah pemeran utama di seluruh perjalanan ini.'
                 : 'Berapa pun ingatan yang persis sama, yang paling berharga adalah bagaimana kita tersenyum saat mengingatnya kembali bersama.'}
             </p>
 
-            <div className="mt-8">
+            <div className="mt-6">
               <button
                 type="button"
                 onClick={() => setAnswers({})}

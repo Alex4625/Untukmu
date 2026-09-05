@@ -63,6 +63,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+@media (max-width: 768px) {
+  body {
+    background-attachment: scroll;
+    background-size: cover;
+  }
+}
+
 ::selection {
   background: #F9EC88;
   color: #4A2411;
@@ -78,14 +85,23 @@ body {
 .stardew-panel {
   background-color: #FFF3CC;
   border-style: solid;
-  border-width: 16px;
+  border-width: 10px;
   border-image-source: url('/images/stardew/menu_border.png');
   border-image-slice: 34% fill;
   border-image-repeat: stretch;
-  border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(102, 51, 0, 0.2);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(102, 51, 0, 0.2);
   color: #3E2723;
   transition: all 0.2s ease;
+}
+
+@media (min-width: 640px) {
+  .card,
+  .stardew-panel {
+    border-width: 16px;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(102, 51, 0, 0.2);
+  }
 }
 
 .card p,
@@ -102,16 +118,34 @@ body {
   color: #663300;
 }
 
+/* Elegant Inner Card for child components to avoid heavy double border nesting */
+.card-inner {
+  background-color: #FFFDF4;
+  border: 2px solid #8C4E28;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  color: #252525;
+  transition: all 0.15s ease;
+}
+
 .card-paper {
   background-color: #FFF3CC;
   border-style: solid;
-  border-width: 14px;
+  border-width: 10px;
   border-image-source: url('/images/stardew/menu_border.png');
   border-image-slice: 34% fill;
   border-image-repeat: stretch;
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
   color: #252525;
+}
+
+@media (min-width: 640px) {
+  .card-paper {
+    border-width: 14px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+  }
 }
 
 /* Stardew Valley Authentic Wooden Plank Buttons */
@@ -407,19 +441,19 @@ body {
 @keyframes chapterToastFade {
   0% {
     opacity: 0;
-    transform: translate(-50%, -8px);
+    transform: translateY(-8px);
   }
   15% {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translateY(0);
   }
   80% {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translateY(0);
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -6px);
+    transform: translateY(-6px);
   }
 }
 

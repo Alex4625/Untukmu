@@ -33,27 +33,27 @@ function SingleLetterScene({ letter, index }: { letter: Letter; index: number })
           <div
             role="region"
             aria-label={`Amplop tertutup: ${letter.title}`}
-            className="card group relative mx-auto w-full max-w-lg cursor-pointer p-8 text-center shadow-[0_8px_24px_rgba(0,0,0,0.4)] transition-all duration-200 hover:-translate-y-1 hover:brightness-105 active:scale-[0.99] sm:p-10"
+            className="card-inner group relative mx-auto w-full max-w-lg cursor-pointer p-5 sm:p-8 text-center shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 active:scale-[0.99]"
             onClick={() => setIsManuallyOpened(true)}
           >
             {/* Tactile Wax Seal Stamp */}
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border-2 border-[#4A2411] bg-gradient-to-b from-[#A05A2C] to-[#7A3C18] text-[#F9EC88] shadow-md transition-transform duration-200 group-hover:scale-105">
-              <Mail size={24} className="text-[#F9EC88]" />
+            <div className="mx-auto mb-3 sm:mb-4 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full border-2 border-[#4A2411] bg-gradient-to-b from-[#A05A2C] to-[#7A3C18] text-[#F9EC88] shadow-md transition-transform duration-200 group-hover:scale-105">
+              <Mail size={22} className="text-[#F9EC88]" />
             </div>
 
             <p className="font-nunito text-xs font-extrabold uppercase tracking-wider text-[#B53000]">
               {letter.unlock_label || 'Surat Tertutup'}
             </p>
 
-            <h3 className="mt-1 font-nunito text-2xl sm:text-3xl font-black text-[#663300]">
+            <h3 className="mt-1 font-nunito text-xl sm:text-3xl font-black text-[#663300]">
               {letter.title}
             </h3>
 
-            <p className="mt-1 font-nunito text-sm font-bold italic text-[#8C4E28]">
+            <p className="mt-1 font-nunito text-xs sm:text-sm font-bold italic text-[#8C4E28]">
               Ditulis khusus untuk Nona
             </p>
 
-            <div className="stardew-divider my-4" />
+            <div className="stardew-divider my-3 sm:my-4" />
 
             <button
               type="button"
@@ -61,7 +61,7 @@ function SingleLetterScene({ letter, index }: { letter: Letter; index: number })
                 e.stopPropagation();
                 setIsManuallyOpened(true);
               }}
-              className="btn-primary group/btn gap-2 px-6 py-2.5 text-sm font-extrabold"
+              className="btn-primary group/btn gap-2 px-5 py-2 sm:px-6 sm:py-2.5 text-xs sm:text-sm font-extrabold"
             >
               <span>Buka Surat</span>
               <MailOpen size={16} className="text-[#F9EC88] transition-transform group-hover/btn:scale-110" />
@@ -72,20 +72,20 @@ function SingleLetterScene({ letter, index }: { letter: Letter; index: number })
           <article
             role="region"
             aria-label={`Surat terbuka: ${letter.title}`}
-            className={`card relative w-full overflow-hidden border border-[rgba(90,40,52,0.12)] bg-[#FDFBF7] p-7 text-left shadow-elevated transition-all sm:p-12 md:p-14 ${
+            className={`card-inner relative w-full overflow-hidden bg-[#FFFDF4] p-4 sm:p-8 md:p-10 text-left shadow-lg transition-all ${
               reducedMotion ? '' : 'animate-in fade-in zoom-in-95 duration-400'
             }`}
           >
             {/* Subtle Watermark Feather */}
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute right-6 top-6 text-burgundy/10 sm:right-10 sm:top-10"
+              className="pointer-events-none absolute right-4 top-4 text-[#8C4E28]/10 sm:right-8 sm:top-8"
             >
-              <Feather size={64} />
+              <Feather size={48} className="sm:w-16 sm:h-16" />
             </div>
 
             {/* Header of the letter */}
-            <div className="flex items-center justify-between border-b-2 border-[#8C4E28]/30 pb-3 text-xs">
+            <div className="flex items-center justify-between border-b-2 border-[#8C4E28]/25 pb-2.5 text-xs">
               <span className="font-nunito font-extrabold uppercase tracking-wider text-[#B53000]">
                 {letter.unlock_label || 'Surat'}
               </span>
@@ -95,23 +95,23 @@ function SingleLetterScene({ letter, index }: { letter: Letter; index: number })
             </div>
 
             {/* Letter Title */}
-            <h3 className="mt-4 font-nunito text-2xl sm:text-3xl font-black text-[#663300]">
+            <h3 className="mt-3 sm:mt-4 font-nunito text-xl sm:text-3xl font-black text-[#663300]">
               {letter.title}
             </h3>
 
-            <div className="stardew-divider my-4" />
+            <div className="stardew-divider my-3 sm:my-4" />
 
             {/* Body of the letter */}
-            <div className="font-nunito text-base sm:text-lg font-bold leading-relaxed text-[#3E2723] whitespace-pre-line">
+            <div className="font-nunito text-sm sm:text-base md:text-lg font-bold leading-relaxed text-[#3E2723] whitespace-pre-line">
               {letter.body}
             </div>
 
             {/* Signature */}
-            <div className="mt-8 border-t-2 border-[#8C4E28]/30 pt-4 text-right">
-              <p className="font-nunito text-base font-black italic text-[#8C4E28]">
+            <div className="mt-6 sm:mt-8 border-t-2 border-[#8C4E28]/25 pt-3 sm:pt-4 text-right">
+              <p className="font-nunito text-sm sm:text-base font-black italic text-[#8C4E28]">
                 Dengan segenap hati,
               </p>
-              <p className="font-nunito text-lg font-black text-[#663300]">
+              <p className="font-nunito text-base sm:text-lg font-black text-[#663300]">
                 Alex
               </p>
             </div>

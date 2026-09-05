@@ -113,48 +113,48 @@ function FlipCard({ card, index }: { card: MemoryCard; index: number }) {
         aria-label={`${card.title}. ${
           isFlipped ? 'Sisi belakang terbuka. Ketuk untuk membalik ke depan.' : 'Ketuk untuk membaca pesan.'
         }`}
-        className="card relative flex min-h-[220px] w-full cursor-pointer flex-col justify-between border border-[rgba(90,40,52,0.12)] bg-[#FDFBF7] p-5 text-left shadow-card transition-all hover:border-dustyrose/50 hover:shadow-elevated active:scale-[0.99] sm:p-6"
+        className="card-inner relative flex min-h-[220px] w-full cursor-pointer flex-col justify-between p-4 sm:p-5 text-left shadow-md transition-all hover:border-[#4A2411] active:scale-[0.99]"
       >
         {isFlipped ? (
           <div className="flex h-full flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between text-xs text-dustyrose">
-                <span className="font-semibold uppercase tracking-wider">
+              <div className="flex items-center justify-between text-xs text-[#B53000]">
+                <span className="font-extrabold uppercase tracking-wider">
                   {card.card_type || 'Pesan'}
                 </span>
-                <span className="text-gold font-display italic">#{String(index + 1).padStart(2, '0')}</span>
+                <span className="text-[#D4A325] font-nunito font-black italic">#{String(index + 1).padStart(2, '0')}</span>
               </div>
-              <p className="mt-3 font-sans text-sm leading-relaxed text-ink whitespace-pre-line sm:text-[15px]">
+              <p className="mt-3 font-nunito text-xs sm:text-sm font-bold leading-relaxed text-[#3E2723] whitespace-pre-line">
                 {card.body}
               </p>
             </div>
-            <p className="mt-4 text-right text-[11px] italic text-dustyrose">
+            <p className="mt-3 text-right text-[11px] font-bold italic text-[#B53000]">
               ← Ketuk untuk membalik ke depan
             </p>
           </div>
         ) : (
           <div className="flex h-full flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="font-display text-sm italic text-gold">
+              <span className="font-nunito text-xs font-black text-[#D4A325]">
                 #{String(index + 1).padStart(2, '0')}
               </span>
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-paper text-dustyrose">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[#8C4E28] bg-[#FFE8A3] text-[#B53000]">
                 <Heart size={13} fill="currentColor" />
               </span>
             </div>
 
-            <div className="my-auto py-3">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-dustyrose">
+            <div className="my-auto py-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#B53000]">
                 {card.card_type || 'Alasan'}
               </span>
-              <h4 className="mt-1.5 font-display text-xl font-normal leading-snug text-burgundy sm:text-2xl">
+              <h4 className="mt-1 font-nunito text-lg sm:text-xl font-black leading-snug text-[#663300]">
                 {card.title}
               </h4>
             </div>
 
-            <p className="flex items-center gap-1 text-[11px] italic text-ink-muted">
+            <p className="flex items-center justify-between text-[11px] font-bold text-[#8C4E28]">
               <span>Ketuk untuk membalik</span>
-              <RotateCw size={11} className="text-dustyrose" />
+              <RotateCw size={12} className="text-[#B53000]" />
             </p>
           </div>
         )}
@@ -172,7 +172,7 @@ function FlipCard({ card, index }: { card: MemoryCard; index: number }) {
       aria-label={`${card.title}. ${
         isFlipped ? 'Sisi belakang terbuka. Ketuk untuk membalik ke depan.' : 'Ketuk untuk membaca pesan.'
       }`}
-      className="group relative h-[230px] w-full cursor-pointer select-none sm:h-[260px]"
+      className="group relative h-[225px] w-full cursor-pointer select-none sm:h-[250px]"
       style={{
         perspective: '1000px',
         transform: `rotate(${rotation}deg)`
@@ -185,45 +185,45 @@ function FlipCard({ card, index }: { card: MemoryCard; index: number }) {
         }}
       >
         {/* SISI DEPAN (Front Side) */}
-        <div className="card absolute inset-0 flex flex-col justify-between overflow-hidden p-5 text-left transition-all duration-200 group-hover:brightness-105 group-hover:shadow-elevated [backface-visibility:hidden] sm:p-6">
+        <div className="card-inner absolute inset-0 flex flex-col justify-between overflow-hidden p-4 sm:p-5 text-left shadow-md transition-all duration-200 group-hover:brightness-105 group-hover:shadow-lg [backface-visibility:hidden]">
           <div className="flex items-center justify-between">
-            <span className="font-nunito text-xs font-extrabold text-[#D4A325] sm:text-sm">
+            <span className="font-nunito text-xs font-black text-[#D4A325]">
               #{String(index + 1).padStart(2, '0')}
             </span>
-            <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[#8C4E28] bg-[#FFE8A3] text-[#B53000] sm:h-8 sm:w-8">
-              <Heart size={14} fill="currentColor" />
+            <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[#8C4E28] bg-[#FFE8A3] text-[#B53000]">
+              <Heart size={13} fill="currentColor" />
             </span>
           </div>
 
-          <div className="my-auto py-2">
-            <span className="font-nunito text-[11px] font-extrabold uppercase tracking-wider text-[#B53000]">
+          <div className="my-auto py-1.5">
+            <span className="font-nunito text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-[#B53000]">
               {card.card_type || 'Alasan'}
             </span>
-            <h4 className="mt-1 font-nunito text-xl sm:text-2xl font-black leading-snug text-[#663300]">
+            <h4 className="mt-1 font-nunito text-base sm:text-xl font-black leading-snug text-[#663300] line-clamp-3">
               {card.title}
             </h4>
           </div>
 
           <div className="flex items-center justify-between font-nunito text-[11px] font-bold text-[#8C4E28]">
             <span>Ketuk untuk membalik</span>
-            <RotateCw size={13} className="text-[#B53000] transition-transform group-hover:rotate-45" />
+            <RotateCw size={12} className="text-[#B53000] transition-transform group-hover:rotate-45" />
           </div>
         </div>
 
         {/* SISI BELAKANG (Back Side - Revealed Message) */}
-        <div className="card absolute inset-0 flex flex-col justify-between overflow-y-auto p-5 text-left [backface-visibility:hidden] [transform:rotateY(180deg)] sm:p-6">
-          <div>
-            <div className="flex items-center justify-between border-b-2 border-[#8C4E28]/30 pb-2 font-nunito text-xs font-black uppercase text-[#B53000]">
+        <div className="card-inner absolute inset-0 flex flex-col justify-between overflow-hidden p-4 sm:p-5 text-left [backface-visibility:hidden] [transform:rotateY(180deg)] shadow-md">
+          <div className="flex flex-col h-[calc(100%-24px)]">
+            <div className="flex items-center justify-between border-b border-[#8C4E28]/25 pb-1.5 font-nunito text-xs font-black uppercase text-[#B53000]">
               <span>{card.card_type || 'Yang Tak Terucap'}</span>
               <span className="text-[#663300]">#{String(index + 1).padStart(2, '0')}</span>
             </div>
-            <p className="mt-3 font-nunito text-sm sm:text-base font-bold leading-relaxed text-[#3E2723] whitespace-pre-line">
+            <div className="mt-2 overflow-y-auto pr-1 flex-1 font-nunito text-xs sm:text-sm font-bold leading-relaxed text-[#3E2723] whitespace-pre-line">
               {card.body}
-            </p>
+            </div>
           </div>
 
-          <div className="mt-3 pt-2 text-right">
-            <span className="inline-flex items-center gap-1 font-nunito text-xs font-black text-[#B53000]">
+          <div className="pt-1 text-right">
+            <span className="inline-flex items-center gap-1 font-nunito text-[11px] font-black text-[#B53000]">
               <span>← Ketuk untuk balik</span>
             </span>
           </div>

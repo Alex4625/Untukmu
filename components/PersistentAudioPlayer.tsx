@@ -80,25 +80,27 @@ export function PersistentAudioWidget() {
   }
 
   return (
-    <aside className="fixed bottom-5 left-4 z-40 sm:bottom-6 sm:left-6" aria-label="Pemutar musik latar">
-      <div className="flex items-center gap-2.5 rounded-2xl border-2 border-[#8C4E28] bg-[#FFF3CC]/95 p-2 pr-4 shadow-[0_6px_20px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-150">
+    <aside className="fixed bottom-4 left-3 z-40 sm:bottom-6 sm:left-6" aria-label="Pemutar musik latar">
+      <div className="flex items-center gap-2 rounded-2xl border-2 border-[#8C4E28] bg-[#FFF3CC]/95 p-1.5 sm:p-2 sm:pr-4 shadow-[0_6px_20px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-150">
         <button
           type="button"
           onClick={togglePlay}
           aria-label={isPlaying ? 'Jeda musik cerita' : 'Putar musik cerita'}
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-[#4A2411] text-[#FFF3CC] shadow-md transition duration-150 active:scale-95 ${
+          title={isPlaying ? 'Jeda musik' : 'Putar musik'}
+          className={`flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl border-2 border-[#4A2411] text-[#FFF3CC] shadow-md transition duration-150 active:scale-95 ${
             isPlaying
               ? 'bg-gradient-to-b from-[#A05A2C] to-[#7A3C18] ring-2 ring-[#F9EC88]'
               : 'bg-gradient-to-b from-[#8C4E28] to-[#663300] hover:brightness-110'
           }`}
         >
-          {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5 text-[#F9EC88]" />}
+          {isPlaying ? <Pause size={15} /> : <Play size={15} className="ml-0.5 text-[#F9EC88]" />}
         </button>
 
-        <div className="flex flex-col text-left">
+        {/* Text is hidden on small mobile, visible on tablet/desktop */}
+        <div className="hidden sm:flex flex-col text-left pr-1">
           <span className="flex items-center gap-1 font-nunito text-xs font-black text-[#663300] sm:text-sm">
             <Music2 size={13} className="text-[#B53000] shrink-0" />
-            <span className="truncate max-w-[100px] sm:max-w-[140px]">
+            <span className="truncate max-w-[140px]">
               {isPlaying ? 'Memutar Musik' : 'Musik Cerita'}
             </span>
           </span>

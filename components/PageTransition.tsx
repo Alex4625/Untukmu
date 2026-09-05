@@ -24,16 +24,16 @@ export default function PageTransition({ children }: { children: React.ReactNode
         <aside
           key={`toast-${pathname}`}
           aria-live="polite"
-          className="pointer-events-none fixed top-16 left-1/2 z-40 animate-chapter-toast sm:top-18"
+          className="pointer-events-none fixed top-16 right-3 z-40 animate-chapter-toast sm:top-18 sm:right-6"
         >
-          <div className="flex items-center gap-2 rounded-full border-2 border-[#8C4E28] bg-[#FFF3CC]/95 px-4 py-1.5 shadow-[0_6px_20px_rgba(0,0,0,0.35)] backdrop-blur-md">
+          <div className="flex items-center gap-2 rounded-full border-2 border-[#8C4E28] bg-[#FFF3CC]/95 px-3 py-1 sm:px-4 sm:py-1.5 shadow-[0_6px_20px_rgba(0,0,0,0.35)] backdrop-blur-md">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#8C4E28] text-[#F9EC88] text-[10px] font-black">
               {currentChapter.number}
             </span>
-            <span className="font-nunito text-xs font-black text-[#663300]">
+            <span className="font-nunito text-[11px] sm:text-xs font-black text-[#663300]">
               {currentChapter.publicTitle}
             </span>
-            <Sparkles size={12} className="text-[#D4A325]" />
+            <Sparkles size={11} className="text-[#D4A325]" />
           </div>
         </aside>
       )}
