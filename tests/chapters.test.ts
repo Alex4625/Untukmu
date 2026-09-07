@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { CHAPTERS, getChapterByPath, getNextChapter, getPrevChapter } from '../components/chapters';
 import ChapterDrawer from '../components/ChapterDrawer';
 import ChapterIndexNav from '../components/ChapterIndexNav';
+import PublicNav from '../components/PublicNav';
 
 describe('Chapter Navigation & Metadata (DESIGN.md v2, DEC-014, TASK-013)', () => {
   it('should have exactly 7 chapters matching specification', () => {
@@ -50,9 +51,10 @@ describe('Chapter Navigation & Metadata (DESIGN.md v2, DEC-014, TASK-013)', () =
     assert.strictEqual(getPrevChapter('01'), null);
   });
 
-  it('should export ChapterDrawer and ChapterIndexNav cleanly as functions', () => {
+  it('should export ChapterDrawer, ChapterIndexNav, and PublicNav cleanly as functions', () => {
     assert.strictEqual(typeof ChapterDrawer, 'function');
     assert.strictEqual(typeof ChapterIndexNav, 'function');
+    assert.strictEqual(typeof PublicNav, 'function');
   });
 
   it('should allow non-linear navigation to any of the 7 chapters at any time', () => {
