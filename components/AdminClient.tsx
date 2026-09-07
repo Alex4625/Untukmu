@@ -3,11 +3,11 @@
 import { useEffect, useId, useState } from 'react';
 import type { AdminContent } from '@/lib/adminContent';
 import { DEFAULT_MUSIC_URL } from '@/lib/siteDefaults';
-import type { ContentStatus, Letter, Memory, MemoryCard, Plan, QuizQuestion, SiteSettings } from '@/lib/types';
-import { Eye, EyeOff, FilePenLine, Lock, LogOut, Plus, RefreshCw, ShieldCheck, Trash2, ExternalLink } from 'lucide-react';
+import type { ContentStatus, Letter, Memory, MemoryCard, Plan, QuizQuestion, SiteSettings, DeskPolaroid } from '@/lib/types';
+import { Eye, EyeOff, FilePenLine, Lock, LogOut, Plus, RefreshCw, ShieldCheck, Trash2, ExternalLink, Image as ImageIcon } from 'lucide-react';
 
 type AdminData = AdminContent;
-type Tab = 'memories' | 'letters' | 'memory_cards' | 'quiz_questions' | 'plans' | 'site_settings';
+type Tab = 'memories' | 'letters' | 'memory_cards' | 'quiz_questions' | 'plans' | 'site_settings' | 'desk_polaroids';
 type MutationBody = Record<string, unknown>;
 
 const tabs: { key: Tab; label: string }[] = [
@@ -16,10 +16,11 @@ const tabs: { key: Tab; label: string }[] = [
   { key: 'memory_cards', label: '04. Kotak Kenangan' },
   { key: 'quiz_questions', label: '05. Quiz' },
   { key: 'plans', label: '06. Rencana' },
-  { key: 'site_settings', label: '07. Pesan & Settings' }
+  { key: 'site_settings', label: '07. Pesan & Settings' },
+  { key: 'desk_polaroids', label: '08. Foto Meja (Polaroids)' }
 ];
 
-const emptyData: AdminData = { memories: [], letters: [], memory_cards: [], quiz_questions: [], plans: [], site_settings: null };
+const emptyData: AdminData = { memories: [], letters: [], memory_cards: [], quiz_questions: [], plans: [], desk_polaroids: [], site_settings: null };
 const contentStatuses: ContentStatus[] = ['draft', 'active', 'hidden'];
 const statusLabels: Record<ContentStatus, string> = {
   draft: 'Draft',
@@ -244,6 +245,7 @@ export default function AdminClient({
           {tab === 'quiz_questions' && <QuizAdmin items={data.quiz_questions} reload={load} />}
           {tab === 'plans' && <PlanAdmin items={data.plans} reload={load} />}
           {tab === 'site_settings' && <SettingsAdmin item={data.site_settings} reload={load} />}
+          {tab === 'desk_polaroids' && <DeskPolaroidsAdmin items={data.desk_polaroids || []} reload={load} />}
         </section>
       </div>
     </main>
@@ -974,5 +976,144 @@ function ItemList<T extends { id: string; status?: ContentStatus }>({
         </div>
       ))}
     </div>
+  );
+}
+
+function DeskPolaroidsAdmin({ items, reload }: { items: DeskPolaroid[]; reload: () => void }) {
+  const [form, setForm] = useState({
+    caption: '',
+    media_key: '',
+    image_url: '',
+    rotation_deg: -3,
+    sort_order: 0,
+    status: 'active' as ContentStatus
+  });
+  const [editing, setEditing] = useState<DeskPolaroid | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const edit = editing || null;
+
+  function fill(item: DeskPolaroid) {
+    setEditing(item);
+    setForm({
+      caption: item.caption || '',
+      media_key: item.media_key || item.image_url || '',
+      image_url: item.image_url || '',
+      rotation_deg: item.rotation_deg ?? -3,
+      sort_order: item.sort_order ?? 0,
+      status: item.status
+    });
+  }
+
+  function reset() {
+    setEditing(null);
+    setForm({
+      caption: '',
+      media_key: '',
+      image_url: '',
+      rotation_deg: -3,
+      sort_order: 0,
+      status: 'active'
+    });
+  }
+
+  async function upload(file: File) {
+    setUploading(true);
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+    const json = await res.json();
+    setUploading(false);
+    if (!res.ok) return alert(json.error || 'Upload gagal.');
+    setForm((f) => ({
+      ...f,
+      media_key: json.media_key || json.secure_url || json.image_url,
+      image_url: json.secure_url || json.image_url
+    }));
+  }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (edit) await updateItem('desk_polaroids', edit.id, form);
+    else await createItem('desk_polaroids', form);
+    reset();
+    reload();
+  }
+
+  return (
+    <AdminPanel title="Kelola Foto Meja (Polaroid Keepsakes)" button="Simpan Foto Meja" onSubmit={submit}>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field
+          label="Tulisan Tangan / Caption Foto"
+          value={form.caption}
+          onChange={(v) => setForm({ ...form, caption: v })}
+        />
+        <div>
+          <label className="label">Sudut Kemiringan ({form.rotation_deg}°)</label>
+          <input
+            type="range"
+            min="-15"
+            max="15"
+            className="w-full accent-burgundy"
+            value={form.rotation_deg}
+            onChange={(e) => setForm({ ...form, rotation_deg: Number(e.target.value) })}
+          />
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-4 md:grid-cols-3">
+        <Field
+          label="Urutan Tampil"
+          type="number"
+          value={String(form.sort_order)}
+          onChange={(v) => setForm({ ...form, sort_order: Number(v) || 0 })}
+        />
+        <StatusSelect value={form.status} onChange={(v) => setForm({ ...form, status: v as ContentStatus })} />
+        <div>
+          <label className="label">Unggah Foto Polaroid</label>
+          <input
+            type="file"
+            accept="image/*"
+            className="input"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) void upload(file);
+            }}
+          />
+          {uploading && <p className="mt-1 text-xs text-ink-muted">Mengunggah foto...</p>}
+        </div>
+      </div>
+
+      {form.image_url && (
+        <div className="mt-4 flex items-center gap-4 p-3 rounded-xl bg-paper border border-[rgba(90,40,52,0.12)]">
+          <div
+            className="polaroid-frame w-24 p-1.5 pb-2 rounded-xs"
+            style={{ transform: `rotate(${form.rotation_deg}deg)` }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={form.image_url} alt="Preview" className="h-20 w-full object-cover rounded-xs" />
+            <p className="mt-1 text-center font-display text-[9px] truncate">{form.caption || 'Foto'}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-ink">Foto Polaroid Terpilih</p>
+            <p className="text-[11px] text-ink-muted">Kemiringan: {form.rotation_deg}°</p>
+          </div>
+        </div>
+      )}
+
+      <ItemList
+        items={items}
+        title={(item) => item.caption || 'Foto Polaroid Meja'}
+        subtitle={(item) => `Sudut: ${item.rotation_deg}° · Urutan: ${item.sort_order}`}
+        onEdit={fill}
+        onStatusChange={async (item, status) => {
+          await updateItem('desk_polaroids', item.id, { status });
+          reload();
+        }}
+        onDelete={async (item) => {
+          await deleteItem('desk_polaroids', item.id);
+          reload();
+        }}
+      />
+    </AdminPanel>
   );
 }

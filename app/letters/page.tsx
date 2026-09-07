@@ -1,6 +1,5 @@
-import Letters from '@/components/Letters';
 import LockedNotice from '@/components/LockedNotice';
-import SectionShell from '@/components/SectionShell';
+import UnifiedBookExperience from '@/components/book/UnifiedBookExperience';
 import { getPublicContent } from '@/lib/publicContent';
 import { isPreviewRequest, type PageSearchParams } from '@/lib/publicPreview';
 
@@ -10,15 +9,5 @@ export default async function LettersPage({ searchParams }: { searchParams?: Pag
   const content = await getPublicContent(await isPreviewRequest(searchParams));
   if (!content.unlocked) return <LockedNotice title="Chapter ini belum saatnya dibuka" />;
 
-  return (
-    <SectionShell
-      chapterNumber="03"
-      eyebrow="Chapter 03"
-      title="Yang Aku Ingat"
-      description="Ada beberapa hal yang lebih jujur dan lembut saat ditulis pelan di atas kertas."
-      preview={content.preview}
-    >
-      <Letters letters={content.letters} />
-    </SectionShell>
-  );
+  return <UnifiedBookExperience content={content} targetChapterNumber="03" isInitiallyOpen={true} />;
 }

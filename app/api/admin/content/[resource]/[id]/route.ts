@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { isAdminRequest } from '@/lib/adminAuth';
-import { getDb, memories, letters, memoryCards, quizQuestions, plans, siteSettings } from '@/lib/db';
+import { getDb, memories, letters, memoryCards, quizQuestions, plans, siteSettings, deskPolaroids } from '@/lib/db';
 import { isAllowedResource } from '@/lib/resource';
 import { sanitizeContentInput } from '@/lib/resource';
 import { getMediaUrl } from '@/lib/media';
@@ -113,6 +113,21 @@ export async function PUT(request: Request, { params }: { params: Promise<{ reso
         }
         break;
       }
+      case 'desk_polaroids': {
+        const updateValues: Partial<typeof deskPolaroids.$inferInsert> = {};
+        if (typeof body.caption !== 'undefined') updateValues.caption = body.caption ? String(body.caption) : null;
+        if (typeof body.media_key !== 'undefined') updateValues.media_key = body.media_key ? String(body.media_key) : null;
+        if (typeof body.rotation_deg === 'number') updateValues.rotation_deg = body.rotation_deg;
+        if (typeof body.sort_order === 'number') updateValues.sort_order = body.sort_order;
+        if (typeof body.status === 'string') updateValues.status = body.status as 'draft' | 'active' | 'hidden';
+
+        const updated = await db.update(deskPolaroids).set(updateValues).where(eq(deskPolaroids.id, id)).returning();
+        result = {
+          ...updated[0],
+          image_url: getMediaUrl(updated[0]?.media_key || null)
+        };
+        break;
+      }
     }
 
     return NextResponse.json(result);
@@ -147,6 +162,9 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
         break;
       case 'plans':
         await db.delete(plans).where(eq(plans.id, id));
+        break;
+      case 'desk_polaroids':
+        await db.delete(deskPolaroids).where(eq(deskPolaroids.id, id));
         break;
       case 'site_settings':
         break;

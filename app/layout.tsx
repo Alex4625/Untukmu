@@ -67,8 +67,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AudioProvider>
           <StorybookTransitionProvider>
             {children}
-            <PersistentAudioWidget />
-            <ChapterIndexNav />
           </StorybookTransitionProvider>
         </AudioProvider>
       </body>

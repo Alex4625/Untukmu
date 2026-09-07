@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { isAdminRequest } from '@/lib/adminAuth';
-import { getDb, memories, letters, memoryCards, quizQuestions, plans, siteSettings } from '@/lib/db';
+import { getDb, memories, letters, memoryCards, quizQuestions, plans, siteSettings, deskPolaroids } from '@/lib/db';
 import { isAllowedResource } from '@/lib/resource';
 import { sanitizeContentInput } from '@/lib/resource';
 import { getMediaUrl } from '@/lib/media';
@@ -111,6 +111,22 @@ export async function POST(request: Request, { params }: { params: Promise<{ res
           updated_at: now
         }).returning();
         result = inserted[0];
+        break;
+      }
+      case 'desk_polaroids': {
+        const inserted = await db.insert(deskPolaroids).values({
+          id,
+          caption: body.caption ? String(body.caption) : null,
+          media_key: body.media_key ? String(body.media_key) : null,
+          rotation_deg: typeof body.rotation_deg === 'number' ? body.rotation_deg : -3,
+          sort_order: typeof body.sort_order === 'number' ? body.sort_order : 0,
+          status: (body.status as 'draft' | 'active' | 'hidden') || 'active',
+          created_at: now
+        }).returning();
+        result = {
+          ...inserted[0],
+          image_url: getMediaUrl(inserted[0]?.media_key || null)
+        };
         break;
       }
     }

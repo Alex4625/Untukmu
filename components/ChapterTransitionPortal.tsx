@@ -118,7 +118,7 @@ export default function ChapterTransitionPortal({
                   <div className="flex items-center gap-2">
                     <span className="inline-flex items-center gap-1 rounded-full border border-[#8C4E28] bg-[#8C4E28] px-2.5 py-0.5 font-nunito text-[11px] font-black uppercase text-[#F9EC88]">
                       <Sparkles size={11} className="text-[#F9EC88]" />
-                      <span>Balik ke Babak {nextChapter.number}</span>
+                      <span>Lanjut ke Babak {nextChapter.number}</span>
                     </span>
                     <span className="font-nunito text-xs font-bold text-[#8C4E28]">
                       Halaman Selanjutnya
@@ -137,7 +137,7 @@ export default function ChapterTransitionPortal({
                 {/* Tactile Page-Turn Button */}
                 <div className="shrink-0 flex items-center justify-end sm:justify-center">
                   <span className="inline-flex items-center gap-2 rounded-xl border-2 border-[#4A2411] bg-gradient-to-b from-[#A05A2C] to-[#7A3C18] px-4 py-2.5 sm:px-5 sm:py-3 font-nunito text-sm sm:text-base font-black text-[#FFF3CC] shadow-md transition-transform duration-200 group-hover:scale-105 group-hover:brightness-110">
-                    <span>Balik Halaman</span>
+                    <span>Lanjut Membaca</span>
                     <ArrowRight size={18} className="text-[#F9EC88] transition-transform duration-200 group-hover:translate-x-1.5" />
                   </span>
                 </div>
@@ -145,7 +145,7 @@ export default function ChapterTransitionPortal({
             </Link>
 
             {/* Secondary Previous Navigation */}
-            <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center justify-center pt-2">
               {prevChapter ? (
                 <Link
                   href={previewPath(prevChapter.href, preview)}
@@ -160,7 +160,7 @@ export default function ChapterTransitionPortal({
                   className="btn-secondary group gap-2 text-xs sm:text-sm font-black text-[#663300]"
                 >
                   <ArrowLeft size={16} className="text-[#8C4E28] transition-transform duration-200 group-hover:-translate-x-1" />
-                  <span>Balik ke Babak {prevChapter.number}: {prevChapter.publicTitle}</span>
+                  <span>Kembali ke Babak {prevChapter.number}: {prevChapter.publicTitle}</span>
                 </Link>
               ) : (
                 <Link
@@ -174,16 +174,6 @@ export default function ChapterTransitionPortal({
                   <span>Daftar Cerita (Daftar Isi)</span>
                 </Link>
               )}
-
-              <Link
-                href={previewPath('/hub', preview)}
-                onClick={(e) =>
-                  handleNavigate(e, previewPath('/hub', preview), undefined, 'hub')
-                }
-                className="text-xs font-black text-[#8C4E28] hover:text-[#B53000] underline underline-offset-4"
-              >
-                Daftar Isi Cerita
-              </Link>
             </div>
           </div>
         ) : (
@@ -233,7 +223,7 @@ export default function ChapterTransitionPortal({
 
       {/* Floating Dog-Ear Page-Curl Interactive Triggers (Bottom Corners) */}
       {nextChapter && (
-        <div className="fixed bottom-4 right-4 z-40">
+        <div className="fixed bottom-16 right-4 z-40 sm:bottom-4">
           <Link
             href={previewPath(nextChapter.href, preview)}
             onClick={(e) =>
@@ -244,7 +234,7 @@ export default function ChapterTransitionPortal({
                 'forward'
               )
             }
-            title={`Balik Halaman ke Babak ${nextChapter.number}: ${nextChapter.publicTitle}`}
+            title={`Lanjut ke Babak ${nextChapter.number}: ${nextChapter.publicTitle}`}
             className="dog-ear-hover group flex items-center gap-1.5 rounded-l-2xl rounded-tr-lg border-2 border-[#4A2411] bg-gradient-to-br from-[#FFE8A3] via-[#FFF3CC] to-[#E2C787] px-3 py-2 text-xs font-black text-[#663300] shadow-[0_6px_16px_rgba(0,0,0,0.35)]"
           >
             <span>Babak {nextChapter.number}</span>
@@ -254,7 +244,7 @@ export default function ChapterTransitionPortal({
       )}
 
       {prevChapter && (
-        <div className="fixed bottom-4 left-4 z-40">
+        <div className="fixed bottom-16 left-4 z-40 sm:bottom-4">
           <Link
             href={previewPath(prevChapter.href, preview)}
             onClick={(e) =>

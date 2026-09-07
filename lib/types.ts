@@ -67,12 +67,24 @@ export type SiteSettings = {
   updated_at: string;
 };
 
+export type DeskPolaroid = {
+  id: string;
+  caption: string | null;
+  media_key: string | null;
+  image_url?: string | null;
+  rotation_deg: number;
+  sort_order: number;
+  status: ContentStatus;
+  created_at: string;
+};
+
 export type PublicContent = {
   memories: Memory[];
   letters: Letter[];
   memory_cards: MemoryCard[];
   quiz_questions: QuizQuestion[];
   plans: Plan[];
+  desk_polaroids: DeskPolaroid[];
   site_settings: SiteSettings | null;
   unlocked: boolean;
   preview: boolean;

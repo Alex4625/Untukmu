@@ -1,12 +1,28 @@
-import { getDb, memories, letters, memoryCards, quizQuestions, plans, siteSettings, type MemoryEntity } from './db';
+import { getDb, memories, letters, memoryCards, quizQuestions, plans, siteSettings, deskPolaroids, type MemoryEntity, type DeskPolaroidEntity } from './db';
 import { getUnlockIso, isUnlockedNow } from './date';
 import { getMediaUrl } from './media';
-import type { Memory, PublicContent, SiteSettings } from './types';
+import type { Memory, PublicContent, SiteSettings, DeskPolaroid } from './types';
 import { asc, eq } from 'drizzle-orm';
 
 export async function getPublicContent(preview = false): Promise<PublicContent> {
   const previewMode = Boolean(preview);
   const unlocked = previewMode || isUnlockedNow();
+  const db = getDb();
+
+  let deskPolaroidsList: DeskPolaroid[] = [];
+  try {
+    const rawPolaroids = await db.select().from(deskPolaroids).where(eq(deskPolaroids.status, 'active')).orderBy(asc(deskPolaroids.sort_order));
+    deskPolaroidsList = rawPolaroids.map((p: DeskPolaroidEntity) => ({
+      ...p,
+      status: p.status as DeskPolaroid['status'],
+      rotation_deg: p.rotation_deg ?? -3,
+      sort_order: p.sort_order ?? 0,
+      image_url: getMediaUrl(p.media_key)
+    }));
+  } catch {
+    // Fallback if table is not yet seeded
+    deskPolaroidsList = [];
+  }
 
   if (!unlocked) {
     return {
@@ -15,6 +31,7 @@ export async function getPublicContent(preview = false): Promise<PublicContent> 
       memory_cards: [],
       quiz_questions: [],
       plans: [],
+      desk_polaroids: deskPolaroidsList,
       site_settings: await getLockedSettings(),
       unlocked: false,
       preview: false,
@@ -22,8 +39,6 @@ export async function getPublicContent(preview = false): Promise<PublicContent> 
       error: null
     };
   }
-
-  const db = getDb();
 
   try {
     const [settingsList, memoriesList, lettersList, cardsList, quizList, plansList] = await Promise.all([
@@ -48,6 +63,7 @@ export async function getPublicContent(preview = false): Promise<PublicContent> 
       memory_cards: cardsList.map((c) => ({ ...c, status: c.status as Memory['status'] })),
       quiz_questions: quizList.map((q) => ({ ...q, status: q.status as Memory['status'], correct_option: q.correct_option as 'A'|'B'|'C'|'D' })),
       plans: plansList.map((p) => ({ ...p, status: p.status as Memory['status'], plan_status: p.plan_status as 'ingin_dilakukan'|'direncanakan'|'tercapai' })),
+      desk_polaroids: deskPolaroidsList,
       site_settings: settingsList[0] || null,
       unlocked,
       preview: previewMode,
@@ -62,6 +78,7 @@ export async function getPublicContent(preview = false): Promise<PublicContent> 
       memory_cards: [],
       quiz_questions: [],
       plans: [],
+      desk_polaroids: deskPolaroidsList,
       site_settings: null,
       unlocked,
       preview: previewMode,

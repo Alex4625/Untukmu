@@ -1,4 +1,4 @@
-export const allowedResources = ['memories', 'letters', 'memory_cards', 'quiz_questions', 'plans', 'site_settings'] as const;
+export const allowedResources = ['memories', 'letters', 'memory_cards', 'quiz_questions', 'plans', 'site_settings', 'desk_polaroids'] as const;
 export type Resource = (typeof allowedResources)[number];
 
 export function isAllowedResource(value: string): value is Resource {
@@ -66,6 +66,14 @@ const fieldRules: Record<Resource, Record<string, FieldRule>> = {
     birthday_message: { type: 'string', nullable: true, maxLength: 10000 },
     final_message: { type: 'string', nullable: true, maxLength: 20000 },
     music_url: { type: 'string', nullable: true, maxLength: 2000 }
+  },
+  desk_polaroids: {
+    caption: { type: 'string', nullable: true, maxLength: 500 },
+    media_key: { type: 'string', nullable: true, maxLength: 2000 },
+    image_url: { type: 'string', nullable: true, maxLength: 2000 },
+    rotation_deg: { type: 'number', nullable: true },
+    sort_order: { type: 'number', nullable: true },
+    status: { type: 'status' }
   }
 };
 

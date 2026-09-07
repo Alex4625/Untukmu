@@ -84,3 +84,59 @@ export function playPageFlipSound(direction: 'forward' | 'backward' | 'shuffle' 
     // Graceful fallback if Web Audio is unsupported or blocked by browser policy
   }
 }
+
+/**
+ * Play a rich, satisfying sound when opening the heavy antique book cover.
+ */
+export function playBookOpenSound(): void {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    // Part 1: Soft paper shuffle
+    playPageFlipSound('shuffle');
+
+    // Part 2: Low-frequency gentle leather resonance
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(140, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + 0.35);
+
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.35);
+  } catch {}
+}
+
+/**
+ * Play a gentle, muted thud when the heavy antique book cover closes.
+ */
+export function playBookCloseSound(): void {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(110, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(45, ctx.currentTime + 0.28);
+
+    gain.gain.setValueAtTime(0.14, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.28);
+
+    // Complementary soft air rustle
+    setTimeout(() => playPageFlipSound('backward'), 40);
+  } catch {}
+}
+

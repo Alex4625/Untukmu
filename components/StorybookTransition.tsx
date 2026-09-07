@@ -261,18 +261,18 @@ function BookPageFlipOverlay({ state }: { state: TransitionState }) {
       className="fixed inset-0 z-[9999] flex items-center justify-center select-none pointer-events-auto overflow-hidden bg-[#1D100A]/70 backdrop-blur-md"
     >
       {/* 3D Book Stage Container */}
-      <div className="book-stage relative w-full max-w-4xl h-[75vh] max-h-[640px] px-3 sm:px-6">
+      <div className="book-stage relative w-full max-w-4xl h-[65vh] sm:h-[75vh] max-h-[640px] px-2 sm:px-6">
         {/* Book Hardcover Frame / Stardew Valley Wooden Book Binder */}
-        <div className="relative w-full h-full rounded-2xl border-4 border-[#4A2411] bg-[#3B1E10] p-2.5 sm:p-4 shadow-[0_30px_90px_rgba(0,0,0,0.8),_inset_0_2px_10px_rgba(255,255,255,0.15)] flex">
+        <div className="relative w-full h-full rounded-xl sm:rounded-2xl border-[3px] sm:border-4 border-[#4A2411] bg-[#3B1E10] p-1.5 sm:p-4 shadow-[0_30px_90px_rgba(0,0,0,0.8),_inset_0_2px_10px_rgba(255,255,255,0.15)] flex">
           
           {/* Subtle Golden Book Edging Accent */}
           <div className="absolute inset-1.5 rounded-xl border border-[#D4A325]/40 pointer-events-none" />
 
-          {/* Book Interior Spread (Left Page & Right Page) */}
+          {/* Book Interior Spread (Left Page & Right Page - hidden left page on mobile) */}
           <div className="relative w-full h-full flex rounded-lg overflow-hidden border border-[#8C4E28] bg-[#FDF7E5] shadow-inner">
 
-            {/* Left Page (Stationary) */}
-            <div className="relative w-1/2 h-full bg-gradient-to-r from-[#F7ECD0] via-[#FFF9EA] to-[#FFFDF5] p-4 sm:p-8 flex flex-col justify-between border-r border-[#8C4E28]/30">
+            {/* Left Page (Stationary - hidden on mobile for cleaner view) */}
+            <div className="relative hidden sm:flex w-1/2 h-full bg-gradient-to-r from-[#F7ECD0] via-[#FFF9EA] to-[#FFFDF5] p-4 sm:p-8 flex-col justify-between border-r border-[#8C4E28]/30">
               {/* Header / Heraldry */}
               <div className="flex items-center justify-between border-b border-[#8C4E28]/20 pb-2">
                 <span className="font-nunito text-[10px] sm:text-xs font-black uppercase tracking-wider text-[#8C4E28]">
@@ -319,8 +319,8 @@ function BookPageFlipOverlay({ state }: { state: TransitionState }) {
               </div>
             </div>
 
-            {/* Right Page (Stationary) */}
-            <div className="relative w-1/2 h-full bg-gradient-to-l from-[#F7ECD0] via-[#FFF9EA] to-[#FFFDF5] p-4 sm:p-8 flex flex-col justify-between">
+            {/* Right Page (Stationary - full width on mobile) */}
+            <div className="relative w-full sm:w-1/2 h-full bg-gradient-to-l from-[#F7ECD0] via-[#FFF9EA] to-[#FFFDF5] p-5 sm:p-8 flex flex-col justify-between">
               {/* Header / Heraldry */}
               <div className="flex items-center justify-between border-b border-[#8C4E28]/20 pb-2">
                 <span className="font-nunito text-[10px] sm:text-xs font-bold text-[#A05A2C]">
@@ -332,11 +332,11 @@ function BookPageFlipOverlay({ state }: { state: TransitionState }) {
               </div>
 
               {/* Center Content for Right Page */}
-              <div className="my-auto text-center space-y-3 px-2">
-                <div className="mx-auto flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-[#8C4E28] bg-[#FFE8A3] text-[#B53000] shadow-sm">
-                  <Sparkles size={18} className="text-[#D4A325]" />
+              <div className="my-auto text-center space-y-3 sm:space-y-3 px-2">
+                <div className="mx-auto flex h-12 w-12 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-[#8C4E28] bg-[#FFE8A3] text-[#B53000] shadow-sm">
+                  <Sparkles size={20} className="text-[#D4A325]" />
                 </div>
-                <h3 className="font-display text-lg sm:text-3xl font-black italic text-[#663300] tracking-tight">
+                <h3 className="font-display text-2xl sm:text-3xl font-black italic text-[#663300] tracking-tight">
                   {targetChapter ? targetChapter.publicTitle : 'Daftar Cerita'}
                 </h3>
                 <div className="h-0.5 w-12 mx-auto bg-[#8C4E28]/30" />
@@ -360,8 +360,8 @@ function BookPageFlipOverlay({ state }: { state: TransitionState }) {
               </div>
             </div>
 
-            {/* Central Book Spine & Binding Crease */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-3 -translate-x-1/2 z-30 pointer-events-none bg-gradient-to-r from-[#4A2411]/25 via-[#2C1810]/40 to-[#4A2411]/25 shadow-[0_0_10px_rgba(0,0,0,0.25)]" />
+            {/* Central Book Spine & Binding Crease (hidden on mobile since single page) */}
+            <div className="hidden sm:block absolute left-1/2 top-0 bottom-0 w-3 -translate-x-1/2 z-30 pointer-events-none bg-gradient-to-r from-[#4A2411]/25 via-[#2C1810]/40 to-[#4A2411]/25 shadow-[0_0_10px_rgba(0,0,0,0.25)]" />
 
             {/* The Flipping 3D Paper Sheet (Turns across the center spine) */}
             {isShuffle ? (
@@ -385,73 +385,96 @@ function BookPageFlipOverlay({ state }: { state: TransitionState }) {
                 </div>
               </div>
             ) : (
-              /* True 3D Page Curl & Turn Sheet */
-              <div
-                className={`absolute top-0 bottom-0 z-40 preserve-3d pointer-events-none ${
-                  direction === 'backward'
-                    ? 'left-0 w-1/2 animate-page-flip-backward'
-                    : 'left-1/2 w-1/2 animate-page-flip-forward'
-                }`}
-              >
-                {/* Front Side of Turning Page (0° to 90°) */}
-                <div className="backface-hidden absolute inset-0 rounded-r-lg border border-[#8C4E28]/40 bg-gradient-to-br from-[#FFFDF5] via-[#FFF8E6] to-[#F5E6BF] p-4 sm:p-8 flex flex-col justify-between shadow-[0_15px_35px_rgba(44,24,16,0.4)]">
-                  <div className="flex items-center justify-between border-b border-[#8C4E28]/20 pb-2">
-                    <span className="font-nunito text-[10px] sm:text-xs font-black uppercase tracking-wider text-[#8C4E28]">
-                      {sourceChapter ? `Babak ${sourceChapter.number}` : 'Untuk Nona'}
-                    </span>
-                    <span className="font-nunito text-[10px] sm:text-xs font-bold text-[#B53000]">
-                      Membalik...
-                    </span>
-                  </div>
-
-                  <div className="my-auto text-center space-y-2">
-                    <p className="font-display text-base sm:text-xl font-bold italic text-[#663300]">
-                      {sourceChapter ? sourceChapter.publicTitle : 'Cerita Kita'}
+              <>
+                {/* Mobile: Simple fade transition overlay */}
+                <div className="sm:hidden animate-page-shuffle absolute inset-0 z-40 flex items-center justify-center pointer-events-none p-4">
+                  <div className="relative w-4/5 max-w-sm rounded-2xl border-3 border-[#8C4E28] bg-gradient-to-br from-[#FFFDF5] via-[#FFF9EA] to-[#FBE8BA] p-5 text-center shadow-[0_25px_60px_rgba(44,24,16,0.65)]">
+                    <div className="flex items-center justify-center gap-2 mb-2 text-[#D4A325]">
+                      {direction === 'backward' ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
+                    </div>
+                    <p className="font-nunito text-[10px] font-black uppercase tracking-widest text-[#B53000]">
+                      {direction === 'backward' ? 'Kembali ke' : 'Membalik ke'}
                     </p>
-                    <div className="h-0.5 w-10 mx-auto bg-[#8C4E28]/30" />
-                  </div>
-
-                  <div className="text-right font-nunito text-[10px] sm:text-xs font-black text-[#8C4E28]/70 border-t border-[#8C4E28]/20 pt-2">
-                    {sourceChapter ? `Hal. ${sourceChapter.index}` : '1'}
-                  </div>
-                </div>
-
-                {/* Back Side of Turning Page (90° to 180°) */}
-                <div
-                  className="backface-hidden absolute inset-0 rounded-l-lg border border-[#8C4E28]/40 bg-gradient-to-bl from-[#FFFDF5] via-[#FFF8E6] to-[#F5E6BF] p-4 sm:p-8 flex flex-col justify-between shadow-[0_15px_35px_rgba(44,24,16,0.4)]"
-                  style={{ transform: 'rotateY(180deg)' }}
-                >
-                  <div className="flex items-center justify-between border-b border-[#8C4E28]/20 pb-2">
-                    <span className="font-nunito text-[10px] sm:text-xs font-bold text-[#B53000]">
-                      Membuka...
-                    </span>
-                    <span className="font-nunito text-[10px] sm:text-xs font-black uppercase tracking-wider text-[#8C4E28]">
-                      {targetChapter ? `Babak ${targetChapter.number}` : 'Daftar Cerita'}
-                    </span>
-                  </div>
-
-                  <div className="my-auto text-center space-y-2">
-                    <p className="font-display text-base sm:text-xl font-bold italic text-[#663300]">
+                    <h4 className="mt-1 font-display text-xl font-black italic text-[#663300]">
                       {targetChapter ? targetChapter.publicTitle : 'Daftar Cerita'}
+                    </h4>
+                    <p className="mt-2 font-nunito text-[10px] font-bold text-[#8C4E28]">
+                      {targetChapter
+                        ? `Babak ${targetChapter.number} (${targetChapter.index}/${CHAPTERS.length})`
+                        : 'Daftar Cerita'}
                     </p>
-                    <div className="h-0.5 w-10 mx-auto bg-[#8C4E28]/30" />
-                  </div>
-
-                  <div className="text-left font-nunito text-[10px] sm:text-xs font-black text-[#8C4E28]/70 border-t border-[#8C4E28]/20 pt-2">
-                    {targetChapter ? `Hal. ${targetChapter.index}` : 'Hal'}
                   </div>
                 </div>
-              </div>
+
+                {/* Desktop: True 3D Page Curl & Turn Sheet */}
+                <div
+                  className={`hidden sm:block absolute top-0 bottom-0 z-40 preserve-3d pointer-events-none ${
+                    direction === 'backward'
+                      ? 'left-0 w-1/2 animate-page-flip-backward'
+                      : 'left-1/2 w-1/2 animate-page-flip-forward'
+                  }`}
+                >
+                  {/* Front Side of Turning Page (0° to 90°) */}
+                  <div className="backface-hidden absolute inset-0 rounded-r-lg border border-[#8C4E28]/40 bg-gradient-to-br from-[#FFFDF5] via-[#FFF8E6] to-[#F5E6BF] p-4 sm:p-8 flex flex-col justify-between shadow-[0_15px_35px_rgba(44,24,16,0.4)]">
+                    <div className="flex items-center justify-between border-b border-[#8C4E28]/20 pb-2">
+                      <span className="font-nunito text-[10px] sm:text-xs font-black uppercase tracking-wider text-[#8C4E28]">
+                        {sourceChapter ? `Babak ${sourceChapter.number}` : 'Untuk Nona'}
+                      </span>
+                      <span className="font-nunito text-[10px] sm:text-xs font-bold text-[#B53000]">
+                        Membalik...
+                      </span>
+                    </div>
+
+                    <div className="my-auto text-center space-y-2">
+                      <p className="font-display text-base sm:text-xl font-bold italic text-[#663300]">
+                        {sourceChapter ? sourceChapter.publicTitle : 'Cerita Kita'}
+                      </p>
+                      <div className="h-0.5 w-10 mx-auto bg-[#8C4E28]/30" />
+                    </div>
+
+                    <div className="text-right font-nunito text-[10px] sm:text-xs font-black text-[#8C4E28]/70 border-t border-[#8C4E28]/20 pt-2">
+                      {sourceChapter ? `Hal. ${sourceChapter.index}` : '1'}
+                    </div>
+                  </div>
+
+                  {/* Back Side of Turning Page (90° to 180°) */}
+                  <div
+                    className="backface-hidden absolute inset-0 rounded-l-lg border border-[#8C4E28]/40 bg-gradient-to-bl from-[#FFFDF5] via-[#FFF8E6] to-[#F5E6BF] p-4 sm:p-8 flex flex-col justify-between shadow-[0_15px_35px_rgba(44,24,16,0.4)]"
+                    style={{ transform: 'rotateY(180deg)' }}
+                  >
+                    <div className="flex items-center justify-between border-b border-[#8C4E28]/20 pb-2">
+                      <span className="font-nunito text-[10px] sm:text-xs font-bold text-[#B53000]">
+                        Membuka...
+                      </span>
+                      <span className="font-nunito text-[10px] sm:text-xs font-black uppercase tracking-wider text-[#8C4E28]">
+                        {targetChapter ? `Babak ${targetChapter.number}` : 'Daftar Cerita'}
+                      </span>
+                    </div>
+
+                    <div className="my-auto text-center space-y-2">
+                      <p className="font-display text-base sm:text-xl font-bold italic text-[#663300]">
+                        {targetChapter ? targetChapter.publicTitle : 'Daftar Cerita'}
+                      </p>
+                      <div className="h-0.5 w-10 mx-auto bg-[#8C4E28]/30" />
+                    </div>
+
+                    <div className="text-left font-nunito text-[10px] sm:text-xs font-black text-[#8C4E28]/70 border-t border-[#8C4E28]/20 pt-2">
+                      {targetChapter ? `Hal. ${targetChapter.index}` : 'Hal'}
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
 
-            {/* Dynamic Shadow underneath turning sheet */}
-            <div className="animate-page-shadow-under absolute inset-0 z-20 pointer-events-none bg-gradient-to-r from-transparent via-black/35 to-transparent" />
+            {/* Dynamic Shadow underneath turning sheet (desktop only) */}
+            <div className="hidden sm:block animate-page-shadow-under absolute inset-0 z-20 pointer-events-none bg-gradient-to-r from-transparent via-black/35 to-transparent" />
           </div>
         </div>
 
         {/* Ambient Reading Prompt below Book */}
         <div className="mt-3 text-center">
-          <p className="font-nunito text-xs sm:text-sm font-bold text-[#F9EC88] drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
+          <p className="inline-flex items-center gap-2 rounded-full border border-[#8C4E28]/50 bg-[#1D100A]/60 px-4 py-1.5 font-nunito text-xs sm:text-sm font-bold text-[#F9EC88] shadow-lg backdrop-blur-sm">
+            <BookOpen size={14} className="text-[#D4A325]" />
             Membalik ke {targetChapter ? `Babak ${targetChapter.number}: ${targetChapter.publicTitle}` : 'Daftar Cerita'}...
           </p>
         </div>

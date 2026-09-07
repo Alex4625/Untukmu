@@ -540,18 +540,6 @@ body {
   animation: pageShadowUnder 0.85s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-/* Dog-ear Corner Curl Effect */
-.dog-ear-hover {
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.dog-ear-hover:hover {
-  transform: scale(1.08) translate(-3px, -3px);
-  filter: drop-shadow(-4px 4px 10px rgba(74, 36, 17, 0.45));
-}
-.dog-ear-hover:active {
-  transform: scale(0.96);
-}
-
 @keyframes pageFlipForward {
   0% {
     transform: rotateY(0deg);
@@ -625,6 +613,314 @@ body {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+}
+
+/* ==========================================================================
+   Antique Physical Book & Wooden Desk Styling (Realistic Handcrafted 3D)
+   ========================================================================== */
+
+/* Rustic Wooden Tabletop Surface with realistic warmth and planks */
+.antique-desk-surface {
+  background-color: #1f1008;
+  background-image:
+    radial-gradient(ellipse at 50% 38%, rgba(135, 75, 42, 0.42) 0%, rgba(32, 16, 8, 0.92) 68%, #100703 100%),
+    repeating-linear-gradient(90deg, transparent 0px, transparent 220px, rgba(10, 5, 2, 0.5) 221px, rgba(70, 36, 18, 0.3) 222px, transparent 224px),
+    linear-gradient(to right, rgba(0, 0, 0, 0.2) 0%, transparent 12%, transparent 88%, rgba(0, 0, 0, 0.2) 100%);
+  box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.92);
+}
+
+/* Hardbound Antique Leather Cover */
+.antique-book-leather {
+  background: linear-gradient(145deg, #3E2012 0%, #2A1409 55%, #1B0C05 100%);
+  border: 1px solid rgba(212, 163, 37, 0.5);
+  box-shadow:
+    0 35px 70px -15px rgba(0, 0, 0, 0.9),
+    0 15px 30px -5px rgba(0, 0, 0, 0.7),
+    inset 0 1px 2px rgba(255, 235, 180, 0.25),
+    inset 0 0 25px rgba(0, 0, 0, 0.85);
+}
+
+/* Stitched Border on Leather */
+.leather-stitch-border {
+  border: 1.5px dashed rgba(212, 163, 37, 0.5);
+  border-radius: 8px;
+}
+
+/* Warm Antique Parchment Paper Texture */
+.antique-parchment-paper {
+  background: linear-gradient(180deg, #FBF5E8 0%, #F5ECDA 100%);
+  box-shadow:
+    inset 0 0 45px rgba(160, 115, 70, 0.14),
+    inset 0 0 12px rgba(130, 85, 45, 0.09);
+}
+
+/* Center Spine Gutter Crease & Thread Binding */
+.spine-gutter-crease {
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(40, 20, 10, 0.18) 28%,
+    rgba(30, 14, 6, 0.48) 48%,
+    rgba(12, 5, 2, 0.82) 50%,
+    rgba(30, 14, 6, 0.48) 52%,
+    rgba(40, 20, 10, 0.18) 72%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+/* Dynamic Stacked Paper Edges Strata Effect */
+.page-stack-edge-left {
+  background: repeating-linear-gradient(
+    90deg,
+    #ECE0CE 0px,
+    #ECE0CE 1px,
+    #D1BEA4 2px,
+    #BBA388 3px
+  );
+  box-shadow: -5px 0 12px rgba(0, 0, 0, 0.45);
+}
+
+.page-stack-edge-right {
+  background: repeating-linear-gradient(
+    90deg,
+    #BBA388 0px,
+    #D1BEA4 1px,
+    #ECE0CE 2px,
+    #ECE0CE 3px
+  );
+  box-shadow: 5px 0 12px rgba(0, 0, 0, 0.45);
+}
+
+.page-stack-edge-bottom {
+  background: repeating-linear-gradient(
+    0deg,
+    #BBA388 0px,
+    #D1BEA4 1px,
+    #ECE0CE 2px,
+    #ECE0CE 3px
+  );
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* Silk Ribbon Bookmark */
+.silk-ribbon-bookmark {
+  background: linear-gradient(to right, #801818, #A32626 45%, #801818 100%);
+  box-shadow:
+    2px 4px 12px rgba(0, 0, 0, 0.55),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+/* Antique Marbled Book Endpaper (Inside Cover / Flyleaf) */
+.antique-marbled-endpaper {
+  background-color: #220c05;
+  background-image:
+    radial-gradient(circle at 50% 40%, rgba(212, 163, 37, 0.28) 0%, transparent 65%),
+    radial-gradient(circle at 15% 25%, rgba(181, 48, 0, 0.35) 0%, transparent 50%),
+    radial-gradient(circle at 85% 75%, rgba(140, 78, 40, 0.4) 0%, transparent 55%),
+    repeating-linear-gradient(45deg, rgba(212, 163, 37, 0.04) 0px, rgba(212, 163, 37, 0.04) 2px, transparent 2px, transparent 8px);
+  border: 1px solid rgba(212, 163, 37, 0.4);
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.85);
+}
+
+/* Smooth 3D Book Cover Opening & Closing Keyframes */
+@keyframes bookCoverSwingOpen {
+  0% {
+    transform: rotateY(0deg) translateZ(0px);
+    box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.9);
+  }
+  30% {
+    transform: rotateY(-55deg) translateZ(24px);
+    box-shadow: -35px 30px 65px rgba(0, 0, 0, 0.7);
+  }
+  70% {
+    transform: rotateY(-135deg) translateZ(16px);
+    box-shadow: -20px 20px 40px rgba(0, 0, 0, 0.5);
+  }
+  100% {
+    transform: rotateY(-180deg) translateZ(0px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  }
+}
+
+@keyframes bookCoverSwingClose {
+  0% {
+    transform: rotateY(-180deg) translateZ(0px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  }
+  35% {
+    transform: rotateY(-125deg) translateZ(24px);
+    box-shadow: -25px 25px 50px rgba(0, 0, 0, 0.6);
+  }
+  75% {
+    transform: rotateY(-45deg) translateZ(16px);
+    box-shadow: -35px 30px 65px rgba(0, 0, 0, 0.7);
+  }
+  100% {
+    transform: rotateY(0deg) translateZ(0px);
+    box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.9);
+  }
+}
+
+.animate-cover-open {
+  transform-origin: left center;
+  animation: bookCoverSwingOpen 0.85s cubic-bezier(0.25, 1, 0.35, 1) forwards;
+  will-change: transform, box-shadow;
+}
+
+.animate-cover-close {
+  transform-origin: left center;
+  animation: bookCoverSwingClose 0.8s cubic-bezier(0.25, 1, 0.35, 1) forwards;
+  will-change: transform, box-shadow;
+}
+
+/* Realistic, Lightweight & Natural 3D Page Turn Keyframes */
+@keyframes pageTurnForwardRealistic {
+  0% {
+    transform: rotateY(0deg) translateZ(0px) rotateZ(0deg);
+    box-shadow: 0 2px 8px rgba(35, 15, 5, 0.08);
+  }
+  45% {
+    /* Natural delicate paper curl and lift over the spine — airy, not bulging out */
+    transform: rotateY(-85deg) translateZ(8px) rotateZ(-1.5deg);
+    box-shadow: -8px 4px 18px rgba(35, 15, 5, 0.18);
+  }
+  100% {
+    transform: rotateY(-180deg) translateZ(0px) rotateZ(0deg);
+    box-shadow: 0 2px 6px rgba(35, 15, 5, 0.05);
+  }
+}
+
+@keyframes pageTurnBackwardRealistic {
+  0% {
+    transform: rotateY(0deg) translateZ(0px) rotateZ(0deg);
+    box-shadow: 0 2px 8px rgba(35, 15, 5, 0.08);
+  }
+  45% {
+    /* Symmetrical natural lift when turning backward */
+    transform: rotateY(85deg) translateZ(8px) rotateZ(1.5deg);
+    box-shadow: 8px 4px 18px rgba(35, 15, 5, 0.18);
+  }
+  100% {
+    transform: rotateY(180deg) translateZ(0px) rotateZ(0deg);
+    box-shadow: 0 2px 6px rgba(35, 15, 5, 0.05);
+  }
+}
+
+.animate-turn-forward {
+  transform-origin: left center;
+  animation: pageTurnForwardRealistic 0.46s cubic-bezier(0.25, 0.9, 0.35, 1) forwards;
+  will-change: transform;
+}
+
+.animate-turn-backward {
+  transform-origin: right center;
+  animation: pageTurnBackwardRealistic 0.46s cubic-bezier(0.25, 0.9, 0.35, 1) forwards;
+  will-change: transform;
+}
+
+/* Floating Flower Petals (Delicate falling Sakura / Rose petals) */
+@keyframes floatPetal {
+  0% {
+    transform: translate3d(0, -30px, 0) rotate(0deg) scale(0.9);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.95;
+  }
+  85% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(var(--drift-x, 80px), 108vh, 0) rotate(var(--spin-deg, 380deg)) scale(1.05);
+    opacity: 0;
+  }
+}
+
+.animate-petal {
+  animation: floatPetal var(--duration, 8s) cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+  will-change: transform, opacity;
+}
+
+.burst-petal {
+  position: fixed;
+  top: -30px;
+  pointer-events: none;
+  z-index: 9999;
+  animation: floatPetal var(--duration, 8s) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  will-change: transform, opacity;
+}
+
+/* Festive Confetti Particle Drop */
+@keyframes confettiFall {
+  0% {
+    transform: translate3d(0, -20px, 0) rotateZ(0deg) rotateY(0deg);
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate3d(calc((var(--random-x, 0.5) - 0.5) * 200px), 108vh, 0) rotateZ(720deg) rotateY(1080deg);
+    opacity: 0;
+  }
+}
+
+.confetti-piece {
+  position: fixed;
+  top: -15px;
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  z-index: 9999;
+  pointer-events: none;
+  animation: confettiFall 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* Real Polaroid Styling with authentic shadow and paper frame */
+.polaroid-frame {
+  background: #FFFDF8;
+  box-shadow:
+    0 12px 28px -5px rgba(0, 0, 0, 0.55),
+    0 4px 10px -2px rgba(0, 0, 0, 0.4),
+    inset 0 0 2px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+.polaroid-frame:hover {
+  transform: translateY(-8px) scale(1.04) rotate(0deg) !important;
+  box-shadow:
+    0 22px 38px -6px rgba(0, 0, 0, 0.7),
+    0 8px 18px -3px rgba(0, 0, 0, 0.5);
+  z-index: 50;
+}
+
+/* Vintage Washi Tape Corner */
+.washi-tape {
+  background: rgba(235, 222, 190, 0.7);
+  border-left: 2px dashed rgba(190, 165, 130, 0.5);
+  border-right: 2px dashed rgba(190, 165, 130, 0.5);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(1px);
+}
+
+/* Ink Stamp Reaction Mark */
+@keyframes stampSlam {
+  0% {
+    opacity: 0;
+    transform: scale(2.2) rotate(-15deg);
+  }
+  60% {
+    opacity: 0.95;
+    transform: scale(0.92) rotate(-3deg);
+  }
+  100% {
+    opacity: 0.9;
+    transform: scale(1) rotate(-4deg);
+  }
+}
+
+.animate-stamp {
+  animation: stampSlam 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 /* Accessibility */

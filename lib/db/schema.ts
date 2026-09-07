@@ -104,6 +104,23 @@ export const siteSettings = sqliteTable('site_settings', {
   updated_at: text('updated_at').notNull()
 });
 
+export const deskPolaroids = sqliteTable(
+  'desk_polaroids',
+  {
+    id: text('id').primaryKey(),
+    caption: text('caption'),
+    media_key: text('media_key'),
+    rotation_deg: integer('rotation_deg').default(-3),
+    sort_order: integer('sort_order').default(0),
+    status: text('status').notNull().default('active'),
+    created_at: text('created_at').notNull()
+  },
+  (table) => [
+    check('desk_polaroids_status_check', sql`${table.status} IN ('draft', 'active', 'hidden')`),
+    index('desk_polaroids_status_sort_idx').on(table.status, table.sort_order)
+  ]
+);
+
 export type MemoryEntity = typeof memories.$inferSelect;
 export type NewMemoryEntity = typeof memories.$inferInsert;
 
@@ -121,3 +138,6 @@ export type NewPlanEntity = typeof plans.$inferInsert;
 
 export type SiteSettingsEntity = typeof siteSettings.$inferSelect;
 export type NewSiteSettingsEntity = typeof siteSettings.$inferInsert;
+
+export type DeskPolaroidEntity = typeof deskPolaroids.$inferSelect;
+export type NewDeskPolaroidEntity = typeof deskPolaroids.$inferInsert;

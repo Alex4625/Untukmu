@@ -112,6 +112,18 @@ export function getDb(): DbInstance {
         music_url text,
         updated_at text NOT NULL
       );
+
+      CREATE TABLE IF NOT EXISTS desk_polaroids (
+        id text PRIMARY KEY NOT NULL,
+        caption text,
+        media_key text,
+        rotation_deg integer DEFAULT -3,
+        sort_order integer DEFAULT 0 NOT NULL,
+        status text DEFAULT 'active' NOT NULL,
+        created_at text NOT NULL,
+        CONSTRAINT desk_polaroids_status_check CHECK(status IN ('draft', 'active', 'hidden'))
+      );
+      CREATE INDEX IF NOT EXISTS desk_polaroids_status_sort_idx ON desk_polaroids (status, sort_order);
     `);
 
     localDbInstance = drizzleBetterSqlite(sqlite, { schema });
