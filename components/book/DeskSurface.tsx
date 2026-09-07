@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import type { DeskPolaroid } from '@/lib/types';
-import { Maximize2, X, Music, Heart, Volume2, VolumeX } from 'lucide-react';
+import { X, Music, Heart, Volume2, VolumeX } from 'lucide-react';
 import { useAudio } from '@/components/PersistentAudioPlayer';
 
 export default function DeskSurface({

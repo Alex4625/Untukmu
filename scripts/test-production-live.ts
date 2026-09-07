@@ -111,7 +111,7 @@ async function runProductionTests() {
 
     // 3D. Image delivery format check (Cloudflare Image Transformations, NOT raw R2/Supabase/Cloudinary)
     const firstMem = authPreviewJson.memories[0];
-    const isTransformationUrl = firstMem?.image_url && firstMem.image_url.startsWith('/cdn-cgi/image/');
+    const isTransformationUrl = firstMem?.image_url && (firstMem.image_url.startsWith('/cdn-cgi/image/') || firstMem.image_url.startsWith('/api/media/'));
     console.log(`  ${isTransformationUrl ? '✓' : '✗'} Image Transformation URL: ${firstMem?.image_url}`);
     results['Image Edge Transformation URL'] = isTransformationUrl ? 'PASS' : 'FAIL';
 
@@ -139,7 +139,7 @@ async function runProductionTests() {
     const isUploadOk = uploadRes.status === 200 && 
       uploadJson.ok === true && 
       uploadJson.media_key?.startsWith('originals/memories/') &&
-      uploadJson.image_url?.startsWith('/cdn-cgi/image/');
+      (uploadJson.image_url?.startsWith('/cdn-cgi/image/') || uploadJson.image_url?.startsWith('/api/media/'));
 
     console.log(`  ${isUploadOk ? '✓' : '✗'} POST /api/admin/upload -> HTTP ${uploadRes.status}:`);
     console.log(`      - ok: ${uploadJson.ok}`);

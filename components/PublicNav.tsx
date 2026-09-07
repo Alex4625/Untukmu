@@ -26,9 +26,11 @@ export default function PublicNav({
   ];
 
   // Close mobile menu whenever the route changes
-  useEffect(() => {
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
     setIsOpen(false);
-  }, [pathname]);
+  }
 
   // Close mobile menu on Escape key press
   useEffect(() => {

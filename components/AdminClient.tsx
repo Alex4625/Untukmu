@@ -4,7 +4,7 @@ import { useEffect, useId, useState } from 'react';
 import type { AdminContent } from '@/lib/adminContent';
 import { DEFAULT_MUSIC_URL } from '@/lib/siteDefaults';
 import type { ContentStatus, Letter, Memory, MemoryCard, Plan, QuizQuestion, SiteSettings, DeskPolaroid } from '@/lib/types';
-import { Eye, EyeOff, FilePenLine, Lock, LogOut, Plus, RefreshCw, ShieldCheck, Trash2, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { Eye, EyeOff, FilePenLine, Lock, LogOut, Plus, RefreshCw, ShieldCheck, Trash2, ExternalLink } from 'lucide-react';
 
 type AdminData = AdminContent;
 type Tab = 'memories' | 'letters' | 'memory_cards' | 'quiz_questions' | 'plans' | 'site_settings' | 'desk_polaroids';

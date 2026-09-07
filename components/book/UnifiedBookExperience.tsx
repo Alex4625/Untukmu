@@ -1,12 +1,33 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { PublicContent } from '@/lib/types';
 import DeskSurface from './DeskSurface';
 import AntiqueBook from './AntiqueBook';
 import MobilePocketBook from './MobilePocketBook';
 import PreviewBanner from '@/components/PreviewBanner';
 import { buildSpreads } from './BookSpreads';
+
+const emptySubscribe = () => () => {};
+
+function useIsMounted() {
+  return React.useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+}
+
+function useIsMobile() {
+  return React.useSyncExternalStore(
+    (callback) => {
+      window.addEventListener('resize', callback);
+      return () => window.removeEventListener('resize', callback);
+    },
+    () => window.innerWidth < 768,
+    () => false
+  );
+}
 
 export default function UnifiedBookExperience({
   content,
@@ -17,13 +38,13 @@ export default function UnifiedBookExperience({
   targetChapterNumber?: string;
   isInitiallyOpen?: boolean;
 }) {
-  const [isMobile, setIsMobile] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const isMobile = useIsMobile();
+  const mounted = useIsMounted();
   const [activeChapter, setActiveChapter] = useState<string | undefined>(targetChapterNumber);
   const [showPetals, setShowPetals] = useState(targetChapterNumber === '07');
 
   // Detect initial target spread index if targetChapterNumber is provided
-  const spreads = buildSpreads(content);
+  const spreads = React.useMemo(() => buildSpreads(content), [content]);
   let initialSpread = 0;
   if (targetChapterNumber) {
     const foundIdx = spreads.findIndex((s) => s.chapterNumber === targetChapterNumber);
@@ -31,16 +52,6 @@ export default function UnifiedBookExperience({
       initialSpread = foundIdx;
     }
   }
-
-  useEffect(() => {
-    setMounted(true);
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   const handleChapterChange = (chapterNumber?: string) => {
     setActiveChapter(chapterNumber);

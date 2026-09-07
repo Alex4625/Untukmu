@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, BookOpen, Sparkles, Heart, CheckCircle2, CornerDownRight, CornerDownLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, Sparkles, CheckCircle2, CornerDownRight, CornerDownLeft } from 'lucide-react';
 import { CHAPTERS, ChapterInfo, getNextChapter, getPrevChapter } from './chapters';
 import { previewPath } from '@/lib/publicUrl';
 import { useChapterTransition } from './StorybookTransition';

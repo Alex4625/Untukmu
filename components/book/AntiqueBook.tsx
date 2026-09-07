@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { PublicContent } from '@/lib/types';
 import { buildSpreads, type SpreadData } from './BookSpreads';
 import { CHAPTERS } from '@/components/chapters';
@@ -70,9 +70,8 @@ export default function AntiqueBook({
   const [turningDirection, setTurningDirection] = useState<'forward' | 'backward' | null>(null);
   const [showRibbonMenu, setShowRibbonMenu] = useState(false);
   const [quizScores, setQuizScores] = useState<Record<string, string>>({});
-  const isTurningRef = useRef(false);
 
-  const spreads = buildSpreads(content);
+  const spreads = useMemo(() => buildSpreads(content), [content]);
   const totalSpreads = spreads.length;
   const currentSpread: SpreadData = spreads[currentSpreadIndex] || spreads[0];
 
@@ -110,41 +109,35 @@ export default function AntiqueBook({
 
   // Turn Page forward or backward with realistic dual-sided leaf animation (natural & lightweight)
   const turnPage = useCallback((direction: 'forward' | 'backward') => {
-    if (isTurningRef.current || bookState !== 'open') return;
+    if (turningDirection !== null || bookState !== 'open') return;
 
     if (direction === 'forward' && currentSpreadIndex < totalSpreads - 1) {
-      isTurningRef.current = true;
       setTurningDirection('forward');
       playPageFlipSound('forward');
 
       setTimeout(() => {
         setCurrentSpreadIndex((prev) => prev + 1);
         setTurningDirection(null);
-        isTurningRef.current = false;
       }, 460);
     } else if (direction === 'backward' && currentSpreadIndex > 0) {
-      isTurningRef.current = true;
       setTurningDirection('backward');
       playPageFlipSound('backward');
 
       setTimeout(() => {
         setCurrentSpreadIndex((prev) => prev - 1);
         setTurningDirection(null);
-        isTurningRef.current = false;
       }, 460);
     }
-  }, [bookState, currentSpreadIndex, totalSpreads]);
+  }, [bookState, currentSpreadIndex, totalSpreads, turningDirection]);
 
   const jumpToSpread = useCallback((index: number) => {
-    if (index === currentSpreadIndex || bookState !== 'open') return;
-    isTurningRef.current = true;
+    if (index === currentSpreadIndex || bookState !== 'open' || turningDirection !== null) return;
     playPageFlipSound('shuffle');
     setTimeout(() => {
       setCurrentSpreadIndex(Math.max(0, Math.min(totalSpreads - 1, index)));
       setShowRibbonMenu(false);
-      isTurningRef.current = false;
     }, 350);
-  }, [bookState, currentSpreadIndex, totalSpreads]);
+  }, [bookState, currentSpreadIndex, totalSpreads, turningDirection]);
 
   const jumpToChapter = useCallback((chapterNumber: string) => {
     const targetIdx = spreads.findIndex((s) => s.chapterNumber === chapterNumber);
@@ -173,14 +166,18 @@ export default function AntiqueBook({
   const leftStackPx = Math.max(3, Math.round((currentSpreadIndex / (totalSpreads - 1)) * 18));
   const rightStackPx = Math.max(3, Math.round(((totalSpreads - 1 - currentSpreadIndex) / (totalSpreads - 1)) * 18));
 
-  const spreadRenderProps = {
-    content,
-    onJumpToChapter: jumpToChapter,
-    onJumpToSpread: jumpToSpread,
-    quizScores,
-    onAnswerQuiz: (qId: string, ans: 'A' | 'B' | 'C' | 'D') => setQuizScores((p) => ({ ...p, [qId]: ans })),
-    triggerPetals: triggerPetals || celebrateLove
-  };
+  const spreadRenderProps = useMemo(
+    () => ({
+      content,
+      onJumpToChapter: jumpToChapter,
+      onJumpToSpread: jumpToSpread,
+      quizScores,
+      onAnswerQuiz: (qId: string, ans: 'A' | 'B' | 'C' | 'D') =>
+        setQuizScores((p) => ({ ...p, [qId]: ans })),
+      triggerPetals: triggerPetals || celebrateLove
+    }),
+    [content, jumpToChapter, jumpToSpread, quizScores, triggerPetals]
+  );
 
   // Next and Prev Spreads for dual-sided rendering
   const nextSpread = spreads[currentSpreadIndex + 1];

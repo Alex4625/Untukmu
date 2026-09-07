@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import type { PublicContent } from '@/lib/types';
 import { buildSpreads } from './BookSpreads';
 import { CHAPTERS } from '@/components/chapters';
 import { playPageFlipSound } from '@/lib/pageFlipAudio';
-import { ChevronLeft, ChevronRight, Bookmark, Heart, BookOpen } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Bookmark, BookOpen } from 'lucide-react';
 import { celebrateLove } from '@/components/ConfettiButton';
 
 export default function MobilePocketBook({
@@ -22,74 +22,59 @@ export default function MobilePocketBook({
   const [quizScores, setQuizScores] = useState<Record<string, string>>({});
   const touchStartX = useRef<number | null>(null);
 
-  const spreads = buildSpreads(content);
+  const spreads = useMemo(() => buildSpreads(content), [content]);
 
-  // Flatten spreads into individual single pages for mobile
-  const singlePages: {
-    id: string;
-    chapterNumber?: string;
-    title: string;
-    render: () => React.ReactNode;
-    pageNumber: number;
-  }[] = [];
+  // Flatten spreads into individual single page metadata for mobile
+  const pageMeta = useMemo(() => {
+    return spreads.flatMap((spread, spreadIdx) => [
+      {
+        id: `${spread.id}-left`,
+        chapterNumber: spread.chapterNumber,
+        title: spread.title,
+        pageNumber: spreadIdx * 2 + 1,
+        spreadIdx,
+        isLeft: true
+      },
+      {
+        id: `${spread.id}-right`,
+        chapterNumber: spread.chapterNumber,
+        title: spread.title,
+        pageNumber: spreadIdx * 2 + 2,
+        spreadIdx,
+        isLeft: false
+      }
+    ]);
+  }, [spreads]);
 
-  spreads.forEach((spread, spreadIdx) => {
-    // Left Page
-    singlePages.push({
-      id: `${spread.id}-left`,
-      chapterNumber: spread.chapterNumber,
-      title: spread.title,
-      render: () =>
-        spread.renderLeft({
-          content,
-          onJumpToChapter: (ch) => jumpToChapter(ch),
-          onJumpToSpread: (sp) => jumpToSpread(sp),
-          triggerPetals: celebrateLove,
-          quizScores,
-          onAnswerQuiz: (qId, ans) => setQuizScores((p) => ({ ...p, [qId]: ans }))
-        }),
-      pageNumber: spreadIdx * 2 + 1
-    });
+  const totalPages = pageMeta.length;
 
-    // Right Page
-    singlePages.push({
-      id: `${spread.id}-right`,
-      chapterNumber: spread.chapterNumber,
-      title: spread.title,
-      render: () =>
-        spread.renderRight({
-          content,
-          onJumpToChapter: (ch) => jumpToChapter(ch),
-          onJumpToSpread: (sp) => jumpToSpread(sp),
-          triggerPetals: celebrateLove,
-          quizScores,
-          onAnswerQuiz: (qId, ans) => setQuizScores((p) => ({ ...p, [qId]: ans }))
-        }),
-      pageNumber: spreadIdx * 2 + 2
-    });
-  });
+  const jumpToPage = useCallback(
+    (index: number) => {
+      const validIdx = Math.max(0, Math.min(pageMeta.length - 1, index));
+      setPageIndex(validIdx);
+      playPageFlipSound('forward');
+      setShowChapterMenu(false);
+      onChapterChange?.(pageMeta[validIdx]?.chapterNumber);
+    },
+    [pageMeta, onChapterChange]
+  );
 
-  const totalPages = singlePages.length;
-  const currentPage = singlePages[pageIndex] || singlePages[0];
+  const jumpToChapter = useCallback(
+    (chapterNumber: string) => {
+      const targetIdx = pageMeta.findIndex((p) => p.chapterNumber === chapterNumber);
+      if (targetIdx !== -1) {
+        jumpToPage(targetIdx);
+      }
+    },
+    [pageMeta, jumpToPage]
+  );
 
-  const jumpToPage = useCallback((index: number) => {
-    const validIdx = Math.max(0, Math.min(totalPages - 1, index));
-    setPageIndex(validIdx);
-    playPageFlipSound('forward');
-    setShowChapterMenu(false);
-    onChapterChange?.(singlePages[validIdx]?.chapterNumber);
-  }, [totalPages, singlePages, onChapterChange]);
-
-  const jumpToChapter = useCallback((chapterNumber: string) => {
-    const targetIdx = singlePages.findIndex((p) => p.chapterNumber === chapterNumber);
-    if (targetIdx !== -1) {
-      jumpToPage(targetIdx);
-    }
-  }, [singlePages, jumpToPage]);
-
-  const jumpToSpread = useCallback((spreadIdx: number) => {
-    jumpToPage(spreadIdx * 2);
-  }, [jumpToPage]);
+  const jumpToSpread = useCallback(
+    (spreadIdx: number) => {
+      jumpToPage(spreadIdx * 2);
+    },
+    [jumpToPage]
+  );
 
   const nextPage = () => {
     if (pageIndex < totalPages - 1) {
@@ -102,6 +87,26 @@ export default function MobilePocketBook({
       jumpToPage(pageIndex - 1);
     }
   };
+
+  const currentPageMeta = pageMeta[pageIndex] || pageMeta[0];
+  const currentSpread = spreads[currentPageMeta.spreadIdx] || spreads[0];
+
+  const spreadRenderProps = useMemo(
+    () => ({
+      content,
+      onJumpToChapter: jumpToChapter,
+      onJumpToSpread: jumpToSpread,
+      triggerPetals: celebrateLove,
+      quizScores,
+      onAnswerQuiz: (qId: string, ans: 'A' | 'B' | 'C' | 'D') =>
+        setQuizScores((p) => ({ ...p, [qId]: ans }))
+    }),
+    [content, jumpToChapter, jumpToSpread, quizScores]
+  );
+
+  const renderedPageContent = currentPageMeta.isLeft
+    ? currentSpread.renderLeft(spreadRenderProps)
+    : currentSpread.renderRight(spreadRenderProps);
 
   // Touch Swipe Handlers for smooth thumb slide
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -181,7 +186,7 @@ export default function MobilePocketBook({
         <div className="antique-parchment-paper relative min-h-[500px] sm:min-h-[540px] w-full rounded-lg p-4 sm:p-6 flex flex-col justify-between overflow-hidden shadow-inner select-none">
           {/* Page Content */}
           <div className="relative z-10 w-full h-full">
-            {currentPage?.render()}
+            {renderedPageContent}
           </div>
         </div>
       </div>
@@ -203,7 +208,7 @@ export default function MobilePocketBook({
           className="flex items-center gap-1.5 rounded-full border border-[#8C4E28]/60 bg-[#241006]/90 px-3 py-1.5 text-[11px] text-[#F9EC88] shadow-sm hover:border-[#D4A325]"
         >
           <BookOpen size={12} />
-          <span>Hal. {currentPage?.pageNumber || pageIndex + 1} / {totalPages}</span>
+          <span>Hal. {currentPageMeta?.pageNumber || pageIndex + 1} / {totalPages}</span>
         </button>
 
         <button

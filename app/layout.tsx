@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Cormorant_Garamond, DM_Sans, Nunito } from 'next/font/google';
 import './globals.css';
-import { AudioProvider, PersistentAudioWidget } from '@/components/PersistentAudioPlayer';
-import ChapterIndexNav from '@/components/ChapterIndexNav';
+import { AudioProvider } from '@/components/PersistentAudioPlayer';
 import { StorybookTransitionProvider } from '@/components/StorybookTransition';
 
 const nunitoFont = Nunito({

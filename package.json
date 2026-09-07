@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "tsx --test tests/**/*.test.ts",
+    "build:worker": "opennextjs-cloudflare",
+    "deploy": "opennextjs-cloudflare && wrangler deploy",
+    "cf:typegen": "wrangler types",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
   },

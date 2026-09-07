@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import type { PublicContent, Memory, Letter, MemoryCard, QuizQuestion, Plan } from '@/lib/types';
 import { CHAPTERS } from '@/components/chapters';
-import { Heart, Calendar, Sparkles, CheckCircle2, Bookmark, ArrowRight, RotateCcw, Volume2 } from 'lucide-react';
+import { Heart, Calendar, Sparkles, CheckCircle2, Bookmark, ArrowRight, RotateCcw } from 'lucide-react';
 import { celebrateLove } from '@/components/ConfettiButton';
 
 export type SpreadData = {
