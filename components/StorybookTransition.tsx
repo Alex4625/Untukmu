@@ -1,18 +1,20 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { CHAPTERS, ChapterInfo, getChapterByPath, getChapterTransitionDirection } from './chapters';
-import { Sparkles, BookOpen } from 'lucide-react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { CHAPTERS, ChapterInfo, getChapterByPath, getNextChapter, getPrevChapter, getChapterTransitionDirection } from './chapters';
+import { Sparkles, BookOpen, ArrowRight, ArrowLeft } from 'lucide-react';
+import { playPageFlipSound } from '@/lib/pageFlipAudio';
+import { previewPath } from '@/lib/publicUrl';
 
-type TransitionDirection = 'forward' | 'backward' | 'hub';
-type TransitionPhase = 'entering' | 'holding' | 'leaving';
+export type TransitionDirection = 'forward' | 'backward' | 'hub' | 'shuffle';
 
 interface TransitionState {
   targetHref: string;
+  sourceChapter?: ChapterInfo;
   targetChapter?: ChapterInfo;
   direction: TransitionDirection;
-  phase: TransitionPhase;
+  isShuffle: boolean;
 }
 
 interface ChapterTransitionContextType {
@@ -42,14 +44,20 @@ export function StorybookTransitionProvider({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [transitionState, setTransitionState] = useState<TransitionState | null>(null);
-  const activeTimerRef = useRef<NodeJS.Timeout[]>([]);
+  const searchParams = useSearchParams();
+  const isPreview = searchParams.get('preview') === 'unlocked';
 
-  // Clear timers on unmount
+  const [transitionState, setTransitionState] = useState<TransitionState | null>(null);
+  const activeTimersRef = useRef<NodeJS.Timeout[]>([]);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  const clearAllTimers = () => {
+    activeTimersRef.current.forEach(clearTimeout);
+    activeTimersRef.current = [];
+  };
+
   useEffect(() => {
-    return () => {
-      activeTimerRef.current.forEach(clearTimeout);
-    };
+    return () => clearAllTimers();
   }, []);
 
   const transitionTo = useCallback(
@@ -58,77 +66,165 @@ export function StorybookTransitionProvider({
       targetChapter?: ChapterInfo,
       directionOverride?: TransitionDirection
     ) => {
-      // Don't trigger if already in transition or navigating to exact same path
       if (transitionState !== null || pathname === href) {
         return;
       }
 
-      // Identify destination chapter if not passed
+      const sourceChapter = getChapterByPath(pathname);
       const resolvedTarget = targetChapter || getChapterByPath(href);
-      const currentChapter = getChapterByPath(pathname);
 
-      // Determine direction: forward, backward, or hub
       let direction: TransitionDirection = directionOverride || 'forward';
+      const isShuffle = directionOverride === 'shuffle' || (!sourceChapter && Boolean(resolvedTarget));
+
       if (!directionOverride) {
         if (!resolvedTarget) {
           direction = 'hub';
+        } else if (isShuffle) {
+          direction = 'shuffle';
         } else {
-          direction = getChapterTransitionDirection(
-            currentChapter?.number,
-            resolvedTarget.number
-          );
+          direction = getChapterTransitionDirection(sourceChapter?.number, resolvedTarget.number);
         }
       }
 
-      // Check for reduced motion preference
+      clearAllTimers();
+
+      // Play authentic Web Audio paper rustle sound
+      if (direction === 'shuffle') {
+        playPageFlipSound('shuffle');
+      } else if (direction === 'backward') {
+        playPageFlipSound('backward');
+      } else {
+        playPageFlipSound('forward');
+      }
+
+      // Check reduced motion preference
       const prefersReducedMotion =
         typeof window !== 'undefined' &&
         window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // Clear any pending timers
-      activeTimerRef.current.forEach(clearTimeout);
-      activeTimerRef.current = [];
-
-      // Phase 1: Begin page turn / lift
       setTransitionState({
         targetHref: href,
+        sourceChapter,
         targetChapter: resolvedTarget,
         direction,
-        phase: 'entering'
+        isShuffle
       });
 
       if (prefersReducedMotion) {
-        // Fast instant route for users who prefer reduced motion
-        const t1 = setTimeout(() => {
+        const t = setTimeout(() => {
           router.push(href);
           window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
           setTransitionState(null);
-        }, 150);
-        activeTimerRef.current.push(t1);
+        }, 120);
+        activeTimersRef.current.push(t);
         return;
       }
 
-      // Phase 2: Page completely covers screen, execute route push in background
+      // Phase 2: Page reaches 90° / midpoint (around 400ms) - push route behind the turning leaf
       const t1 = setTimeout(() => {
-        setTransitionState((prev) => (prev ? { ...prev, phase: 'holding' } : null));
         router.push(href);
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-      }, 340);
+      }, 400);
 
-      // Phase 3: Page unfurls/turns away, unveiling new chapter
+      // Phase 3: Page completes 180° rotation & settles
       const t2 = setTimeout(() => {
-        setTransitionState((prev) => (prev ? { ...prev, phase: 'leaving' } : null));
-      }, 720);
-
-      // Phase 4: Complete transition & remove overlay
-      const t3 = setTimeout(() => {
         setTransitionState(null);
-      }, 1050);
+      }, 920);
 
-      activeTimerRef.current.push(t1, t2, t3);
+      activeTimersRef.current.push(t1, t2);
     },
     [pathname, router, transitionState]
   );
+
+  // Global Keyboard Navigation (Left / Right Arrows to flip chapters)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept if user is typing in form inputs
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      const currentChapter = getChapterByPath(pathname);
+      if (!currentChapter || transitionState !== null) return;
+
+      if (e.key === 'ArrowRight') {
+        const next = getNextChapter(currentChapter.number);
+        if (next) {
+          e.preventDefault();
+          transitionTo(previewPath(next.href, isPreview), next, 'forward');
+        }
+      } else if (e.key === 'ArrowLeft') {
+        const prev = getPrevChapter(currentChapter.number);
+        if (prev) {
+          e.preventDefault();
+          transitionTo(previewPath(prev.href, isPreview), prev, 'backward');
+        } else {
+          // Flip back to table of contents (hub)
+          e.preventDefault();
+          transitionTo(previewPath('/hub', isPreview), undefined, 'backward');
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [pathname, isPreview, transitionState, transitionTo]);
+
+  // Mobile Touch Swipe Gesture Detection (Swipe left for next page, swipe right for previous page)
+  useEffect(() => {
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (!touchStartRef.current || e.changedTouches.length === 0) return;
+      const currentChapter = getChapterByPath(pathname);
+      if (!currentChapter || transitionState !== null) {
+        touchStartRef.current = null;
+        return;
+      }
+
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const deltaX = touchEndX - touchStartRef.current.x;
+      const deltaY = touchEndY - touchStartRef.current.y;
+      touchStartRef.current = null;
+
+      // Ensure horizontal swipe is intentional: > 60px distance & more horizontal than vertical
+      if (Math.abs(deltaX) > 65 && Math.abs(deltaX) > Math.abs(deltaY) * 1.6) {
+        if (deltaX < 0) {
+          // Swiped left -> flip forward
+          const next = getNextChapter(currentChapter.number);
+          if (next) {
+            transitionTo(previewPath(next.href, isPreview), next, 'forward');
+          }
+        } else {
+          // Swiped right -> flip backward
+          const prev = getPrevChapter(currentChapter.number);
+          if (prev) {
+            transitionTo(previewPath(prev.href, isPreview), prev, 'backward');
+          } else {
+            transitionTo(previewPath('/hub', isPreview), undefined, 'backward');
+          }
+        }
+      }
+    };
+
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [pathname, isPreview, transitionState, transitionTo]);
 
   return (
     <ChapterTransitionContext.Provider
@@ -139,144 +235,220 @@ export function StorybookTransitionProvider({
       }}
     >
       {children}
-      {transitionState && <StorybookTransitionOverlay state={transitionState} />}
+      {transitionState && <BookPageFlipOverlay state={transitionState} />}
     </ChapterTransitionContext.Provider>
   );
 }
 
-function StorybookTransitionOverlay({ state }: { state: TransitionState }) {
-  const { targetChapter, direction, phase } = state;
+/**
+ * 3D Physical Book Page Turn Overlay
+ * Renders an authentic paper spread with center spine, dynamic paper shadows,
+ * and double-sided flipping parchment leaf.
+ */
+function BookPageFlipOverlay({ state }: { state: TransitionState }) {
+  const { sourceChapter, targetChapter, direction, isShuffle } = state;
 
   return (
     <div
       role="status"
       aria-live="assertive"
-      className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-auto select-none overflow-hidden"
-      style={{ perspective: '1600px' }}
+      aria-label="Membalik lembaran buku cerita"
+      className="fixed inset-0 z-[9999] flex items-center justify-center select-none pointer-events-auto overflow-hidden bg-[#1D100A]/70 backdrop-blur-md"
     >
-      {/* Background Dimming Backdrop */}
-      <div
-        className={`absolute inset-0 bg-[#2C1810]/40 transition-opacity duration-300 ${
-          phase === 'leaving' ? 'opacity-0' : 'opacity-100'
-        }`}
-      />
+      {/* 3D Book Stage Container */}
+      <div className="book-stage relative w-full max-w-4xl h-[75vh] max-h-[640px] px-3 sm:px-6">
+        {/* Book Hardcover Frame / Stardew Valley Wooden Book Binder */}
+        <div className="relative w-full h-full rounded-2xl border-4 border-[#4A2411] bg-[#3B1E10] p-2.5 sm:p-4 shadow-[0_30px_90px_rgba(0,0,0,0.8),_inset_0_2px_10px_rgba(255,255,255,0.15)] flex">
+          
+          {/* Subtle Golden Book Edging Accent */}
+          <div className="absolute inset-1.5 rounded-xl border border-[#D4A325]/40 pointer-events-none" />
 
-      {/* The 3D Storybook Turning Parchment Leaf */}
-      <div
-        className={`relative w-full h-full flex items-center justify-center p-4 sm:p-8 transition-all duration-400 ease-out ${
-          direction === 'forward'
-            ? phase === 'entering'
-              ? 'animate-storybook-enter-forward'
-              : phase === 'leaving'
-                ? 'animate-storybook-leave-forward'
-                : 'translate-x-0 opacity-100 rotate-0'
-            : direction === 'backward'
-              ? phase === 'entering'
-                ? 'animate-storybook-enter-backward'
-                : phase === 'leaving'
-                  ? 'animate-storybook-leave-backward'
-                  : 'translate-x-0 opacity-100 rotate-0'
-              : phase === 'entering'
-                ? 'animate-storybook-fade-in'
-                : phase === 'leaving'
-                  ? 'animate-storybook-fade-out'
-                  : 'opacity-100'
-        }`}
-      >
-        {/* Parchment Page Surface with Warm Handcrafted Texture & Border */}
-        <div
-          className="relative w-full max-w-xl rounded-3xl border-4 border-[#8C4E28] bg-gradient-to-br from-[#FFFDF4] via-[#FFF9EA] to-[#FBE8BA] p-6 sm:p-10 text-center shadow-[0_25px_60px_-15px_rgba(44,24,16,0.6)]"
-          style={{
-            boxShadow:
-              direction === 'forward'
-                ? '-18px 0 45px -10px rgba(74,36,17,0.45), 0 25px 50px -12px rgba(44,24,16,0.5)'
-                : '18px 0 45px -10px rgba(74,36,17,0.45), 0 25px 50px -12px rgba(44,24,16,0.5)'
-          }}
-        >
-          {/* Subtle Vintage Page Spine & Paper Lines Accent */}
-          <div
-            className={`absolute top-0 bottom-0 w-4 pointer-events-none opacity-25 ${
-              direction === 'forward'
-                ? 'right-0 bg-gradient-to-l from-[#8C4E28] to-transparent rounded-r-2xl'
-                : 'left-0 bg-gradient-to-r from-[#8C4E28] to-transparent rounded-l-2xl'
-            }`}
-          />
+          {/* Book Interior Spread (Left Page & Right Page) */}
+          <div className="relative w-full h-full flex rounded-lg overflow-hidden border border-[#8C4E28] bg-[#FDF7E5] shadow-inner">
 
-          {/* Inner Golden Border Inset */}
-          <div className="rounded-2xl border-2 border-[#D4A325]/50 bg-[#FFFDF4]/80 p-5 sm:p-8 backdrop-blur-sm">
-            {targetChapter ? (
-              <div className="space-y-4 animate-storybook-content-bloom">
-                {/* Chapter Heraldry & Roman Numeral */}
-                <div className="flex items-center justify-center gap-2">
-                  <span className="h-px w-8 sm:w-12 bg-gradient-to-r from-transparent to-[#D4A325]" />
-                  <span className="font-display text-xs sm:text-sm font-bold tracking-[0.25em] uppercase text-[#8C4E28]">
-                    Babak {targetChapter.romanNumeral}
-                  </span>
-                  <span className="h-px w-8 sm:w-12 bg-gradient-to-l from-transparent to-[#D4A325]" />
+            {/* Left Page (Stationary) */}
+            <div className="relative w-1/2 h-full bg-gradient-to-r from-[#F7ECD0] via-[#FFF9EA] to-[#FFFDF5] p-4 sm:p-8 flex flex-col justify-between border-r border-[#8C4E28]/30">
+              {/* Header / Heraldry */}
+              <div className="flex items-center justify-between border-b border-[#8C4E28]/20 pb-2">
+                <span className="font-nunito text-[10px] sm:text-xs font-black uppercase tracking-wider text-[#8C4E28]">
+                  {sourceChapter ? `Babak ${sourceChapter.number}` : 'Buku Catatan'}
+                </span>
+                <span className="font-nunito text-[10px] sm:text-xs font-bold text-[#A05A2C]">
+                  Untuk Nona
+                </span>
+              </div>
+
+              {/* Center Content for Left Page */}
+              <div className="my-auto text-center space-y-3 px-2">
+                <div className="mx-auto flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-[#8C4E28] bg-[#FFE8A3] text-[#B53000] shadow-sm">
+                  {targetChapter ? (
+                    <span className="font-nunito text-xs sm:text-sm font-black">
+                      {targetChapter.romanNumeral}
+                    </span>
+                  ) : (
+                    <BookOpen size={18} />
+                  )}
                 </div>
+                <p className="font-display text-base sm:text-2xl font-bold italic text-[#663300]">
+                  {direction === 'backward' && targetChapter
+                    ? targetChapter.publicTitle
+                    : sourceChapter
+                      ? sourceChapter.publicTitle
+                      : 'Daftar Cerita'}
+                </p>
+                <div className="h-0.5 w-12 mx-auto bg-[#8C4E28]/30" />
+                <p className="font-nunito text-xs sm:text-sm italic text-[#5A3E2D] line-clamp-3">
+                  &ldquo;
+                  {direction === 'backward' && targetChapter
+                    ? targetChapter.prologueQuote
+                    : sourceChapter
+                      ? sourceChapter.prologueQuote
+                      : 'Kumpulan jejak waktu dan harapan yang dirajut bersama.'}
+                  &rdquo;
+                </p>
+              </div>
 
-                {/* Chapter Title */}
-                <h2 className="font-display text-3xl sm:text-5xl font-semibold italic text-[#3D1E0B] tracking-tight">
-                  {targetChapter.publicTitle}
-                </h2>
+              {/* Page Number Footer */}
+              <div className="text-left font-nunito text-[10px] sm:text-xs font-black text-[#8C4E28]/70 border-t border-[#8C4E28]/20 pt-2">
+                {sourceChapter ? `Hal. ${sourceChapter.index * 2 - 1}` : 'Pengantar'}
+              </div>
+            </div>
 
-                {/* Delicate Botanical / Flourish Ornament */}
-                <div className="flex items-center justify-center gap-3 py-1 text-[#D4A325]">
-                  <span className="h-px w-10 sm:w-16 bg-[#D4A325]/40" />
-                  <Sparkles size={16} className="text-[#D4A325]" />
-                  <span className="h-px w-10 sm:w-16 bg-[#D4A325]/40" />
+            {/* Right Page (Stationary) */}
+            <div className="relative w-1/2 h-full bg-gradient-to-l from-[#F7ECD0] via-[#FFF9EA] to-[#FFFDF5] p-4 sm:p-8 flex flex-col justify-between">
+              {/* Header / Heraldry */}
+              <div className="flex items-center justify-between border-b border-[#8C4E28]/20 pb-2">
+                <span className="font-nunito text-[10px] sm:text-xs font-bold text-[#A05A2C]">
+                  10 Desember 2026
+                </span>
+                <span className="font-nunito text-[10px] sm:text-xs font-black uppercase tracking-wider text-[#8C4E28]">
+                  {targetChapter ? `Babak ${targetChapter.number}` : 'Daftar Isi'}
+                </span>
+              </div>
+
+              {/* Center Content for Right Page */}
+              <div className="my-auto text-center space-y-3 px-2">
+                <div className="mx-auto flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-[#8C4E28] bg-[#FFE8A3] text-[#B53000] shadow-sm">
+                  <Sparkles size={18} className="text-[#D4A325]" />
                 </div>
+                <h3 className="font-display text-lg sm:text-3xl font-black italic text-[#663300] tracking-tight">
+                  {targetChapter ? targetChapter.publicTitle : 'Daftar Cerita'}
+                </h3>
+                <div className="h-0.5 w-12 mx-auto bg-[#8C4E28]/30" />
+                <p className="font-nunito text-xs sm:text-sm font-semibold italic text-[#5A3E2D] line-clamp-3">
+                  &ldquo;
+                  {targetChapter
+                    ? targetChapter.prologueQuote
+                    : 'Setiap lembaran menyimpan kenangan yang dirangkai pelan-pelan.'}
+                  &rdquo;
+                </p>
+                {targetChapter && (
+                  <p className="font-nunito text-[11px] sm:text-xs font-black uppercase tracking-widest text-[#B53000]">
+                    Babak {targetChapter.index} dari {CHAPTERS.length}
+                  </p>
+                )}
+              </div>
 
-                {/* Heartfelt Poetic Prologue Quote */}
-                <blockquote className="mx-auto max-w-md font-display text-base sm:text-xl font-normal italic text-[#5C3317] leading-relaxed px-2">
-                  &ldquo;{targetChapter.prologueQuote}&rdquo;
-                </blockquote>
+              {/* Page Number Footer */}
+              <div className="text-right font-nunito text-[10px] sm:text-xs font-black text-[#8C4E28]/70 border-t border-[#8C4E28]/20 pt-2">
+                {targetChapter ? `Hal. ${targetChapter.index * 2}` : 'Daftar'}
+              </div>
+            </div>
 
-                {/* Storybook 7-Lantern Milestone Progress Bar */}
-                <div className="pt-3">
-                  <div className="flex items-center justify-center gap-2 sm:gap-3">
-                    {CHAPTERS.map((ch) => {
-                      const isTarget = ch.number === targetChapter.number;
-                      const isPast = ch.index < targetChapter.index;
+            {/* Central Book Spine & Binding Crease */}
+            <div className="absolute left-1/2 top-0 bottom-0 w-3 -translate-x-1/2 z-30 pointer-events-none bg-gradient-to-r from-[#4A2411]/25 via-[#2C1810]/40 to-[#4A2411]/25 shadow-[0_0_10px_rgba(0,0,0,0.25)]" />
 
-                      return (
-                        <div
-                          key={ch.number}
-                          className="flex flex-col items-center gap-1"
-                        >
-                          <div
-                            className={`h-2.5 rounded-full transition-all duration-300 ${
-                              isTarget
-                                ? 'w-6 sm:w-7 bg-gradient-to-r from-[#B53000] to-[#D4A325] shadow-sm ring-2 ring-[#8C4E28]'
-                                : isPast
-                                  ? 'w-2.5 bg-[#4E7C38]'
-                                  : 'w-2.5 bg-[#8C4E28]/25'
-                            }`}
-                          />
-                        </div>
-                      );
-                    })}
+            {/* The Flipping 3D Paper Sheet (Turns across the center spine) */}
+            {isShuffle ? (
+              /* Rapid multi-page shuffle opening flourish */
+              <div className="animate-page-shuffle absolute inset-0 z-40 flex items-center justify-center pointer-events-none p-4">
+                <div className="relative w-3/4 max-w-md rounded-2xl border-4 border-[#8C4E28] bg-gradient-to-br from-[#FFFDF5] via-[#FFF9EA] to-[#FBE8BA] p-6 text-center shadow-[0_25px_60px_rgba(44,24,16,0.65)]">
+                  <div className="flex items-center justify-center gap-2 mb-2 text-[#D4A325]">
+                    <Sparkles size={20} />
                   </div>
-                  <p className="mt-2 font-nunito text-[11px] sm:text-xs font-bold text-[#8C4E28]/80">
-                    Membuka Halaman {targetChapter.index} dari {CHAPTERS.length}
+                  <p className="font-nunito text-xs font-black uppercase tracking-widest text-[#B53000]">
+                    Membuka Lembaran Buku
+                  </p>
+                  <h4 className="mt-1 font-display text-2xl sm:text-4xl font-black italic text-[#663300]">
+                    {targetChapter ? targetChapter.publicTitle : 'Daftar Cerita'}
+                  </h4>
+                  <p className="mt-2 font-nunito text-xs font-bold text-[#8C4E28]">
+                    {targetChapter
+                      ? `Menuju Babak ${targetChapter.number} (Halaman ${targetChapter.index} dari ${CHAPTERS.length})`
+                      : 'Membuka Daftar Cerita'}
                   </p>
                 </div>
               </div>
             ) : (
-              /* Interlude when navigating back to Hub / Story Index */
-              <div className="space-y-4 animate-storybook-content-bloom">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#8C4E28] text-[#F9EC88] shadow-sm">
-                  <BookOpen size={22} />
+              /* True 3D Page Curl & Turn Sheet */
+              <div
+                className={`absolute top-0 bottom-0 z-40 preserve-3d pointer-events-none ${
+                  direction === 'backward'
+                    ? 'left-0 w-1/2 animate-page-flip-backward'
+                    : 'left-1/2 w-1/2 animate-page-flip-forward'
+                }`}
+              >
+                {/* Front Side of Turning Page (0° to 90°) */}
+                <div className="backface-hidden absolute inset-0 rounded-r-lg border border-[#8C4E28]/40 bg-gradient-to-br from-[#FFFDF5] via-[#FFF8E6] to-[#F5E6BF] p-4 sm:p-8 flex flex-col justify-between shadow-[0_15px_35px_rgba(44,24,16,0.4)]">
+                  <div className="flex items-center justify-between border-b border-[#8C4E28]/20 pb-2">
+                    <span className="font-nunito text-[10px] sm:text-xs font-black uppercase tracking-wider text-[#8C4E28]">
+                      {sourceChapter ? `Babak ${sourceChapter.number}` : 'Untuk Nona'}
+                    </span>
+                    <span className="font-nunito text-[10px] sm:text-xs font-bold text-[#B53000]">
+                      Membalik...
+                    </span>
+                  </div>
+
+                  <div className="my-auto text-center space-y-2">
+                    <p className="font-display text-base sm:text-xl font-bold italic text-[#663300]">
+                      {sourceChapter ? sourceChapter.publicTitle : 'Cerita Kita'}
+                    </p>
+                    <div className="h-0.5 w-10 mx-auto bg-[#8C4E28]/30" />
+                  </div>
+
+                  <div className="text-right font-nunito text-[10px] sm:text-xs font-black text-[#8C4E28]/70 border-t border-[#8C4E28]/20 pt-2">
+                    {sourceChapter ? `Hal. ${sourceChapter.index}` : '1'}
+                  </div>
                 </div>
-                <h2 className="font-display text-2xl sm:text-4xl font-semibold italic text-[#3D1E0B]">
-                  Daftar Isi Cerita
-                </h2>
-                <p className="font-display text-sm sm:text-base italic text-[#5C3317]">
-                  &ldquo;Setiap babak menyimpan sepotong waktu yang berharga.&rdquo;
-                </p>
+
+                {/* Back Side of Turning Page (90° to 180°) */}
+                <div
+                  className="backface-hidden absolute inset-0 rounded-l-lg border border-[#8C4E28]/40 bg-gradient-to-bl from-[#FFFDF5] via-[#FFF8E6] to-[#F5E6BF] p-4 sm:p-8 flex flex-col justify-between shadow-[0_15px_35px_rgba(44,24,16,0.4)]"
+                  style={{ transform: 'rotateY(180deg)' }}
+                >
+                  <div className="flex items-center justify-between border-b border-[#8C4E28]/20 pb-2">
+                    <span className="font-nunito text-[10px] sm:text-xs font-bold text-[#B53000]">
+                      Membuka...
+                    </span>
+                    <span className="font-nunito text-[10px] sm:text-xs font-black uppercase tracking-wider text-[#8C4E28]">
+                      {targetChapter ? `Babak ${targetChapter.number}` : 'Daftar Cerita'}
+                    </span>
+                  </div>
+
+                  <div className="my-auto text-center space-y-2">
+                    <p className="font-display text-base sm:text-xl font-bold italic text-[#663300]">
+                      {targetChapter ? targetChapter.publicTitle : 'Daftar Cerita'}
+                    </p>
+                    <div className="h-0.5 w-10 mx-auto bg-[#8C4E28]/30" />
+                  </div>
+
+                  <div className="text-left font-nunito text-[10px] sm:text-xs font-black text-[#8C4E28]/70 border-t border-[#8C4E28]/20 pt-2">
+                    {targetChapter ? `Hal. ${targetChapter.index}` : 'Hal'}
+                  </div>
+                </div>
               </div>
             )}
+
+            {/* Dynamic Shadow underneath turning sheet */}
+            <div className="animate-page-shadow-under absolute inset-0 z-20 pointer-events-none bg-gradient-to-r from-transparent via-black/35 to-transparent" />
           </div>
+        </div>
+
+        {/* Ambient Reading Prompt below Book */}
+        <div className="mt-3 text-center">
+          <p className="font-nunito text-xs sm:text-sm font-bold text-[#F9EC88] drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
+            Membalik ke {targetChapter ? `Babak ${targetChapter.number}: ${targetChapter.publicTitle}` : 'Daftar Cerita'}...
+          </p>
         </div>
       </div>
     </div>

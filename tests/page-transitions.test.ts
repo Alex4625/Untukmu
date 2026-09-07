@@ -83,4 +83,14 @@ test('Page Transitions & 7 Chapter Narrative Routing (TASK-TRANSITIONS)', async 
     assert.equal(getChapterTransitionDirection('02', undefined), 'forward');
     assert.equal(getChapterTransitionDirection(undefined, '03'), 'forward');
   });
+
+  await t.test('should safely call playPageFlipSound without throwing in non-browser environment', async () => {
+    const { playPageFlipSound } = await import('../lib/pageFlipAudio');
+    assert.doesNotThrow(() => {
+      playPageFlipSound('forward');
+      playPageFlipSound('backward');
+      playPageFlipSound('shuffle');
+    });
+  });
 });
+

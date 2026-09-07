@@ -22,7 +22,7 @@ export default function HubChapterCards({
   ) => {
     e.preventDefault();
     if (isTransitioning) return;
-    transitionTo(href, targetChapter, 'forward');
+    transitionTo(href, targetChapter, 'shuffle');
   };
 
   return (

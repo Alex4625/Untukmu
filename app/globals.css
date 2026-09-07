@@ -497,106 +497,122 @@ body {
   }
 }
 
-/* Storybook Page Turn Transition Animations (Artisanal, Zero AI Slop) */
-.animate-storybook-enter-forward {
-  animation: storybookEnterForward 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  will-change: transform, opacity;
+/* ==========================================================================
+   Interactive 3D Book Page-Turn Transitions (Authentic Physical Book Experience)
+   ========================================================================== */
+
+.book-stage {
+  perspective: 2500px;
+  perspective-origin: 50% 50%;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Page Turn Forward (Right Page Turning Over to Left) */
+.animate-page-flip-forward {
+  animation: pageFlipForward 0.85s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   transform-origin: left center;
+  will-change: transform, box-shadow;
 }
 
-.animate-storybook-leave-forward {
-  animation: storybookLeaveForward 0.35s cubic-bezier(0.32, 0, 0.67, 0) forwards;
-  will-change: transform, opacity;
-  transform-origin: left center;
-}
-
-.animate-storybook-enter-backward {
-  animation: storybookEnterBackward 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  will-change: transform, opacity;
+/* Page Turn Backward (Left Page Turning Over to Right) */
+.animate-page-flip-backward {
+  animation: pageFlipBackward 0.85s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   transform-origin: right center;
+  will-change: transform, box-shadow;
 }
 
-.animate-storybook-leave-backward {
-  animation: storybookLeaveBackward 0.35s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+/* Rapid Page Shuffle (From Hub Table of Contents to Chapter) */
+.animate-page-shuffle {
+  animation: pageShuffleOpening 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
   will-change: transform, opacity;
-  transform-origin: right center;
 }
 
-.animate-storybook-fade-in {
-  animation: storybookFadeIn 0.3s ease-out forwards;
+/* Dynamic Paper Shadow under Turning Page */
+.animate-page-shadow-under {
+  animation: pageShadowUnder 0.85s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.animate-storybook-fade-out {
-  animation: storybookFadeOut 0.3s ease-in forwards;
+/* Dog-ear Corner Curl Effect */
+.dog-ear-hover {
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dog-ear-hover:hover {
+  transform: scale(1.08) translate(-3px, -3px);
+  filter: drop-shadow(-4px 4px 10px rgba(74, 36, 17, 0.45));
+}
+.dog-ear-hover:active {
+  transform: scale(0.96);
 }
 
-.animate-storybook-content-bloom {
-  animation: storybookContentBloom 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes storybookEnterForward {
+@keyframes pageFlipForward {
   0% {
-    transform: perspective(1600px) rotateY(-26deg) translateX(40px) scale(0.94);
-    opacity: 0;
+    transform: rotateY(0deg);
+    box-shadow: 0 4px 15px rgba(44, 24, 16, 0.2);
+  }
+  35% {
+    box-shadow: -20px 10px 40px rgba(44, 24, 16, 0.45);
+  }
+  70% {
+    box-shadow: -35px 5px 30px rgba(44, 24, 16, 0.3);
   }
   100% {
-    transform: perspective(1600px) rotateY(0deg) translateX(0) scale(1);
-    opacity: 1;
+    transform: rotateY(-180deg);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
   }
 }
 
-@keyframes storybookLeaveForward {
+@keyframes pageFlipBackward {
   0% {
-    transform: perspective(1600px) rotateY(0deg) translateX(0) scale(1);
-    opacity: 1;
+    transform: rotateY(0deg);
+    box-shadow: 0 4px 15px rgba(44, 24, 16, 0.2);
+  }
+  35% {
+    box-shadow: 20px 10px 40px rgba(44, 24, 16, 0.45);
+  }
+  70% {
+    box-shadow: 35px 5px 30px rgba(44, 24, 16, 0.3);
   }
   100% {
-    transform: perspective(1600px) rotateY(24deg) translateX(-45px) scale(0.95);
-    opacity: 0;
+    transform: rotateY(180deg);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
   }
 }
 
-@keyframes storybookEnterBackward {
+@keyframes pageShadowUnder {
   0% {
-    transform: perspective(1600px) rotateY(26deg) translateX(-40px) scale(0.94);
-    opacity: 0;
+    opacity: 0.1;
+    transform: scaleX(0.9);
   }
-  100% {
-    transform: perspective(1600px) rotateY(0deg) translateX(0) scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes storybookLeaveBackward {
-  0% {
-    transform: perspective(1600px) rotateY(0deg) translateX(0) scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: perspective(1600px) rotateY(-24deg) translateX(45px) scale(0.95);
-    opacity: 0;
-  }
-}
-
-@keyframes storybookFadeIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes storybookFadeOut {
-  0% {
-    opacity: 1;
-    transform: scale(1);
+  45% {
+    opacity: 0.65;
+    transform: scaleX(1);
   }
   100% {
     opacity: 0;
-    transform: scale(0.96);
+    transform: scaleX(0.85);
+  }
+}
+
+@keyframes pageShuffleOpening {
+  0% {
+    transform: scale(0.94) translateY(15px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.02) translateY(-4px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
   }
 }
 
