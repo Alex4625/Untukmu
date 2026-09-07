@@ -1,13 +1,18 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { CHAPTERS, ChapterInfo, getChapterByPath, getNextChapter, getPrevChapter, getChapterTransitionDirection } from './chapters';
 import { Sparkles, BookOpen, ArrowRight, ArrowLeft } from 'lucide-react';
 import { playPageFlipSound } from '@/lib/pageFlipAudio';
 import { previewPath } from '@/lib/publicUrl';
 
 export type TransitionDirection = 'forward' | 'backward' | 'hub' | 'shuffle';
+
+function getIsPreview(): boolean {
+  if (typeof window === 'undefined') return false;
+  return new URLSearchParams(window.location.search).get('preview') === 'unlocked';
+}
 
 interface TransitionState {
   targetHref: string;
@@ -44,8 +49,6 @@ export function StorybookTransitionProvider({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const isPreview = searchParams.get('preview') === 'unlocked';
 
   const [transitionState, setTransitionState] = useState<TransitionState | null>(null);
   const activeTimersRef = useRef<NodeJS.Timeout[]>([]);
@@ -152,6 +155,7 @@ export function StorybookTransitionProvider({
 
       const currentChapter = getChapterByPath(pathname);
       if (!currentChapter || transitionState !== null) return;
+      const isPreview = getIsPreview();
 
       if (e.key === 'ArrowRight') {
         const next = getNextChapter(currentChapter.number);
@@ -174,7 +178,7 @@ export function StorybookTransitionProvider({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [pathname, isPreview, transitionState, transitionTo]);
+  }, [pathname, transitionState, transitionTo]);
 
   // Mobile Touch Swipe Gesture Detection (Swipe left for next page, swipe right for previous page)
   useEffect(() => {
@@ -200,6 +204,7 @@ export function StorybookTransitionProvider({
 
       // Ensure horizontal swipe is intentional: > 60px distance & more horizontal than vertical
       if (Math.abs(deltaX) > 65 && Math.abs(deltaX) > Math.abs(deltaY) * 1.6) {
+        const isPreview = getIsPreview();
         if (deltaX < 0) {
           // Swiped left -> flip forward
           const next = getNextChapter(currentChapter.number);
@@ -224,7 +229,7 @@ export function StorybookTransitionProvider({
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [pathname, isPreview, transitionState, transitionTo]);
+  }, [pathname, transitionState, transitionTo]);
 
   return (
     <ChapterTransitionContext.Provider
