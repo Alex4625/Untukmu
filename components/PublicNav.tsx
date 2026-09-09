@@ -55,14 +55,14 @@ export default function PublicNav({
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b-2 border-[#F9EC88] bg-[#154794]/95 shadow-[0_4px_16px_rgba(0,0,0,0.4)] backdrop-blur-md">
+      <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b border-[#D4A325]/35 bg-[#1A0D06]/95 shadow-[0_4px_16px_rgba(0,0,0,0.5)] backdrop-blur-md">
         <div className="mx-auto flex h-full max-w-5xl items-center justify-between px-4 sm:px-6">
           {/* Brand / Logo */}
           <Link
             href={previewPath('/', preview)}
-            className="group flex items-center gap-2 font-nunito text-base sm:text-lg font-black text-white transition hover:text-[#F9EC88]"
+            className="group flex items-center gap-2 font-display text-base sm:text-lg font-bold text-[#FBF5E8] transition hover:text-[#F9EC88]"
           >
-            <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[#8C4E28] bg-[#FFE8A3] text-[#B53000] shadow-sm">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[#D4A325]/50 bg-[#2D0F16] text-[#D4A325] shadow-sm">
               <Heart size={14} fill="currentColor" />
             </span>
             <span className="tracking-wide">Untuk Nona</span>

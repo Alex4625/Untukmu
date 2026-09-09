@@ -1,15 +1,7 @@
 import type { Metadata, Viewport } from 'next';
-import { Cormorant_Garamond, DM_Sans, Nunito } from 'next/font/google';
+import { Cormorant_Garamond, DM_Sans } from 'next/font/google';
 import './globals.css';
 import { AudioProvider } from '@/components/PersistentAudioPlayer';
-import { StorybookTransitionProvider } from '@/components/StorybookTransition';
-
-const nunitoFont = Nunito({
-  subsets: ['latin'],
-  weight: ['400', '600', '700', '800', '900'],
-  variable: '--font-nunito',
-  display: 'swap'
-});
 
 const displayFont = Cormorant_Garamond({
   subsets: ['latin'],
@@ -56,17 +48,15 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#5ca6e8'
+  themeColor: '#120804'
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id">
-      <body className={`${nunitoFont.variable} ${sansFont.variable} ${displayFont.variable} font-nunito bg-stardew-sky text-stardew-ink antialiased selection:bg-stardew-gold selection:text-stardew-wood-dark`}>
+    <html lang="id" className="bg-[#120804]">
+      <body className={`${sansFont.variable} ${displayFont.variable} font-sans bg-[#120804] text-[#FBF5E8] antialiased selection:bg-[#D4A325] selection:text-[#120804]`}>
         <AudioProvider>
-          <StorybookTransitionProvider>
-            {children}
-          </StorybookTransitionProvider>
+          {children}
         </AudioProvider>
       </body>
     </html>

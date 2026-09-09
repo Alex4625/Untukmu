@@ -24,23 +24,22 @@ const config: Config = {
         muted: '#7A6F6B',
         error: '#A33C3C',
         stardew: {
-          sky: '#5ca6e8',
-          night: '#154794',
-          parchment: '#FFF3CC',
-          'parchment-dark': '#F2E2B0',
-          'wood-dark': '#4A2411',
-          wood: '#8C4E28',
-          'wood-light': '#C87D43',
-          gold: '#F9EC88',
-          blue: '#0066CC',
-          brown: '#663300',
-          ink: '#252525'
+          sky: '#120804',
+          night: '#1f1008',
+          parchment: '#FBF5E8',
+          'parchment-dark': '#F5ECDA',
+          'wood-dark': '#1B0C05',
+          wood: '#2A1409',
+          'wood-light': '#3E2012',
+          gold: '#D4A325',
+          blue: '#4A1A24',
+          brown: '#2C1810',
+          ink: '#FBF5E8'
         }
       },
       fontFamily: {
         display: ['var(--font-display)', 'Cormorant Garamond', 'serif'],
-        sans: ['var(--font-nunito)', 'var(--font-sans)', 'Nunito', 'sans-serif'],
-        nunito: ['var(--font-nunito)', 'Nunito', 'sans-serif']
+        sans: ['var(--font-sans)', 'DM Sans', 'sans-serif']
       },
       boxShadow: {
         subtle: '0 1px 3px rgba(39, 35, 34, 0.04)',
