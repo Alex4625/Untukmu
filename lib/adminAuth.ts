@@ -121,5 +121,13 @@ export async function setAdminCookie(token: string): Promise<void> {
 
 export async function clearAdminCookie(): Promise<void> {
   const cookieStore = await cookies();
+  cookieStore.set(COOKIE_NAME, '', {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: 0,
+    expires: new Date(0)
+  });
   cookieStore.delete(COOKIE_NAME);
 }

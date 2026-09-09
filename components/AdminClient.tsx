@@ -82,6 +82,8 @@ export default function AdminClient({
 
   async function logout() {
     await fetch('/api/admin/logout', { method: 'POST' });
+    setData(emptyData);
+    setHasLoaded(false);
     setAuthenticated(false);
   }
 
